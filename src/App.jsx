@@ -5,6 +5,7 @@ import AppLayout from './components/AppLayout'
 import PaginaPlaceholder from './components/PaginaPlaceholder'
 import Login from './pages/Login'
 import AdminInicio from './pages/admin/AdminInicio'
+import AdminEscolas from './pages/admin/AdminEscolas'
 import NaoEncontrada from './pages/NaoEncontrada'
 
 // Helper para telas ainda não construídas, já dentro do layout do app
@@ -22,7 +23,7 @@ export default function App() {
 
           {/* ---------- EQUIPE SLARK (admin) ---------- */}
           <Route path="/admin" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminInicio /></AppLayout></RotaProtegida>} />
-          <Route path="/admin/escolas" element={<RotaProtegida perfilNecessario="admin_slark"><Tela titulo="Escolas" subtitulo="Gerencie as escolas clientes." /></RotaProtegida>} />
+          <Route path="/admin/escolas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminEscolas /></AppLayout></RotaProtegida>} />
           <Route path="/admin/alunos" element={<RotaProtegida perfilNecessario="admin_slark"><Tela titulo="Alunos" subtitulo="Visão global de todos os alunos." /></RotaProtegida>} />
           <Route path="/admin/pontuacao" element={<RotaProtegida perfilNecessario="admin_slark"><Tela titulo="Pontuação Global" subtitulo="Ranking entre todas as escolas." /></RotaProtegida>} />
           <Route path="/admin/assinaturas" element={<RotaProtegida perfilNecessario="admin_slark"><Tela titulo="Assinaturas" subtitulo="Planos e status de cada escola." /></RotaProtegida>} />
