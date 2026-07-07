@@ -4,6 +4,7 @@ import {
   LayoutGrid, School, Users, Eye, UsersRound, Award, Target, Trophy,
   BarChart3, BookOpen, ClipboardList, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ArrowLeft, ListChecks,
+  Settings,
 } from 'lucide-react'
 
 // Menus por perfil (espelham as telas do app real)
@@ -109,15 +110,20 @@ export default function Sidebar() {
 
       {/* Rodapé: usuário + ações */}
       <div className="border-t px-4 py-4 space-y-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-azul/30 flex items-center justify-center text-white text-sm font-mono">
-            {perfil?.nome?.[0]?.toUpperCase() || 'U'}
-          </div>
-          <div className="min-w-0">
+        <NavLink to="/perfil" className="flex items-center gap-3 rounded-xl px-2 py-1.5 -mx-2 hover:bg-white/5 transition group">
+          {perfil?.avatar_url ? (
+            <img src={perfil.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-azul/30 flex items-center justify-center text-white text-sm font-mono shrink-0">
+              {perfil?.nome?.[0]?.toUpperCase() || 'U'}
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
             <div className="text-sm font-semibold text-white truncate">{perfil?.nome || 'Usuário'}</div>
             <div className="text-xs text-texto/50 truncate">{perfil?.email}</div>
           </div>
-        </div>
+          <Settings size={15} className="text-texto/40 group-hover:text-white transition shrink-0" />
+        </NavLink>
         <div className="flex items-center justify-between">
           <button onClick={handleSair} className="flex items-center gap-2 text-sm text-texto/65 hover:text-white transition">
             <LogOut size={16} /> Sair

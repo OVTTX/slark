@@ -64,12 +64,18 @@ export function AuthProvider({ children }) {
   const entrar = (email, senha) => supabase.auth.signInWithPassword({ email, password: senha })
   const sair = () => supabase.auth.signOut()
 
+  // Permite que telas como "Perfil" forcem a releitura do perfil (nome, avatar) após uma alteração
+  const recarregarPerfil = () => {
+    if (sessao?.user?.id) return aplicarPerfil(sessao.user.id)
+    return Promise.resolve()
+  }
+
   // true quando a escola do usuário está com a assinatura inadimplente
   // (não se aplica à Equipe Slark, que não pertence a uma escola cliente)
   const bloqueadoPorInadimplencia = Boolean(perfil?.escola_id) && assinatura?.status === 'inadimplente'
 
   return (
-    <AuthContext.Provider value={{ sessao, perfil, assinatura, carregando, entrar, sair, bloqueadoPorInadimplencia }}>
+    <AuthContext.Provider value={{ sessao, perfil, assinatura, carregando, entrar, sair, bloqueadoPorInadimplencia, recarregarPerfil }}>
       {children}
     </AuthContext.Provider>
   )

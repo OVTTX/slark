@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import RotaProtegida from './components/RotaProtegida'
 import AppLayout from './components/AppLayout'
 import Login from './pages/Login'
+import Perfil from './pages/Perfil'
 import AdminInicio from './pages/admin/AdminInicio'
 import AdminEscolas from './pages/admin/AdminEscolas'
 import AdminAlunos from './pages/admin/AdminAlunos'
@@ -46,6 +47,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/perfil" element={<RotaProtegida><Perfil /></RotaProtegida>} />
 
           {/* ---------- EQUIPE SLARK (admin) ---------- */}
           <Route path="/admin" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminInicio /></AppLayout></RotaProtegida>} />
