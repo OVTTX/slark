@@ -11,6 +11,7 @@ import AdminPontuacao from './pages/admin/AdminPontuacao'
 import AdminAssinaturas from './pages/admin/AdminAssinaturas'
 import AdminPagamentos from './pages/admin/AdminPagamentos'
 import AdminFeceap from './pages/admin/AdminFeceap'
+import AdminLeads from './pages/admin/AdminLeads'
 import DiretorInicio from './pages/diretor/DiretorInicio'
 import DiretorSalas from './pages/diretor/DiretorSalas'
 import DiretorProfessores from './pages/diretor/DiretorProfessores'
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/admin/assinaturas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminAssinaturas /></AppLayout></RotaProtegida>} />
           <Route path="/admin/pagamentos" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminPagamentos /></AppLayout></RotaProtegida>} />
           <Route path="/admin/feceap" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminFeceap /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/leads" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminLeads /></AppLayout></RotaProtegida>} />
 
           {/* ---------- DIRETOR ---------- */}
           <Route path="/diretor" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorInicio /></AppLayout></RotaProtegida>} />

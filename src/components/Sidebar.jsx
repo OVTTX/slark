@@ -4,7 +4,7 @@ import {
   LayoutGrid, School, Users, Eye, UsersRound, Award, Target, Trophy,
   BarChart3, BookOpen, ClipboardList, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ArrowLeft, ListChecks,
-  Settings, Kanban,
+  Settings, Kanban, UserPlus,
 } from 'lucide-react'
 
 // Menus por perfil (espelham as telas do app real)
@@ -16,6 +16,7 @@ const MENUS = {
     { to: '/admin/pontuacao', label: 'Pontuação Global', icon: Trophy },
     { to: '/admin/assinaturas', label: 'Assinaturas', icon: CreditCard },
     { to: '/admin/pagamentos', label: 'Pagamentos', icon: DollarSign },
+    { to: '/admin/leads', label: 'Leads', icon: UserPlus },
     { to: '/admin/feceap', label: 'FeCEAP', icon: Kanban },
   ],
   diretor: [
