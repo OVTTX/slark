@@ -144,7 +144,7 @@ export default function AdminPagamentos() {
           <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">Nenhum pagamento registrado ainda.</p>
         </div>
       ) : (
-        <div className="mt-6 rounded-2xl bg-card border overflow-hidden">
+        <div className="mt-6 rounded-2xl bg-card border overflow-hidden overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-texto/50 border-b">

@@ -55,7 +55,7 @@ const MENUS = {
   ],
 }
 
-const botaoBase = 'shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition'
+const botaoBase = 'shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition'
 
 export default function BottomNav() {
   const { perfil, sair } = useAuth()
@@ -69,8 +69,11 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-[95vw]">
-      <div className="flex items-center gap-1 px-2.5 py-2 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-x-auto">
+    <nav
+      className="fixed left-1/2 -translate-x-1/2 z-50 max-w-[95vw]"
+      style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+    >
+      <div className="flex items-center gap-0.5 sm:gap-1 px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-x-auto">
         {/* Logo pequeno */}
         <a
           href={landing}
@@ -102,7 +105,7 @@ export default function BottomNav() {
           to="/perfil"
           title={perfil?.nome || 'Perfil'}
           className={({ isActive }) =>
-            `shrink-0 w-10 h-10 rounded-full flex items-center justify-center overflow-hidden transition ${isActive ? 'ring-2 ring-azul' : 'hover:ring-2 hover:ring-white/20'}`
+            `shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center overflow-hidden transition ${isActive ? 'ring-2 ring-azul' : 'hover:ring-2 hover:ring-white/20'}`
           }
         >
           {perfil?.avatar_url ? (

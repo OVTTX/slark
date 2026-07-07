@@ -146,7 +146,7 @@ function QuadroTarefas() {
         <div className="mt-10 text-texto/50">Carregando quadro…</div>
       ) : (
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {COLUNAS.map((col) => {
+          {COLUNAS.map((col, colIndex) => {
             const itens = tarefas.filter((t) => t.status === col.valor)
             const sobrevoada = colunaSobrevoada === col.valor
             return (
@@ -206,6 +206,26 @@ function QuadroTarefas() {
                           )}
                         </div>
                         {t.prazo && <div className="mt-2 text-[11px] text-texto/40">Prazo: {new Date(t.prazo + 'T00:00:00').toLocaleDateString('pt-BR')}</div>}
+
+                        {/* Setas para mover entre colunas — essenciais no celular, onde arrastar não funciona */}
+                        <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between">
+                          <button
+                            onClick={() => colIndex > 0 && moverPara(t, COLUNAS[colIndex - 1].valor)}
+                            disabled={colIndex === 0}
+                            className="p-1 rounded-lg text-texto/40 hover:text-white hover:bg-white/10 transition disabled:opacity-20 disabled:pointer-events-none"
+                            title={colIndex > 0 ? `Mover para ${COLUNAS[colIndex - 1].rotulo}` : undefined}
+                          >
+                            <ChevronLeft size={14} />
+                          </button>
+                          <button
+                            onClick={() => colIndex < COLUNAS.length - 1 && moverPara(t, COLUNAS[colIndex + 1].valor)}
+                            disabled={colIndex === COLUNAS.length - 1}
+                            className="p-1 rounded-lg text-texto/40 hover:text-white hover:bg-white/10 transition disabled:opacity-20 disabled:pointer-events-none"
+                            title={colIndex < COLUNAS.length - 1 ? `Mover para ${COLUNAS[colIndex + 1].rotulo}` : undefined}
+                          >
+                            <ChevronRight size={14} />
+                          </button>
+                        </div>
                       </div>
                     )
                   })}

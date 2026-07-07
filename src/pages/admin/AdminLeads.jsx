@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import {
   UserPlus, Plus, X, Loader2, Trash2, Phone, Mail, MapPin, Users, TrendingUp,
-  Target, CheckCircle2, Send, Building2, Calendar,
+  Target, CheckCircle2, Send, Building2, Calendar, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 
 const COLUNAS = [
@@ -132,7 +132,7 @@ export default function AdminLeads() {
         <div className="mt-10 text-texto/50">Carregando leads…</div>
       ) : (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
-          {COLUNAS.map((col) => {
+          {COLUNAS.map((col, colIndex) => {
             const itens = leads.filter((l) => l.status === col.valor)
             const sobrevoada = colunaSobrevoada === col.valor
             return (
@@ -177,6 +177,26 @@ export default function AdminLeads() {
                             {l.responsavelNome[0]}
                           </span>
                         )}
+                      </div>
+
+                      {/* Setas para mover entre colunas — essenciais no celular, onde arrastar não funciona */}
+                      <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => colIndex > 0 && moverPara(l, COLUNAS[colIndex - 1].valor)}
+                          disabled={colIndex === 0}
+                          className="p-1 rounded-lg text-texto/40 hover:text-white hover:bg-white/10 transition disabled:opacity-20 disabled:pointer-events-none"
+                          title={colIndex > 0 ? `Mover para ${COLUNAS[colIndex - 1].rotulo}` : undefined}
+                        >
+                          <ChevronLeft size={14} />
+                        </button>
+                        <button
+                          onClick={() => colIndex < COLUNAS.length - 1 && moverPara(l, COLUNAS[colIndex + 1].valor)}
+                          disabled={colIndex === COLUNAS.length - 1}
+                          className="p-1 rounded-lg text-texto/40 hover:text-white hover:bg-white/10 transition disabled:opacity-20 disabled:pointer-events-none"
+                          title={colIndex < COLUNAS.length - 1 ? `Mover para ${COLUNAS[colIndex + 1].rotulo}` : undefined}
+                        >
+                          <ChevronRight size={14} />
+                        </button>
                       </div>
                     </div>
                   ))}

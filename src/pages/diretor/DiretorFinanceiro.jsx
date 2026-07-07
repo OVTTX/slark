@@ -72,7 +72,7 @@ export default function DiretorFinanceiro() {
             </div>
           </div>
 
-          <div className="mt-8 rounded-2xl bg-card border overflow-hidden">
+          <div className="mt-8 rounded-2xl bg-card border overflow-hidden overflow-x-auto">
             {pagamentos.length === 0 ? (
               <div className="p-12 text-center">
                 <DollarSign className="mx-auto text-azul/60" size={40} />

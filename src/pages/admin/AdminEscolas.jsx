@@ -199,7 +199,7 @@ export default function AdminEscolas() {
           </p>
         </div>
       ) : (
-        <div className="mt-8 rounded-2xl bg-card border overflow-hidden">
+        <div className="mt-8 rounded-2xl bg-card border overflow-hidden overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-texto/50 border-b">
