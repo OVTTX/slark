@@ -10,6 +10,13 @@ import AdminAlunos from './pages/admin/AdminAlunos'
 import AdminPontuacao from './pages/admin/AdminPontuacao'
 import AdminAssinaturas from './pages/admin/AdminAssinaturas'
 import AdminPagamentos from './pages/admin/AdminPagamentos'
+import DiretorInicio from './pages/diretor/DiretorInicio'
+import DiretorSalas from './pages/diretor/DiretorSalas'
+import DiretorProfessores from './pages/diretor/DiretorProfessores'
+import DiretorFinanceiro from './pages/diretor/DiretorFinanceiro'
+import DiretorCalendario from './pages/diretor/DiretorCalendario'
+import DiretorNotas from './pages/diretor/DiretorNotas'
+import DiretorRanking from './pages/diretor/DiretorRanking'
 import NaoEncontrada from './pages/NaoEncontrada'
 
 // Helper para telas ainda não construídas, já dentro do layout do app
@@ -34,13 +41,13 @@ export default function App() {
           <Route path="/admin/pagamentos" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminPagamentos /></AppLayout></RotaProtegida>} />
 
           {/* ---------- DIRETOR ---------- */}
-          <Route path="/diretor" element={<RotaProtegida perfilNecessario="diretor"><Tela titulo="Dashboard do Diretor" subtitulo="Visão geral da escola." /></RotaProtegida>} />
-          <Route path="/diretor/salas" element={<RotaProtegida perfilNecessario="diretor"><Tela titulo="Salas" /></RotaProtegida>} />
-          <Route path="/diretor/professores" element={<RotaProtegida perfilNecessario="diretor"><Tela titulo="Professores" /></RotaProtegida>} />
-          <Route path="/diretor/financeiro" element={<RotaProtegida perfilNecessario="diretor"><Tela titulo="Financeiro" subtitulo="Receitas, despesas e salários." /></RotaProtegida>} />
-          <Route path="/diretor/calendario" element={<RotaProtegida perfilNecessario="diretor"><Tela titulo="Calendário" /></RotaProtegida>} />
-          <Route path="/diretor/notas" element={<RotaProtegida perfilNecessario="diretor"><Tela titulo="Notas" /></RotaProtegida>} />
-          <Route path="/diretor/ranking" element={<RotaProtegida perfilNecessario="diretor"><Tela titulo="Ranking" /></RotaProtegida>} />
+          <Route path="/diretor" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorInicio /></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/salas" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorSalas /></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/professores" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorProfessores /></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/financeiro" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorFinanceiro /></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/calendario" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorCalendario /></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/notas" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorNotas /></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/ranking" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorRanking /></AppLayout></RotaProtegida>} />
 
           {/* ---------- PROFESSOR ---------- */}
           <Route path="/professor" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Dashboard" subtitulo="Visão geral das suas turmas." /></RotaProtegida>} />
