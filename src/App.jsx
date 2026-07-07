@@ -6,6 +6,10 @@ import PaginaPlaceholder from './components/PaginaPlaceholder'
 import Login from './pages/Login'
 import AdminInicio from './pages/admin/AdminInicio'
 import AdminEscolas from './pages/admin/AdminEscolas'
+import AdminAlunos from './pages/admin/AdminAlunos'
+import AdminPontuacao from './pages/admin/AdminPontuacao'
+import AdminAssinaturas from './pages/admin/AdminAssinaturas'
+import AdminPagamentos from './pages/admin/AdminPagamentos'
 import NaoEncontrada from './pages/NaoEncontrada'
 
 // Helper para telas ainda não construídas, já dentro do layout do app
@@ -24,10 +28,10 @@ export default function App() {
           {/* ---------- EQUIPE SLARK (admin) ---------- */}
           <Route path="/admin" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminInicio /></AppLayout></RotaProtegida>} />
           <Route path="/admin/escolas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminEscolas /></AppLayout></RotaProtegida>} />
-          <Route path="/admin/alunos" element={<RotaProtegida perfilNecessario="admin_slark"><Tela titulo="Alunos" subtitulo="Visão global de todos os alunos." /></RotaProtegida>} />
-          <Route path="/admin/pontuacao" element={<RotaProtegida perfilNecessario="admin_slark"><Tela titulo="Pontuação Global" subtitulo="Ranking entre todas as escolas." /></RotaProtegida>} />
-          <Route path="/admin/assinaturas" element={<RotaProtegida perfilNecessario="admin_slark"><Tela titulo="Assinaturas" subtitulo="Planos e status de cada escola." /></RotaProtegida>} />
-          <Route path="/admin/pagamentos" element={<RotaProtegida perfilNecessario="admin_slark"><Tela titulo="Pagamentos" subtitulo="Cobranças, recebimentos e inadimplência." /></RotaProtegida>} />
+          <Route path="/admin/alunos" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminAlunos /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/pontuacao" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminPontuacao /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/assinaturas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminAssinaturas /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/pagamentos" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminPagamentos /></AppLayout></RotaProtegida>} />
 
           {/* ---------- DIRETOR ---------- */}
           <Route path="/diretor" element={<RotaProtegida perfilNecessario="diretor"><Tela titulo="Dashboard do Diretor" subtitulo="Visão geral da escola." /></RotaProtegida>} />
