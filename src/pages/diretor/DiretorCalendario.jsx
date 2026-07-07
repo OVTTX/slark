@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { Calendar, Plus, X, Loader2, Trash2 } from 'lucide-react'
 
 const TIPOS = [
-  { valor: 'prova', rotulo: 'Prova', cor: '#FF6B6B' },
+  { valor: 'atividade', rotulo: 'Atividade', cor: '#FF6B6B' },
   { valor: 'reuniao', rotulo: 'Reunião', cor: '#2E5BFF' },
   { valor: 'feriado', rotulo: 'Feriado', cor: '#3FD08A' },
   { valor: 'evento', rotulo: 'Evento', cor: '#C44DFF' },
@@ -89,7 +89,7 @@ export default function DiretorCalendario() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-4xl font-bold text-white tracking-tight">Calendário</h1>
-          <p className="mt-2 text-texto/60">Provas, reuniões, feriados e eventos da escola.</p>
+          <p className="mt-2 text-texto/60">Atividades, reuniões, feriados e eventos da escola.</p>
         </div>
         <button
           onClick={() => setModalAberto(true)}

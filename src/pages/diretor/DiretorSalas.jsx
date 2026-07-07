@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { School, Plus, X, Loader2, Pencil, Users, GraduationCap } from 'lucide-react'
+import ConvidarAlunoModal from '../../components/ConvidarAlunoModal'
 
 const FORM_VAZIO = { nome: '', serie: '', professor_id: '' }
 
@@ -91,12 +92,15 @@ export default function DiretorSalas() {
           <h1 className="text-4xl font-bold text-white tracking-tight">Salas</h1>
           <p className="mt-2 text-texto/60">Gerencie as salas da sua escola.</p>
         </div>
-        <button
-          onClick={abrirNova}
-          className="flex items-center gap-2 px-5 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/30"
-        >
-          <Plus size={18} /> Nova sala
-        </button>
+        <div className="flex items-center gap-3">
+          <ConvidarAlunoModal salas={salas} onConvidado={carregar} />
+          <button
+            onClick={abrirNova}
+            className="flex items-center gap-2 px-5 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/30"
+          >
+            <Plus size={18} /> Nova sala
+          </button>
+        </div>
       </div>
 
       {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}

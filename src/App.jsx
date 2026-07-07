@@ -17,6 +17,10 @@ import DiretorFinanceiro from './pages/diretor/DiretorFinanceiro'
 import DiretorCalendario from './pages/diretor/DiretorCalendario'
 import DiretorNotas from './pages/diretor/DiretorNotas'
 import DiretorRanking from './pages/diretor/DiretorRanking'
+import ProfessorAlunos from './pages/professor/ProfessorAlunos'
+import ProfessorTrilhas from './pages/professor/ProfessorTrilhas'
+import AlunoInicio from './pages/aluno/AlunoInicio'
+import AlunoTrilhas from './pages/aluno/AlunoTrilhas'
 import NaoEncontrada from './pages/NaoEncontrada'
 
 // Helper para telas ainda não construídas, já dentro do layout do app
@@ -52,7 +56,7 @@ export default function App() {
           {/* ---------- PROFESSOR ---------- */}
           <Route path="/professor" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Dashboard" subtitulo="Visão geral das suas turmas." /></RotaProtegida>} />
           <Route path="/professor/salas" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Salas" /></RotaProtegida>} />
-          <Route path="/professor/alunos" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Alunos" /></RotaProtegida>} />
+          <Route path="/professor/alunos" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorAlunos /></AppLayout></RotaProtegida>} />
           <Route path="/professor/observacoes" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Observações" /></RotaProtegida>} />
           <Route path="/professor/equipes" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Equipes" /></RotaProtegida>} />
           <Route path="/professor/insignias" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Insígnias" /></RotaProtegida>} />
@@ -60,17 +64,17 @@ export default function App() {
           <Route path="/professor/placar" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Placar Equipes" /></RotaProtegida>} />
           <Route path="/professor/relatorios" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Relatórios" /></RotaProtegida>} />
           <Route path="/professor/planos-ia" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Planos de Aula IA" /></RotaProtegida>} />
-          <Route path="/professor/trilhas" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Trilhas de Aprendizado" subtitulo="Crie trilhas com textos, PDFs, links e artes do Canva." /></RotaProtegida>} />
+          <Route path="/professor/trilhas" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorTrilhas /></AppLayout></RotaProtegida>} />
           <Route path="/professor/gabaritos" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Gabaritos" subtitulo="Cadastre respostas e a IA gera o passo a passo." /></RotaProtegida>} />
           <Route path="/professor/notas" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Notas" /></RotaProtegida>} />
           <Route path="/professor/aula-slark" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Aula Slark" /></RotaProtegida>} />
           <Route path="/professor/ranking" element={<RotaProtegida perfilNecessario="professor"><Tela titulo="Ranking" /></RotaProtegida>} />
 
           {/* ---------- ALUNO ---------- */}
-          <Route path="/aluno" element={<RotaProtegida perfilNecessario="aluno"><Tela titulo="Meu Painel" subtitulo="Seus pontos, selos e progresso." /></RotaProtegida>} />
+          <Route path="/aluno" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoInicio /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/competencias" element={<RotaProtegida perfilNecessario="aluno"><Tela titulo="Mapa de Competências" /></RotaProtegida>} />
           <Route path="/aluno/atividades" element={<RotaProtegida perfilNecessario="aluno"><Tela titulo="Atividades" subtitulo="Entregue tarefas e veja o feedback da IA." /></RotaProtegida>} />
-          <Route path="/aluno/trilhas" element={<RotaProtegida perfilNecessario="aluno"><Tela titulo="Trilhas" /></RotaProtegida>} />
+          <Route path="/aluno/trilhas" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoTrilhas /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/time" element={<RotaProtegida perfilNecessario="aluno"><Tela titulo="Meu Time" /></RotaProtegida>} />
           <Route path="/aluno/chat" element={<RotaProtegida perfilNecessario="aluno"><Tela titulo="Chat com o Professor" /></RotaProtegida>} />
           <Route path="/aluno/ranking" element={<RotaProtegida perfilNecessario="aluno"><Tela titulo="Ranking" /></RotaProtegida>} />

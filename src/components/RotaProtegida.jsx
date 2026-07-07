@@ -1,9 +1,10 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import BloqueioInadimplencia from './BloqueioInadimplencia'
 
 // Protege rotas: exige login e, opcionalmente, um perfil específico
 export default function RotaProtegida({ children, perfilNecessario }) {
-  const { sessao, perfil, carregando } = useAuth()
+  const { sessao, perfil, carregando, bloqueadoPorInadimplencia } = useAuth()
 
   if (carregando) {
     return (
@@ -15,6 +16,9 @@ export default function RotaProtegida({ children, perfilNecessario }) {
   if (!sessao) return <Navigate to="/login" replace />
   if (perfilNecessario && perfil?.perfil !== perfilNecessario) {
     return <Navigate to="/login" replace />
+  }
+  if (bloqueadoPorInadimplencia) {
+    return <BloqueioInadimplencia />
   }
   return children
 }
