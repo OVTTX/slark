@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import {
-  Building2, Plus, X, Loader2, Users, Pencil, Power, MapPin,
+  Building2, Plus, X, Loader2, Users, Pencil, Power, MapPin, Trash2, AlertTriangle,
 } from 'lucide-react'
 
 const ESTADOS = [
@@ -43,6 +43,9 @@ export default function AdminEscolas() {
   const [editandoId, setEditandoId] = useState(null) // null = criando nova
   const [form, setForm] = useState(FORM_VAZIO)
   const [salvando, setSalvando] = useState(false)
+  const [escolaParaExcluir, setEscolaParaExcluir] = useState(null)
+  const [confirmacaoNome, setConfirmacaoNome] = useState('')
+  const [excluindo, setExcluindo] = useState(false)
 
   async function carregar() {
     setCarregando(true)
@@ -170,6 +173,29 @@ export default function AdminEscolas() {
     }
   }
 
+  function abrirExclusao(escola) {
+    setEscolaParaExcluir(escola)
+    setConfirmacaoNome('')
+  }
+
+  async function confirmarExclusao() {
+    if (!escolaParaExcluir) return
+    setExcluindo(true)
+    setErro('')
+    try {
+      const { error } = await supabase.from('escolas').delete().eq('id', escolaParaExcluir.id)
+      if (error) throw error
+      setEscolaParaExcluir(null)
+      setConfirmacaoNome('')
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível excluir a escola. Tente novamente.')
+    } finally {
+      setExcluindo(false)
+    }
+  }
+
   return (
     <div>
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -262,6 +288,13 @@ export default function AdminEscolas() {
                         className={`p-2 rounded-lg transition ${esc.ativa ? 'text-texto/60 hover:text-red-400 hover:bg-red-400/10' : 'text-texto/60 hover:text-[#3FD08A] hover:bg-[#3FD08A]/10'}`}
                       >
                         <Power size={16} />
+                      </button>
+                      <button
+                        onClick={() => abrirExclusao(esc)}
+                        title="Excluir escola"
+                        className="p-2 rounded-lg text-texto/60 hover:text-red-400 hover:bg-red-400/10 transition"
+                      >
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>
@@ -377,6 +410,74 @@ export default function AdminEscolas() {
                 {salvando ? 'Salvando…' : editandoId ? 'Salvar alterações' : 'Cadastrar escola'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {escolaParaExcluir && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setEscolaParaExcluir(null)}>
+          <div
+            className="w-full max-w-md rounded-2xl bg-bg-2 border border-red-400/20 p-7"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-11 h-11 rounded-full bg-red-400/10 flex items-center justify-center">
+                <AlertTriangle size={20} className="text-red-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white">Excluir "{escolaParaExcluir.nome}"?</h2>
+                <p className="mt-1 text-sm text-texto/60 leading-relaxed">
+                  Essa ação é <span className="text-red-400 font-semibold">permanente</span> e não pode ser desfeita.
+                </p>
+              </div>
+              <button onClick={() => setEscolaParaExcluir(null)} className="ml-auto text-texto/50 hover:text-white transition">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="mt-5 rounded-xl bg-red-400/5 border border-red-400/15 p-4 text-sm text-texto/70 leading-relaxed">
+              Serão excluídos junto com a escola:
+              <ul className="mt-2 space-y-1 list-disc list-inside">
+                <li>{escolaParaExcluir.qtdAlunos} aluno(s) e todo o histórico de pontuação, entregas e observações</li>
+                <li>Todas as salas, times e trilhas da escola</li>
+                <li>Assinatura e histórico de pagamentos</li>
+                <li>Convites pendentes de alunos</li>
+              </ul>
+              <p className="mt-3 text-texto/50">
+                Professores e o diretor vinculados perdem o acesso a esta escola, mas as contas deles não são apagadas.
+              </p>
+            </div>
+
+            <div className="mt-5">
+              <label className="block text-sm font-medium text-texto/70 mb-1.5">
+                Para confirmar, digite <span className="text-white font-semibold">{escolaParaExcluir.nome}</span> abaixo:
+              </label>
+              <input
+                autoFocus
+                value={confirmacaoNome}
+                onChange={(e) => setConfirmacaoNome(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-card border border-red-400/20 text-white focus:outline-none focus:border-red-400 transition"
+              />
+            </div>
+
+            <div className="mt-6 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setEscolaParaExcluir(null)}
+                className="flex-1 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white font-semibold transition"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={confirmacaoNome !== escolaParaExcluir.nome || excluindo}
+                onClick={confirmarExclusao}
+                className="flex-1 py-2.5 rounded-full bg-red-500 hover:bg-red-600 text-white font-semibold transition disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
+              >
+                {excluindo && <Loader2 size={16} className="animate-spin" />}
+                {excluindo ? 'Excluindo…' : 'Excluir permanentemente'}
+              </button>
+            </div>
           </div>
         </div>
       )}
