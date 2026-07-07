@@ -25,7 +25,6 @@ import ProfessorInsignias from './pages/professor/ProfessorInsignias'
 import ProfessorDesafios from './pages/professor/ProfessorDesafios'
 import ProfessorPlacar from './pages/professor/ProfessorPlacar'
 import ProfessorRelatorios from './pages/professor/ProfessorRelatorios'
-import ProfessorPlanosIA from './pages/professor/ProfessorPlanosIA'
 import ProfessorTrilhas from './pages/professor/ProfessorTrilhas'
 import ProfessorGabaritos from './pages/professor/ProfessorGabaritos'
 import ProfessorNotas from './pages/professor/ProfessorNotas'
@@ -75,7 +74,6 @@ export default function App() {
           <Route path="/professor/desafios" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorDesafios /></AppLayout></RotaProtegida>} />
           <Route path="/professor/placar" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorPlacar /></AppLayout></RotaProtegida>} />
           <Route path="/professor/relatorios" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorRelatorios /></AppLayout></RotaProtegida>} />
-          <Route path="/professor/planos-ia" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorPlanosIA /></AppLayout></RotaProtegida>} />
           <Route path="/professor/trilhas" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorTrilhas /></AppLayout></RotaProtegida>} />
           <Route path="/professor/gabaritos" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorGabaritos /></AppLayout></RotaProtegida>} />
           <Route path="/professor/notas" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorNotas /></AppLayout></RotaProtegida>} />

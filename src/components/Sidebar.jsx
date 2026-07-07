@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
   LayoutGrid, School, Users, Eye, UsersRound, Award, Target, Trophy,
-  BarChart3, Sparkles, BookOpen, ClipboardList, GraduationCap, DollarSign,
+  BarChart3, BookOpen, ClipboardList, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ArrowLeft, ListChecks,
 } from 'lucide-react'
 
@@ -35,7 +35,6 @@ const MENUS = {
     { to: '/professor/desafios', label: 'Desafios', icon: Target },
     { to: '/professor/placar', label: 'Placar Equipes', icon: Trophy },
     { to: '/professor/relatorios', label: 'Relatórios', icon: BarChart3 },
-    { to: '/professor/planos-ia', label: 'Planos de Aula IA', icon: Sparkles },
     { to: '/professor/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/professor/gabaritos', label: 'Gabaritos', icon: ListChecks },
     { to: '/professor/notas', label: 'Notas', icon: ClipboardList },
