@@ -1,19 +1,33 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { Eye, Loader2, Search } from 'lucide-react'
+import {
+  Eye, Loader2, Search, Sparkles, Wand2, Award, Crown, Brain, Lightbulb,
+  MessageCircle, HeartHandshake, RefreshCcw, Check,
+} from 'lucide-react'
+
+const ICONES = { Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search, Award }
+function IconeSelo({ nome, ...props }) {
+  const Comp = ICONES[nome] || Award
+  return <Comp {...props} />
+}
 
 export default function ProfessorObservacoes() {
   const { perfil } = useAuth()
   const [alunos, setAlunos] = useState([])
   const [alunoSelecionado, setAlunoSelecionado] = useState(null)
   const [observacoes, setObservacoes] = useState([])
+  const [caracteristicas, setCaracteristicas] = useState([])
+  const [selos, setSelos] = useState([])
   const [busca, setBusca] = useState('')
   const [texto, setTexto] = useState('')
   const [carregando, setCarregando] = useState(true)
   const [carregandoObs, setCarregandoObs] = useState(false)
   const [salvando, setSalvando] = useState(false)
+  const [analisandoId, setAnalisandoId] = useState(null)
+  const [aplicandoId, setAplicandoId] = useState(null)
   const [erro, setErro] = useState('')
+  const [avisoIA, setAvisoIA] = useState('')
 
   useEffect(() => {
     if (!perfil?.id) return
@@ -25,6 +39,16 @@ export default function ProfessorObservacoes() {
         if (eSalas) throw eSalas
         const salaIds = (salasData || []).map((s) => s.id)
         const salaPorId = Object.fromEntries((salasData || []).map((s) => [s.id, s]))
+
+        const [{ data: caracData, error: eCarac }, { data: selosData, error: eSelos }] = await Promise.all([
+          supabase.from('caracteristicas').select('*'),
+          supabase.from('selos').select('*').not('caracteristica_id', 'is', null),
+        ])
+        if (eCarac) throw eCarac
+        if (eSelos) throw eSelos
+        setCaracteristicas(caracData || [])
+        setSelos(selosData || [])
+
         if (salaIds.length === 0) { setAlunos([]); return }
 
         const { data: alunosData, error: eAlunos } = await supabase.from('alunos').select('*').in('sala_id', salaIds).order('nome')
@@ -57,27 +81,101 @@ export default function ProfessorObservacoes() {
   function selecionar(aluno) {
     setAlunoSelecionado(aluno)
     setTexto('')
+    setAvisoIA('')
     carregarObservacoes(aluno.id)
+  }
+
+  const caracteristicaPorId = useMemo(() => Object.fromEntries(caracteristicas.map((c) => [c.id, c])), [caracteristicas])
+  const seloPorCaracteristicaId = useMemo(() => Object.fromEntries(selos.map((s) => [s.caracteristica_id, s])), [selos])
+
+  async function analisar(observacao) {
+    if (caracteristicas.length === 0) {
+      setAvisoIA('Cadastre características antes de usar a análise por IA.')
+      return
+    }
+    setAnalisandoId(observacao.id)
+    setAvisoIA('')
+    try {
+      const { data, error } = await supabase.functions.invoke('analisar-observacao', {
+        body: {
+          texto: observacao.texto,
+          caracteristicas: caracteristicas.map((c) => ({ id: c.id, nome: c.nome, descricao: c.descricao })),
+        },
+      })
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+
+      const analise = data.analise
+      const caracteristicaSugerida = caracteristicas.find(
+        (c) => c.nome.trim().toLowerCase() === String(analise.caracteristica_sugerida || '').trim().toLowerCase(),
+      )
+
+      const { error: eUpdate } = await supabase.from('observacoes').update({
+        mapa_competencias: analise.competencias || null,
+        caracteristica_sugerida_id: caracteristicaSugerida?.id || null,
+        confianca_ia: analise.confianca ?? null,
+        justificativa_ia: analise.justificativa || null,
+        analisada_em: new Date().toISOString(),
+      }).eq('id', observacao.id)
+      if (eUpdate) throw eUpdate
+
+      await carregarObservacoes(observacao.aluno_id)
+    } catch (e) {
+      console.error(e)
+      setAvisoIA(e.message || 'Não foi possível analisar essa observação agora.')
+    } finally {
+      setAnalisandoId(null)
+    }
   }
 
   async function adicionar(e) {
     e.preventDefault()
     if (!texto.trim() || !alunoSelecionado) return
     setSalvando(true)
+    setAvisoIA('')
     try {
-      const { error } = await supabase.from('observacoes').insert({
+      const { data, error } = await supabase.from('observacoes').insert({
         aluno_id: alunoSelecionado.id,
         professor_id: perfil.id,
         texto: texto.trim(),
-      })
+      }).select().single()
       if (error) throw error
       setTexto('')
       await carregarObservacoes(alunoSelecionado.id)
+      // dispara a análise de IA automaticamente assim que a observação é salva
+      if (data) analisar(data)
     } catch (e) {
       console.error(e)
       setErro('Não foi possível salvar a observação.')
     } finally {
       setSalvando(false)
+    }
+  }
+
+  async function aplicarCaracteristica(observacao) {
+    const caracteristica = caracteristicaPorId[observacao.caracteristica_sugerida_id]
+    const selo = seloPorCaracteristicaId[observacao.caracteristica_sugerida_id]
+    if (!caracteristica || !alunoSelecionado) return
+    setAplicandoId(observacao.id)
+    try {
+      const { error: eAluno } = await supabase.from('alunos').update({ caracteristica_id: caracteristica.id }).eq('id', alunoSelecionado.id)
+      if (eAluno) throw eAluno
+
+      if (selo) {
+        const { error: eSelo } = await supabase.from('aluno_selos').upsert(
+          { aluno_id: alunoSelecionado.id, selo_id: selo.id },
+          { onConflict: 'aluno_id,selo_id', ignoreDuplicates: true },
+        )
+        if (eSelo) throw eSelo
+      }
+
+      setAlunoSelecionado((prev) => ({ ...prev, caracteristica_id: caracteristica.id }))
+      setAlunos((prev) => prev.map((a) => (a.id === alunoSelecionado.id ? { ...a, caracteristica_id: caracteristica.id } : a)))
+    } catch (e) {
+      console.error(e)
+      setAvisoIA('Não foi possível aplicar a característica sugerida.')
+    } finally {
+      setAplicandoId(null)
     }
   }
 
@@ -88,8 +186,13 @@ export default function ProfessorObservacoes() {
 
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white tracking-tight">Observações</h1>
-      <p className="mt-2 text-texto/60">Registre anotações individuais sobre o desenvolvimento de cada aluno.</p>
+      <div className="flex items-center gap-3">
+        <Eye className="text-azul" size={28} />
+        <h1 className="text-4xl font-bold text-white tracking-tight">Observações</h1>
+      </div>
+      <p className="mt-2 text-texto/60">
+        Registre anotações sobre cada aluno. A IA da Slark lê o texto, monta o mapa de competências e sugere a característica e o selo do aluno.
+      </p>
 
       {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 
@@ -112,16 +215,29 @@ export default function ProfessorObservacoes() {
               />
             </div>
             <div className="space-y-1">
-              {alunosFiltrados.map((a) => (
-                <button
-                  key={a.id}
-                  onClick={() => selecionar(a)}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition ${alunoSelecionado?.id === a.id ? 'bg-azul text-white' : 'text-texto/70 hover:bg-white/5 hover:text-white'}`}
-                >
-                  <div className="font-medium">{a.nome}</div>
-                  <div className={`text-xs ${alunoSelecionado?.id === a.id ? 'text-white/70' : 'text-texto/45'}`}>{a.salaNome}</div>
-                </button>
-              ))}
+              {alunosFiltrados.map((a) => {
+                const carac = caracteristicaPorId[a.caracteristica_id]
+                return (
+                  <button
+                    key={a.id}
+                    onClick={() => selecionar(a)}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition ${alunoSelecionado?.id === a.id ? 'bg-azul text-white' : 'text-texto/70 hover:bg-white/5 hover:text-white'}`}
+                  >
+                    <div className="font-medium">{a.nome}</div>
+                    <div className={`flex items-center gap-1.5 text-xs mt-0.5 ${alunoSelecionado?.id === a.id ? 'text-white/70' : 'text-texto/45'}`}>
+                      {a.salaNome}
+                      {carac && (
+                        <span
+                          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold"
+                          style={{ background: alunoSelecionado?.id === a.id ? 'rgba(255,255,255,.2)' : `${carac.cor}22`, color: alunoSelecionado?.id === a.id ? '#fff' : carac.cor }}
+                        >
+                          {carac.nome}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -132,7 +248,24 @@ export default function ProfessorObservacoes() {
               </div>
             ) : (
               <div className="rounded-2xl bg-card border p-6">
-                <div className="font-bold text-white text-lg">{alunoSelecionado.nome}</div>
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="font-bold text-white text-lg">{alunoSelecionado.nome}</div>
+                  {caracteristicaPorId[alunoSelecionado.caracteristica_id] && (
+                    <span
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+                      style={{
+                        background: `${caracteristicaPorId[alunoSelecionado.caracteristica_id].cor}22`,
+                        color: caracteristicaPorId[alunoSelecionado.caracteristica_id].cor,
+                      }}
+                    >
+                      {seloPorCaracteristicaId[alunoSelecionado.caracteristica_id] && (
+                        <IconeSelo nome={seloPorCaracteristicaId[alunoSelecionado.caracteristica_id].icone} size={12} />
+                      )}
+                      Característica atual: {caracteristicaPorId[alunoSelecionado.caracteristica_id].nome}
+                    </span>
+                  )}
+                </div>
+
                 <form onSubmit={adicionar} className="mt-4 flex gap-2">
                   <textarea
                     value={texto} onChange={(e) => setTexto(e.target.value)}
@@ -149,18 +282,85 @@ export default function ProfessorObservacoes() {
                   </button>
                 </form>
 
+                {avisoIA && <p className="mt-3 text-xs text-[#F5C451] bg-[#F5C451]/10 px-3 py-2 rounded-lg">{avisoIA}</p>}
+
                 <div className="mt-6 pt-6 border-t space-y-4">
                   {carregandoObs ? (
                     <div className="text-texto/50 text-sm">Carregando observações…</div>
                   ) : observacoes.length === 0 ? (
                     <p className="text-sm text-texto/45">Nenhuma observação registrada ainda.</p>
                   ) : (
-                    observacoes.map((o) => (
-                      <div key={o.id} className="rounded-xl bg-white/[0.03] p-4">
-                        <p className="text-sm text-white/90 leading-relaxed">{o.texto}</p>
-                        <div className="mt-2 text-xs text-texto/45">{new Date(o.criada_em).toLocaleString('pt-BR')}</div>
-                      </div>
-                    ))
+                    observacoes.map((o) => {
+                      const maiorPontuacao = Math.max(1, ...(o.mapa_competencias || []).map((c) => c.pontuacao || 0))
+                      const sugestao = caracteristicaPorId[o.caracteristica_sugerida_id]
+                      const seloSugerido = seloPorCaracteristicaId[o.caracteristica_sugerida_id]
+                      const jaTemEssaCaracteristica = alunoSelecionado.caracteristica_id === o.caracteristica_sugerida_id
+                      return (
+                        <div key={o.id} className="rounded-xl bg-white/[0.03] p-4">
+                          <p className="text-sm text-white/90 leading-relaxed">{o.texto}</p>
+                          <div className="mt-2 text-xs text-texto/45">{new Date(o.criada_em).toLocaleString('pt-BR')}</div>
+
+                          {analisandoId === o.id ? (
+                            <div className="mt-3 flex items-center gap-2 text-xs text-azul">
+                              <Loader2 size={13} className="animate-spin" /> IA analisando o texto…
+                            </div>
+                          ) : o.mapa_competencias ? (
+                            <div className="mt-4 pt-4 border-t border-white/5">
+                              <div className="flex items-center gap-1.5 text-xs font-semibold text-texto/60 mb-2.5">
+                                <Sparkles size={12} className="text-azul" /> Mapa de competências (IA)
+                              </div>
+                              <div className="space-y-1.5">
+                                {(o.mapa_competencias || []).map((c) => (
+                                  <div key={c.nome} className="flex items-center gap-2">
+                                    <span className="text-[11px] text-texto/55 w-32 shrink-0 truncate">{c.nome}</span>
+                                    <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                                      <div className="h-full rounded-full bg-azul transition-all" style={{ width: `${Math.max(4, (c.pontuacao / maiorPontuacao) * 100)}%` }} />
+                                    </div>
+                                    <span className="text-[11px] text-texto/50 w-5 text-right">{c.pontuacao}</span>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {sugestao && (
+                                <div className="mt-3 rounded-lg bg-azul/10 border border-azul/20 p-3">
+                                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                                    <div className="flex items-center gap-2 text-sm">
+                                      {seloSugerido && <IconeSelo nome={seloSugerido.icone} size={14} style={{ color: sugestao.cor }} />}
+                                      <span className="text-white/90">
+                                        IA sugere: <span className="font-semibold" style={{ color: sugestao.cor }}>{sugestao.nome}</span>
+                                        {typeof o.confianca_ia === 'number' && (
+                                          <span className="text-texto/45"> ({Math.round(o.confianca_ia * 100)}% confiança)</span>
+                                        )}
+                                      </span>
+                                    </div>
+                                    {jaTemEssaCaracteristica ? (
+                                      <span className="inline-flex items-center gap-1 text-xs text-[#3FD08A]"><Check size={13} /> Já aplicada</span>
+                                    ) : (
+                                      <button
+                                        onClick={() => aplicarCaracteristica(o)}
+                                        disabled={aplicandoId === o.id}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-azul hover:bg-azul-puro text-white transition disabled:opacity-60"
+                                      >
+                                        {aplicandoId === o.id ? <Loader2 size={13} className="animate-spin" /> : <Wand2 size={13} />}
+                                        Aplicar e conceder selo
+                                      </button>
+                                    )}
+                                  </div>
+                                  {o.justificativa_ia && <p className="mt-2 text-xs text-texto/50 leading-relaxed">{o.justificativa_ia}</p>}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => analisar(o)}
+                              className="mt-3 inline-flex items-center gap-1.5 text-xs text-azul hover:text-white transition"
+                            >
+                              <RefreshCcw size={12} /> Analisar com IA
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })
                   )}
                 </div>
               </div>

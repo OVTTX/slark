@@ -8,10 +8,10 @@ import AdminInicio from './pages/admin/AdminInicio'
 import AdminEscolas from './pages/admin/AdminEscolas'
 import AdminAlunos from './pages/admin/AdminAlunos'
 import AdminPontuacao from './pages/admin/AdminPontuacao'
-import AdminAssinaturas from './pages/admin/AdminAssinaturas'
-import AdminPagamentos from './pages/admin/AdminPagamentos'
+import AdminFinanceiro from './pages/admin/AdminFinanceiro'
 import AdminFeceap from './pages/admin/AdminFeceap'
 import AdminLeads from './pages/admin/AdminLeads'
+import AdminUsuarios from './pages/admin/AdminUsuarios'
 import DiretorInicio from './pages/diretor/DiretorInicio'
 import DiretorSalas from './pages/diretor/DiretorSalas'
 import DiretorProfessores from './pages/diretor/DiretorProfessores'
@@ -56,10 +56,10 @@ export default function App() {
           <Route path="/admin/escolas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminEscolas /></AppLayout></RotaProtegida>} />
           <Route path="/admin/alunos" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminAlunos /></AppLayout></RotaProtegida>} />
           <Route path="/admin/pontuacao" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminPontuacao /></AppLayout></RotaProtegida>} />
-          <Route path="/admin/assinaturas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminAssinaturas /></AppLayout></RotaProtegida>} />
-          <Route path="/admin/pagamentos" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminPagamentos /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/financeiro" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminFinanceiro /></AppLayout></RotaProtegida>} />
           <Route path="/admin/feceap" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminFeceap /></AppLayout></RotaProtegida>} />
           <Route path="/admin/leads" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminLeads /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/usuarios" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminUsuarios /></AppLayout></RotaProtegida>} />
 
           {/* ---------- DIRETOR ---------- */}
           <Route path="/diretor" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorInicio /></AppLayout></RotaProtegida>} />
