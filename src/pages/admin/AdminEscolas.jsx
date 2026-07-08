@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import {
   Building2, Plus, X, Loader2, Users, Pencil, Power, MapPin, Trash2, AlertTriangle,
+  Search, ChevronLeft, ChevronRight,
 } from 'lucide-react'
+
+const POR_PAGINA = 10
 
 const ESTADOS = [
   'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB',
@@ -46,6 +49,8 @@ export default function AdminEscolas() {
   const [escolaParaExcluir, setEscolaParaExcluir] = useState(null)
   const [confirmacaoNome, setConfirmacaoNome] = useState('')
   const [excluindo, setExcluindo] = useState(false)
+  const [busca, setBusca] = useState('')
+  const [pagina, setPagina] = useState(1)
 
   async function carregar() {
     setCarregando(true)
@@ -80,6 +85,20 @@ export default function AdminEscolas() {
   }
 
   useEffect(() => { carregar() }, [])
+
+  const escolasFiltradas = useMemo(() => {
+    const termo = busca.trim().toLowerCase()
+    if (!termo) return escolas
+    return escolas.filter((esc) =>
+      esc.nome.toLowerCase().includes(termo) ||
+      (esc.cidade || '').toLowerCase().includes(termo) ||
+      (esc.responsavel_nome || '').toLowerCase().includes(termo),
+    )
+  }, [escolas, busca])
+
+  const totalPaginas = Math.max(1, Math.ceil(escolasFiltradas.length / POR_PAGINA))
+  const paginaAtual = Math.min(pagina, totalPaginas)
+  const escolasDaPagina = escolasFiltradas.slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA)
 
   function abrirNova() {
     setEditandoId(null)
@@ -211,20 +230,30 @@ export default function AdminEscolas() {
         </button>
       </div>
 
+      <div className="mt-6 relative max-w-sm">
+        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-texto/40" />
+        <input
+          value={busca} onChange={(e) => { setBusca(e.target.value); setPagina(1) }}
+          placeholder="Buscar por escola, cidade ou responsável…"
+          className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-card border border-azul/15 text-white placeholder:text-texto/30 focus:outline-none focus:border-azul transition"
+        />
+      </div>
+
       {erro && (
         <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>
       )}
 
       {carregando ? (
         <div className="mt-10 text-texto/50">Carregando escolas…</div>
-      ) : escolas.length === 0 ? (
+      ) : escolasFiltradas.length === 0 ? (
         <div className="mt-10 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
           <Building2 className="mx-auto text-azul/60" size={40} />
           <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">
-            Nenhuma escola cadastrada ainda. Clique em "Nova escola" para começar.
+            {escolas.length === 0 ? 'Nenhuma escola cadastrada ainda. Clique em "Nova escola" para começar.' : 'Nenhuma escola encontrada com essa busca.'}
           </p>
         </div>
       ) : (
+        <>
         <div className="mt-8 rounded-2xl bg-card border overflow-hidden overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -237,7 +266,7 @@ export default function AdminEscolas() {
               </tr>
             </thead>
             <tbody>
-              {escolas.map((esc) => (
+              {escolasDaPagina.map((esc) => (
                 <tr key={esc.id} className="border-b last:border-0 hover:bg-white/[0.02] transition">
                   <td className="px-6 py-4">
                     <div className="font-semibold text-white">{esc.nome}</div>
@@ -303,6 +332,19 @@ export default function AdminEscolas() {
             </tbody>
           </table>
         </div>
+
+        {totalPaginas > 1 && (
+          <div className="mt-4 flex items-center justify-center gap-3 text-sm text-texto/60">
+            <button onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={paginaAtual === 1} className="p-1.5 rounded-lg hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none transition">
+              <ChevronLeft size={16} />
+            </button>
+            Página {paginaAtual} de {totalPaginas}
+            <button onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))} disabled={paginaAtual === totalPaginas} className="p-1.5 rounded-lg hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none transition">
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        )}
+        </>
       )}
 
       {modalAberto && (

@@ -1,7 +1,18 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { Trophy, Award, Sparkles, School } from 'lucide-react'
+import { Trophy, Award, Sparkles, School, Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search } from 'lucide-react'
+
+// selos antigos guardam um emoji em "icone"; os ligados a características
+// guardam o nome de um ícone lucide (ex: "Lightbulb").
+const ICONES_LUCIDE = { Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search }
+
+function IconeSelo({ icone, size = 32, className = '' }) {
+  const Comp = icone && ICONES_LUCIDE[icone]
+  if (Comp) return <Comp size={size} className={className} />
+  if (!icone) return <Award size={size} className={className} />
+  return <span className="leading-none" style={{ fontSize: size }}>{icone}</span>
+}
 
 export default function AlunoInicio() {
   const { perfil } = useAuth()
@@ -100,7 +111,9 @@ export default function AlunoInicio() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {selos.map((s, i) => (
               <div key={i} className="rounded-2xl bg-card border p-5 text-center">
-                <div className="text-4xl">{s.selos.icone}</div>
+                <div className="h-9 flex items-center justify-center">
+                  <IconeSelo icone={s.selos.icone} size={30} className="text-azul/80" />
+                </div>
                 <div className="mt-2 font-semibold text-white text-sm">{s.selos.nome}</div>
                 <div className="text-xs text-texto/50 mt-1">{s.selos.descricao}</div>
               </div>

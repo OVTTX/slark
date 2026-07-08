@@ -11,7 +11,10 @@ import {
 const MENUS = {
   admin_slark: [
     { to: '/admin', label: 'Visão Geral', icon: LayoutGrid, end: true },
+    { to: '/admin/metricas', label: 'Métricas', icon: BarChart3 },
     { to: '/admin/escolas', label: 'Escolas', icon: Building2 },
+    { to: '/admin/turmas', label: 'Turmas', icon: School },
+    { to: '/admin/professores', label: 'Professores', icon: GraduationCap },
     { to: '/admin/alunos', label: 'Alunos', icon: Users },
     { to: '/admin/pontuacao', label: 'Pontuação Global', icon: Trophy },
     { to: '/admin/financeiro', label: 'Financeiro', icon: Wallet },

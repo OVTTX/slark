@@ -1,7 +1,18 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { Award, Loader2 } from 'lucide-react'
+import { Award, Loader2, Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search } from 'lucide-react'
+
+// selos antigos guardam um emoji em "icone" (ex: 🏆); os selos ligados a
+// características guardam o nome de um ícone lucide (ex: "Lightbulb").
+const ICONES_LUCIDE = { Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search }
+
+function IconeSelo({ icone, size = 32, className = '' }) {
+  const Comp = icone && ICONES_LUCIDE[icone]
+  if (Comp) return <Comp size={size} className={className} />
+  if (!icone) return <Award size={size} className={className} />
+  return <span className="leading-none" style={{ fontSize: size }}>{icone}</span>
+}
 
 export default function ProfessorInsignias() {
   const { perfil } = useAuth()
@@ -106,7 +117,11 @@ export default function ProfessorInsignias() {
                   className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-azul/15 text-white focus:outline-none focus:border-azul transition"
                 >
                   <option value="">Selecione…</option>
-                  {selos.map((s) => <option key={s.id} value={s.id}>{s.icone} {s.nome}</option>)}
+                  {selos.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.icone && !ICONES_LUCIDE[s.icone] ? `${s.icone} ` : ''}{s.nome}
+                    </option>
+                  ))}
                 </select>
               </div>
               {aviso && <p className="text-sm text-[#3FD08A] bg-[#3FD08A]/10 px-4 py-2.5 rounded-xl">{aviso}</p>}
@@ -132,7 +147,9 @@ export default function ProfessorInsignias() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {selos.map((s) => (
                     <div key={s.id} className="rounded-2xl bg-card border p-5 text-center">
-                      <div className="text-4xl">{s.icone || <Award className="mx-auto text-azul/60" />}</div>
+                      <div className="h-9 flex items-center justify-center">
+                        <IconeSelo icone={s.icone} size={30} className="text-azul/80" />
+                      </div>
                       <div className="mt-2 font-semibold text-white text-sm">{s.nome}</div>
                       <div className="text-xs text-texto/50 mt-1">{s.descricao}</div>
                       <div className="text-[11px] text-texto/40 mt-2">{s.pontos_necessarios} pts sugeridos</div>
@@ -150,7 +167,7 @@ export default function ProfessorInsignias() {
                 <div className="space-y-2">
                   {concedidos.map((c) => (
                     <div key={`${c.aluno_id}-${c.selo_id}`} className="rounded-xl bg-card/50 border p-3.5 flex items-center gap-3 text-sm">
-                      <span className="text-xl">{c.selos?.icone}</span>
+                      <IconeSelo icone={c.selos?.icone} size={18} className="text-azul/80" />
                       <span className="text-white/90 font-medium">{c.alunos?.nome}</span>
                       <span className="text-texto/50">ganhou</span>
                       <span className="text-white/90">{c.selos?.nome}</span>

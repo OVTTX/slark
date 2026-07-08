@@ -5,8 +5,11 @@ import AppLayout from './components/AppLayout'
 import Login from './pages/Login'
 import Perfil from './pages/Perfil'
 import AdminInicio from './pages/admin/AdminInicio'
+import AdminMetricas from './pages/admin/AdminMetricas'
 import AdminEscolas from './pages/admin/AdminEscolas'
 import AdminAlunos from './pages/admin/AdminAlunos'
+import AdminTurmas from './pages/admin/AdminTurmas'
+import AdminProfessores from './pages/admin/AdminProfessores'
 import AdminPontuacao from './pages/admin/AdminPontuacao'
 import AdminFinanceiro from './pages/admin/AdminFinanceiro'
 import AdminFeceap from './pages/admin/AdminFeceap'
@@ -53,8 +56,11 @@ export default function App() {
 
           {/* ---------- EQUIPE SLARK (admin) ---------- */}
           <Route path="/admin" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminInicio /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/metricas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminMetricas /></AppLayout></RotaProtegida>} />
           <Route path="/admin/escolas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminEscolas /></AppLayout></RotaProtegida>} />
           <Route path="/admin/alunos" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminAlunos /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/turmas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminTurmas /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/professores" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminProfessores /></AppLayout></RotaProtegida>} />
           <Route path="/admin/pontuacao" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminPontuacao /></AppLayout></RotaProtegida>} />
           <Route path="/admin/financeiro" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminFinanceiro /></AppLayout></RotaProtegida>} />
           <Route path="/admin/feceap" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminFeceap /></AppLayout></RotaProtegida>} />
