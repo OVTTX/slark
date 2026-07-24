@@ -108,7 +108,7 @@ export default function AlunoAtividades() {
                 <div className="min-w-0">
                   <div className="font-semibold text-white">{a.titulo}</div>
                   {a.prazo && <div className="text-xs text-texto/45 mt-1">Prazo: {new Date(a.prazo).toLocaleDateString('pt-BR')}</div>}
-                  {a.entrega?.nota != null && <div className="text-xs text-[#3FD08A] mt-1">Nota: {Number(a.entrega.nota).toFixed(1)}</div>}
+                  {a.entrega?.nota != null && <div className="text-xs text-[#3FD08A] mt-1">Nota: {Math.round(Number(a.entrega.nota))}%</div>}
                 </div>
                 <span
                   className="shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -130,7 +130,7 @@ export default function AlunoAtividades() {
 
             {aberto.entrega?.status === 'corrigida' && (
               <div className="mt-4 rounded-xl bg-[#3FD08A]/10 border border-[#3FD08A]/30 p-4">
-                <div className="flex items-center gap-2 text-[#3FD08A] font-semibold text-sm"><CheckCircle2 size={15} /> Corrigida — Nota {Number(aberto.entrega.nota).toFixed(1)}</div>
+                <div className="flex items-center gap-2 text-[#3FD08A] font-semibold text-sm"><CheckCircle2 size={15} /> Corrigida — {Math.round(Number(aberto.entrega.nota))}%</div>
                 {aberto.entrega.feedback_ia && <p className="text-sm text-white/80 mt-2">{aberto.entrega.feedback_ia}</p>}
               </div>
             )}

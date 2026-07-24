@@ -66,7 +66,7 @@ export default function DiretorNotas() {
   )
 
   const media = listaFiltrada.length
-    ? (listaFiltrada.reduce((s, e) => s + Number(e.nota), 0) / listaFiltrada.length).toFixed(1)
+    ? `${Math.round(listaFiltrada.reduce((s, e) => s + Number(e.nota), 0) / listaFiltrada.length)}%`
     : '—'
 
   return (
@@ -115,7 +115,7 @@ export default function DiretorNotas() {
                   <td className="px-6 py-4 text-texto/70">
                     <div className="flex items-center gap-1.5"><School size={13} className="text-texto/40" />{e.salaNome}</div>
                   </td>
-                  <td className="px-6 py-4 text-right font-bold text-white">{Number(e.nota).toFixed(1)}</td>
+                  <td className="px-6 py-4 text-right font-bold text-white">{Math.round(Number(e.nota))}%</td>
                 </tr>
               ))}
             </tbody>

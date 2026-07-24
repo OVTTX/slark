@@ -43,7 +43,7 @@ const MENUS = {
     { to: '/professor/relatorios', label: 'Relatórios', icon: BarChart3 },
     { to: '/professor/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/professor/gabaritos', label: 'Gabaritos', icon: ListChecks },
-    { to: '/professor/notas', label: 'Notas', icon: ClipboardList },
+    { to: '/professor/projetos', label: 'Projetos', icon: ClipboardList },
     { to: '/professor/aula-slark', label: 'Aula Slark', icon: GraduationCap },
     { to: '/professor/ranking', label: 'Ranking', icon: Trophy },
   ],

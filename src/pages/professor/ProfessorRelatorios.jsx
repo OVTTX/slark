@@ -50,7 +50,7 @@ export default function ProfessorRelatorios() {
 
         setLinhas((alunosData || []).map((a) => {
           const notas = notasPorAluno[a.id] || []
-          const media = notas.length ? (notas.reduce((s, n) => s + n, 0) / notas.length).toFixed(1) : '—'
+          const media = notas.length ? `${Math.round(notas.reduce((s, n) => s + n, 0) / notas.length)}%` : '—'
           return {
             id: a.id,
             nome: a.nome,
