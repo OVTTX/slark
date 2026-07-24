@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { MessageCircle, Send, Loader2, ShieldAlert } from 'lucide-react'
+import { MessageCircle, Send, Loader2, ShieldAlert, Trash2 } from 'lucide-react'
 
 export default function AlunoChat() {
   const { perfil } = useAuth()
@@ -12,6 +12,8 @@ export default function AlunoChat() {
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState('')
   const [aviso, setAviso] = useState('')
+  const [confirmandoLimpeza, setConfirmandoLimpeza] = useState(false)
+  const [limpando, setLimpando] = useState(false)
   const fimRef = useRef(null)
 
   async function carregar() {
@@ -79,6 +81,25 @@ export default function AlunoChat() {
     }
   }
 
+  async function limparConversa() {
+    if (!professor) return
+    setLimpando(true)
+    try {
+      const { error } = await supabase
+        .from('mensagens')
+        .delete()
+        .or(`and(remetente_id.eq.${perfil.id},destinatario_id.eq.${professor.id}),and(remetente_id.eq.${professor.id},destinatario_id.eq.${perfil.id})`)
+      if (error) throw error
+      setMensagens([])
+      setConfirmandoLimpeza(false)
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível limpar a conversa.')
+    } finally {
+      setLimpando(false)
+    }
+  }
+
   return (
     <div>
       <h1 className="text-4xl font-bold text-white tracking-tight">Chat com o Professor</h1>
@@ -95,7 +116,18 @@ export default function AlunoChat() {
         </div>
       ) : (
         <div className="mt-8 rounded-2xl bg-card border flex flex-col h-[560px]">
-          <div className="px-5 py-4 border-b font-semibold text-white">{professor.nome}</div>
+          <div className="px-5 py-4 border-b font-semibold text-white flex items-center justify-between">
+            <span>{professor.nome}</span>
+            {mensagens.length > 0 && (
+              <button
+                onClick={() => setConfirmandoLimpeza(true)}
+                title="Limpar conversa"
+                className="text-texto/40 hover:text-red-400 transition p-1.5 rounded-lg hover:bg-red-400/10"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
+          </div>
           <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
             {mensagens.length === 0 && <p className="text-sm text-texto/45 text-center mt-8">Envie a primeira mensagem para começar a conversa.</p>}
             {mensagens.map((m) => {
@@ -132,6 +164,31 @@ export default function AlunoChat() {
               {enviando ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
             </button>
           </form>
+        </div>
+      )}
+
+      {confirmandoLimpeza && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setConfirmandoLimpeza(false)}>
+          <div className="w-full max-w-sm rounded-2xl bg-bg-2 border p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2 text-white font-semibold"><Trash2 size={18} className="text-red-400" /> Limpar conversa</div>
+            <p className="mt-3 text-sm text-texto/60 leading-relaxed">
+              Isso apaga todas as mensagens trocadas com {professor.nome} para sempre, para os dois lados. Não pode ser desfeito.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setConfirmandoLimpeza(false)}
+                className="flex-1 py-2.5 rounded-xl border text-texto/70 font-semibold hover:bg-white/5 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={limparConversa} disabled={limpando}
+                className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold transition disabled:opacity-60"
+              >
+                {limpando ? 'Limpando…' : 'Limpar'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
