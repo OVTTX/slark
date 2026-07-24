@@ -1,9 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
-  LayoutGrid, School, Users, Eye, UsersRound, Award, Target, Trophy,
+  LayoutGrid, School, Users, Eye, UsersRound, Target, Trophy,
   BarChart3, BookOpen, ClipboardList, GraduationCap, DollarSign,
-  Calendar, FileText, Building2, CreditCard, LogOut, ArrowLeft, ListChecks,
+  Calendar, FileText, Building2, CreditCard, LogOut, ListChecks,
   Kanban, UserPlus, Wallet, ShieldCheck, MessageCircle,
 } from 'lucide-react'
 
@@ -38,13 +38,10 @@ const MENUS = {
     { to: '/professor/observacoes', label: 'Observações', icon: Eye },
     { to: '/professor/chat', label: 'Chat', icon: MessageCircle },
     { to: '/professor/equipes', label: 'Equipes', icon: UsersRound },
-    { to: '/professor/insignias', label: 'Insígnias', icon: Award },
     { to: '/professor/desafios', label: 'Desafios', icon: Target },
-    { to: '/professor/placar', label: 'Placar Equipes', icon: Trophy },
     { to: '/professor/relatorios', label: 'Relatórios', icon: BarChart3 },
     { to: '/professor/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/professor/gabaritos', label: 'Gabaritos', icon: ListChecks },
-    { to: '/professor/projetos', label: 'Projetos', icon: ClipboardList },
     { to: '/professor/aula-slark', label: 'Aula Slark', icon: GraduationCap },
     { to: '/professor/ranking', label: 'Ranking', icon: Trophy },
   ],
@@ -120,10 +117,6 @@ export default function BottomNav() {
             </span>
           )}
         </NavLink>
-
-        <a href={landing} title="Voltar ao site" className={`${botaoBase} text-texto/50 hover:text-white hover:bg-white/10`}>
-          <ArrowLeft size={17} />
-        </a>
 
         <button onClick={handleSair} title="Sair" className={`${botaoBase} text-texto/50 hover:text-red-400 hover:bg-red-400/10`}>
           <LogOut size={17} />

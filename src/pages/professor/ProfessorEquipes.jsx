@@ -1,9 +1,31 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { UsersRound, Plus, X, Loader2, Trash2, UserPlus } from 'lucide-react'
+import { UsersRound, Plus, X, Loader2, Trash2, UserPlus, Trophy } from 'lucide-react'
 
 export default function ProfessorEquipes() {
+  const [aba, setAba] = useState('equipes')
+
+  return (
+    <div>
+      <h1 className="text-4xl font-bold text-white tracking-tight">Equipes</h1>
+      <p className="mt-2 text-texto/60">Organize seus alunos em times e acompanhe o placar entre eles.</p>
+
+      <div className="mt-6 inline-flex rounded-xl bg-card border p-1">
+        <button onClick={() => setAba('equipes')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'equipes' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
+          Equipes
+        </button>
+        <button onClick={() => setAba('placar')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'placar' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
+          Placar
+        </button>
+      </div>
+
+      {aba === 'equipes' ? <GestaoEquipes /> : <Placar />}
+    </div>
+  )
+}
+
+function GestaoEquipes() {
   const { perfil } = useAuth()
   const [salas, setSalas] = useState([])
   const [salaAtiva, setSalaAtiva] = useState('')
@@ -110,11 +132,17 @@ export default function ProfessorEquipes() {
   }
 
   return (
-    <div>
+    <div className="mt-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-4xl font-bold text-white tracking-tight">Equipes</h1>
-          <p className="mt-2 text-texto/60">Organize seus alunos em times combinando características diferentes.</p>
+        <div className="flex flex-wrap gap-2">
+          {salas.length > 1 && salas.map((s) => (
+            <button
+              key={s.id} onClick={() => setSalaAtiva(s.id)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${salaAtiva === s.id ? 'bg-azul text-white' : 'bg-card text-texto/60 hover:text-white'}`}
+            >
+              {s.nome}
+            </button>
+          ))}
         </div>
         {salaAtiva && (
           <button
@@ -126,35 +154,22 @@ export default function ProfessorEquipes() {
         )}
       </div>
 
-      {salas.length > 1 && (
-        <div className="mt-6 flex flex-wrap gap-2">
-          {salas.map((s) => (
-            <button
-              key={s.id} onClick={() => setSalaAtiva(s.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${salaAtiva === s.id ? 'bg-azul text-white' : 'bg-card text-texto/60 hover:text-white'}`}
-            >
-              {s.nome}
-            </button>
-          ))}
-        </div>
-      )}
-
       {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 
       {salas.length === 0 ? (
-        <div className="mt-10 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
+        <div className="mt-6 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
           <UsersRound className="mx-auto text-azul/60" size={40} />
           <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">Você ainda não tem salas atribuídas.</p>
         </div>
       ) : carregando ? (
-        <div className="mt-10 text-texto/50">Carregando equipes…</div>
+        <div className="mt-6 text-texto/50">Carregando equipes…</div>
       ) : times.length === 0 ? (
-        <div className="mt-10 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
+        <div className="mt-6 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
           <UsersRound className="mx-auto text-azul/60" size={40} />
           <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">Nenhuma equipe criada nesta sala ainda.</p>
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {times.map((t) => (
             <div key={t.id} className="rounded-2xl bg-card border p-6">
               <div className="flex items-start justify-between">
@@ -219,6 +234,84 @@ export default function ProfessorEquipes() {
               </button>
             </form>
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+const CORES_PODIO = ['#F5C451', '#C0C0C0', '#CD7F32']
+
+function Placar() {
+  const { perfil } = useAuth()
+  const [times, setTimes] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
+
+  useEffect(() => {
+    if (!perfil?.id) return
+    async function carregar() {
+      setCarregando(true)
+      setErro('')
+      try {
+        const { data: salasData, error: eSalas } = await supabase.from('salas').select('id, nome').eq('professor_id', perfil.id)
+        if (eSalas) throw eSalas
+        const salaIds = (salasData || []).map((s) => s.id)
+        const salaPorId = Object.fromEntries((salasData || []).map((s) => [s.id, s]))
+        if (salaIds.length === 0) { setTimes([]); return }
+
+        const { data: timesData, error: eTimes } = await supabase
+          .from('times').select('*').in('sala_id', salaIds).order('pontos', { ascending: false })
+        if (eTimes) throw eTimes
+        setTimes((timesData || []).map((t) => ({ ...t, salaNome: salaPorId[t.sala_id]?.nome || '—' })))
+      } catch (e) {
+        console.error(e)
+        setErro('Não foi possível carregar o placar. Confira a conexão com o Supabase.')
+      } finally {
+        setCarregando(false)
+      }
+    }
+    carregar()
+  }, [perfil?.id])
+
+  const maior = times[0]?.pontos || 1
+
+  return (
+    <div className="mt-6">
+      {erro && <p className="mb-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
+
+      {carregando ? (
+        <div className="text-texto/50">Carregando placar…</div>
+      ) : times.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
+          <UsersRound className="mx-auto text-azul/60" size={40} />
+          <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">Nenhuma equipe criada ainda. Crie equipes na aba "Equipes".</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {times.map((t, i) => (
+            <div key={t.id} className="rounded-2xl bg-card border p-5 flex items-center gap-5 transition hover:-translate-y-0.5 hover:border-azul/40">
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center font-bold text-lg shrink-0"
+                style={{
+                  background: i < 3 ? `${CORES_PODIO[i]}22` : 'rgba(255,255,255,0.05)',
+                  color: i < 3 ? CORES_PODIO[i] : 'rgba(255,255,255,0.5)',
+                }}
+              >
+                {i + 1}º
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-white truncate">{t.nome}</div>
+                <div className="text-xs text-texto/50">{t.salaNome}</div>
+                <div className="mt-2 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                  <div className="h-full rounded-full bg-azul transition-all" style={{ width: `${Math.max(4, (t.pontos / maior) * 100)}%` }} />
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 justify-end font-bold text-white text-lg shrink-0">
+                <Trophy size={16} className="text-[#F5C451]" /> {t.pontos}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

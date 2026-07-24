@@ -98,7 +98,7 @@ export default function AlunoCompetencias() {
           </div>
         </div>
         <div className="rounded-2xl bg-card border p-6">
-          <div className="flex items-center gap-2 text-white font-semibold"><Award size={18} className="text-azul" /> Insígnias conquistadas</div>
+          <div className="flex items-center gap-2 text-white font-semibold"><Award size={18} className="text-azul" /> Selos conquistados</div>
           <div className="mt-3 flex items-end gap-2">
             <span className="text-3xl font-bold text-white">{selosConquistados}</span>
             <span className="text-texto/50 text-sm mb-1">de {selosTotal}</span>
