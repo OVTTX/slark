@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
 import RotaProtegida from './components/RotaProtegida'
 import AppLayout from './components/AppLayout'
 import Login from './pages/Login'
@@ -45,9 +46,10 @@ import NaoEncontrada from './pages/NaoEncontrada'
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/perfil" element={<RotaProtegida><Perfil /></RotaProtegida>} />
@@ -101,5 +103,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </ThemeProvider>
   )
 }

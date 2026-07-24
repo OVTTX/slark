@@ -1,10 +1,11 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import {
   LayoutGrid, School, Users, Eye, UsersRound, Target, Trophy,
   BarChart3, BookOpen, ClipboardList, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ListChecks,
-  Kanban, UserPlus, Wallet, ShieldCheck, MessageCircle,
+  Kanban, UserPlus, Wallet, ShieldCheck, MessageCircle, Sun, Moon,
 } from 'lucide-react'
 
 // Menus por perfil (espelham as telas do app real)
@@ -60,6 +61,7 @@ const botaoBase = 'shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-cent
 
 export default function BottomNav() {
   const { perfil, sair } = useAuth()
+  const { tema, alternarTema } = useTheme()
   const navigate = useNavigate()
   const menu = MENUS[perfil?.perfil] || []
   const landing = import.meta.env.VITE_LANDING_URL || '#'
@@ -117,6 +119,14 @@ export default function BottomNav() {
             </span>
           )}
         </NavLink>
+
+        <button
+          onClick={alternarTema}
+          title={tema === 'claro' ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
+          className={`${botaoBase} text-texto/50 hover:text-white hover:bg-white/10`}
+        >
+          {tema === 'claro' ? <Moon size={16} /> : <Sun size={16} />}
+        </button>
 
         <button onClick={handleSair} title="Sair" className={`${botaoBase} text-texto/50 hover:text-red-400 hover:bg-red-400/10`}>
           <LogOut size={17} />

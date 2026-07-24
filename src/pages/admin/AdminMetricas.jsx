@@ -211,10 +211,10 @@ export default function AdminMetricas() {
               ) : (
                 <ResponsiveContainer width="100%" height={Math.max(180, distribuicaoCaracteristicas.length * 44)}>
                   <BarChart data={distribuicaoCaracteristicas} layout="vertical" margin={{ left: 8, right: 16 }}>
-                    <CartesianGrid horizontal={false} stroke="rgba(255,255,255,.06)" />
-                    <XAxis type="number" allowDecimals={false} stroke="rgba(232,230,255,.4)" fontSize={12} domain={[0, maiorContagemCaracteristica]} />
-                    <YAxis type="category" dataKey="nome" stroke="rgba(232,230,255,.6)" fontSize={12} width={100} />
-                    <Tooltip content={<TooltipEscuro />} cursor={{ fill: 'rgba(255,255,255,.03)' }} />
+                    <CartesianGrid horizontal={false} stroke="rgb(var(--c-onbg) / .08)" />
+                    <XAxis type="number" allowDecimals={false} stroke="rgb(var(--c-texto) / .5)" fontSize={12} domain={[0, maiorContagemCaracteristica]} />
+                    <YAxis type="category" dataKey="nome" stroke="rgb(var(--c-texto) / .7)" fontSize={12} width={100} />
+                    <Tooltip content={<TooltipEscuro />} cursor={{ fill: 'rgb(var(--c-onbg) / .04)' }} />
                     <Bar dataKey="quantidade" name="Alunos" radius={[0, 6, 6, 0]}>
                       {distribuicaoCaracteristicas.map((c) => <Cell key={c.nome} fill={c.cor || '#2E5BFF'} />)}
                     </Bar>
@@ -226,12 +226,12 @@ export default function AdminMetricas() {
             <CardGrafico titulo="Evolução de pontos e selos" subtitulo={`Últimos ${MESES_JANELA} meses, rede toda`}>
               <ResponsiveContainer width="100%" height={260}>
                 <ComposedChart data={evolucao} margin={{ left: 0, right: 8 }}>
-                  <CartesianGrid stroke="rgba(255,255,255,.06)" />
-                  <XAxis dataKey="mes" stroke="rgba(232,230,255,.6)" fontSize={12} />
+                  <CartesianGrid stroke="rgb(var(--c-onbg) / .08)" />
+                  <XAxis dataKey="mes" stroke="rgb(var(--c-texto) / .7)" fontSize={12} />
                   <YAxis yAxisId="pontos" stroke="rgba(46,91,255,.7)" fontSize={12} width={40} />
                   <YAxis yAxisId="selos" orientation="right" allowDecimals={false} stroke="rgba(245,196,81,.8)" fontSize={12} width={30} />
-                  <Tooltip content={<TooltipEscuro />} cursor={{ fill: 'rgba(255,255,255,.03)' }} />
-                  <Legend wrapperStyle={{ fontSize: 12, color: '#E8E6FF' }} />
+                  <Tooltip content={<TooltipEscuro />} cursor={{ fill: 'rgb(var(--c-onbg) / .04)' }} />
+                  <Legend wrapperStyle={{ fontSize: 12, color: 'rgb(var(--c-texto))' }} />
                   <Bar yAxisId="selos" dataKey="selos" name="Selos concedidos" fill="#F5C451" radius={[4, 4, 0, 0]} barSize={18} />
                   <Line yAxisId="pontos" type="monotone" dataKey="pontos" name="Pontos gerados" stroke="#2E5BFF" strokeWidth={2.5} dot={{ r: 3 }} />
                 </ComposedChart>
@@ -246,10 +246,10 @@ export default function AdminMetricas() {
               ) : (
                 <ResponsiveContainer width="100%" height={Math.max(180, engajamento.length * 44)}>
                   <BarChart data={engajamento} layout="vertical" margin={{ left: 8, right: 16 }}>
-                    <CartesianGrid horizontal={false} stroke="rgba(255,255,255,.06)" />
-                    <XAxis type="number" domain={[0, 100]} unit="%" stroke="rgba(232,230,255,.4)" fontSize={12} />
-                    <YAxis type="category" dataKey="nome" stroke="rgba(232,230,255,.6)" fontSize={12} width={100} />
-                    <Tooltip content={<TooltipEscuro />} cursor={{ fill: 'rgba(255,255,255,.03)' }} />
+                    <CartesianGrid horizontal={false} stroke="rgb(var(--c-onbg) / .08)" />
+                    <XAxis type="number" domain={[0, 100]} unit="%" stroke="rgb(var(--c-texto) / .5)" fontSize={12} />
+                    <YAxis type="category" dataKey="nome" stroke="rgb(var(--c-texto) / .7)" fontSize={12} width={100} />
+                    <Tooltip content={<TooltipEscuro />} cursor={{ fill: 'rgb(var(--c-onbg) / .04)' }} />
                     <Bar dataKey="taxaEntrega" name="Taxa de entrega (%)" fill="#3FD08A" radius={[0, 6, 6, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -262,10 +262,10 @@ export default function AdminMetricas() {
               ) : (
                 <ResponsiveContainer width="100%" height={Math.max(180, engajamento.length * 44)}>
                   <BarChart data={engajamento} layout="vertical" margin={{ left: 8, right: 16 }}>
-                    <CartesianGrid horizontal={false} stroke="rgba(255,255,255,.06)" />
-                    <XAxis type="number" allowDecimals={false} stroke="rgba(232,230,255,.4)" fontSize={12} />
-                    <YAxis type="category" dataKey="nome" stroke="rgba(232,230,255,.6)" fontSize={12} width={100} />
-                    <Tooltip content={<TooltipEscuro />} cursor={{ fill: 'rgba(255,255,255,.03)' }} />
+                    <CartesianGrid horizontal={false} stroke="rgb(var(--c-onbg) / .08)" />
+                    <XAxis type="number" allowDecimals={false} stroke="rgb(var(--c-texto) / .5)" fontSize={12} />
+                    <YAxis type="category" dataKey="nome" stroke="rgb(var(--c-texto) / .7)" fontSize={12} width={100} />
+                    <Tooltip content={<TooltipEscuro />} cursor={{ fill: 'rgb(var(--c-onbg) / .04)' }} />
                     <Bar dataKey="pontosMedios" name="Pontos médios" fill="#2E5BFF" radius={[0, 6, 6, 0]} />
                   </BarChart>
                 </ResponsiveContainer>

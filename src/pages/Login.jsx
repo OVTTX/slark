@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { supabase, carregarPerfil } from '../lib/supabase'
 import { HOME_POR_PERFIL } from '../lib/rotasPorPerfil'
-import { ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Loader2, CheckCircle2, Sun, Moon } from 'lucide-react'
 
 const EMAIL_DEMO_SUFIXO = '@slarkdemo.com.br'
 
 export default function Login() {
   const { entrar } = useAuth()
+  const { tema, alternarTema } = useTheme()
   const navigate = useNavigate()
   const landing = import.meta.env.VITE_LANDING_URL || '#'
 
@@ -123,7 +125,15 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-bg text-texto font-display flex">
+    <div className="min-h-screen bg-bg text-texto font-display flex relative">
+      <button
+        onClick={alternarTema}
+        title={tema === 'claro' ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
+        className="fixed top-5 right-5 z-10 w-10 h-10 rounded-full flex items-center justify-center bg-card border text-texto/60 hover:text-white transition"
+      >
+        {tema === 'claro' ? <Moon size={16} /> : <Sun size={16} />}
+      </button>
+
       {/* Coluna esquerda: marca */}
       <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-bg-2 flex-col justify-between p-12">
         <div className="absolute -top-32 -right-24 w-[40vw] h-[40vw] rounded-full blur-3xl"

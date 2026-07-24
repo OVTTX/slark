@@ -3,10 +3,29 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+/* ---------- Tema (claro/escuro) ---------- */
+/* Slark é escura por padrão; .light na <html> troca a paleta pra clara,
+   mantendo as cores de marca (rosa/azul/azul-puro/profundo) fixas. */
+:root {
+  color-scheme: dark;
+  --c-bg: 5 3 31;         /* #05031F */
+  --c-bg2: 10 7 53;       /* #0A0735 */
+  --c-card: 14 11 64;     /* #0E0B40 */
+  --c-texto: 232 230 255; /* #E8E6FF */
+  --c-onbg: 255 255 255;  /* branco puro */
+}
+:root.light {
+  color-scheme: light;
+  --c-bg: 247 243 251;    /* leve tom rosa/lavanda da marca */
+  --c-bg2: 252 250 253;
+  --c-card: 255 255 255;
+  --c-texto: 61 55 107;   /* tom escuro (família do azul/profundo) para texto secundário */
+  --c-onbg: 12 9 40;      /* quase preto, com um toque de profundo, para texto principal */
+}
+
 html, body, #root { height: 100%; }
 html, body { overflow-x: hidden; max-width: 100vw; }
-body { background: #05031F; -webkit-tap-highlight-color: transparent; }
+body { background: rgb(var(--c-bg)); -webkit-tap-highlight-color: transparent; transition: background-color .15s ease; }
 ::selection { background: #2E5BFF; color: #fff; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: rgba(120,130,255,.2); border-radius: 99px; }
