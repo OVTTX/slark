@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { Trophy, Award, Sparkles, School, Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search } from 'lucide-react'
+import CaminhoTrilha from '../../components/CaminhoTrilha'
+import { Trophy, Award, Sparkles, School, Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search, BookOpen, ArrowRight } from 'lucide-react'
 
 // selos antigos guardam um emoji em "icone"; os ligados a características
 // guardam o nome de um ícone lucide (ex: "Lightbulb").
@@ -16,9 +18,11 @@ function IconeSelo({ icone, size = 32, className = '' }) {
 
 export default function AlunoInicio() {
   const { perfil } = useAuth()
+  const navigate = useNavigate()
   const [aluno, setAluno] = useState(null)
   const [sala, setSala] = useState(null)
   const [selos, setSelos] = useState([])
+  const [trilhaRetomar, setTrilhaRetomar] = useState(null) // { trilha, progresso: Set }
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
 
@@ -42,6 +46,8 @@ export default function AlunoInicio() {
           const { data: selosData } = await supabase
             .from('aluno_selos').select('concedido_em, selos(nome, descricao, icone, pontos_necessarios)').eq('aluno_id', alunoData.id)
           setSelos(selosData || [])
+
+          await carregarTrilhaParaRetomar(alunoData)
         }
       } catch (e) {
         console.error(e)
@@ -50,8 +56,42 @@ export default function AlunoInicio() {
         setCarregando(false)
       }
     }
+
+    async function carregarTrilhaParaRetomar(alunoData) {
+      const { data: trilhasData } = await supabase
+        .from('trilhas').select('*, trilha_blocos(*)')
+        .eq('escola_id', perfil.escola_id).eq('status', 'publicado')
+        .or(`sala_id.eq.${alunoData.sala_id},sala_id.is.null`)
+        .order('criada_em', { ascending: false })
+
+      const trilhas = (trilhasData || [])
+        .map((t) => ({ ...t, blocos: (t.trilha_blocos || []).sort((a, b) => a.ordem - b.ordem) }))
+        .filter((t) => t.blocos.length > 0)
+      if (trilhas.length === 0) return
+
+      const { data: conclusoesData } = await supabase.from('trilha_conclusoes').select('trilha_id').eq('aluno_id', alunoData.id)
+      const concluidas = new Set((conclusoesData || []).map((c) => c.trilha_id))
+      const pendentes = trilhas.filter((t) => !concluidas.has(t.id))
+      if (pendentes.length === 0) return
+
+      const { data: progressoData } = await supabase
+        .from('trilha_bloco_progresso').select('bloco_id, trilha_id')
+        .eq('aluno_id', alunoData.id).in('trilha_id', pendentes.map((t) => t.id))
+
+      const progressoPorTrilha = {}
+      for (const p of progressoData || []) {
+        if (!progressoPorTrilha[p.trilha_id]) progressoPorTrilha[p.trilha_id] = new Set()
+        progressoPorTrilha[p.trilha_id].add(p.bloco_id)
+      }
+
+      // prioriza uma trilha já iniciada; senão, a mais recente disponível
+      const emAndamento = pendentes.find((t) => progressoPorTrilha[t.id]?.size > 0)
+      const escolhida = emAndamento || pendentes[0]
+      setTrilhaRetomar({ trilha: escolhida, progresso: progressoPorTrilha[escolhida.id] || new Set() })
+    }
+
     carregar()
-  }, [perfil?.id])
+  }, [perfil?.id, perfil?.escola_id])
 
   if (carregando) return <div className="text-texto/50">Carregando seu painel…</div>
 
@@ -83,6 +123,30 @@ export default function AlunoInicio() {
           <div className="mt-1 text-xl font-bold text-white">{sala?.nome || '—'}</div>
         </div>
       </div>
+
+      {trilhaRetomar && (
+        <div className="mt-6 rounded-2xl bg-card border p-6">
+          <div className="flex items-center gap-2 text-white font-semibold">
+            <BookOpen size={18} className="text-azul" /> Retomar trilha
+          </div>
+          <div className="mt-1 text-sm text-texto/60">{trilhaRetomar.trilha.titulo}</div>
+
+          <div className="py-4">
+            <CaminhoTrilha
+              blocos={trilhaRetomar.trilha.blocos.slice(0, 5)}
+              concluidos={trilhaRetomar.progresso}
+              compacto
+            />
+          </div>
+
+          <button
+            onClick={() => navigate('/aluno/trilhas', { state: { abrirTrilhaId: trilhaRetomar.trilha.id } })}
+            className="w-full py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/40 flex items-center justify-center gap-2"
+          >
+            Continuar <ArrowRight size={16} />
+          </button>
+        </div>
+      )}
 
       {aluno.caracteristicas && (
         <div className="mt-6 rounded-2xl bg-card border p-6">
