@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import {
   LayoutGrid, School, Users, Eye, UsersRound, Target, Trophy,
-  BarChart3, BookOpen, ClipboardList, GraduationCap, DollarSign,
+  BarChart3, BookOpen, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ListChecks,
   Kanban, UserPlus, Wallet, ShieldCheck, MessageCircle, Sun, Moon,
 } from 'lucide-react'
@@ -49,7 +49,6 @@ const MENUS = {
   aluno: [
     { to: '/aluno', label: 'Meu Painel', icon: LayoutGrid, end: true },
     { to: '/aluno/competencias', label: 'Mapa de Competências', icon: Target },
-    { to: '/aluno/atividades', label: 'Atividades', icon: ClipboardList },
     { to: '/aluno/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/aluno/time', label: 'Meu Time', icon: UsersRound },
     { to: '/aluno/chat', label: 'Chat', icon: Eye },

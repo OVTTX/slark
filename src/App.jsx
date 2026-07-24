@@ -37,7 +37,6 @@ import ProfessorAulaSlark from './pages/professor/ProfessorAulaSlark'
 import ProfessorRanking from './pages/professor/ProfessorRanking'
 import AlunoInicio from './pages/aluno/AlunoInicio'
 import AlunoCompetencias from './pages/aluno/AlunoCompetencias'
-import AlunoAtividades from './pages/aluno/AlunoAtividades'
 import AlunoTrilhas from './pages/aluno/AlunoTrilhas'
 import AlunoTime from './pages/aluno/AlunoTime'
 import AlunoChat from './pages/aluno/AlunoChat'
@@ -93,7 +92,6 @@ export default function App() {
           {/* ---------- ALUNO ---------- */}
           <Route path="/aluno" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoInicio /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/competencias" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoCompetencias /></AppLayout></RotaProtegida>} />
-          <Route path="/aluno/atividades" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoAtividades /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/trilhas" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoTrilhas /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/time" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoTime /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/chat" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoChat /></AppLayout></RotaProtegida>} />
