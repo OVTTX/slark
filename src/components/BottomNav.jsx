@@ -4,7 +4,7 @@ import {
   LayoutGrid, School, Users, Eye, UsersRound, Award, Target, Trophy,
   BarChart3, BookOpen, ClipboardList, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ArrowLeft, ListChecks,
-  Kanban, UserPlus, Wallet, ShieldCheck,
+  Kanban, UserPlus, Wallet, ShieldCheck, MessageCircle,
 } from 'lucide-react'
 
 // Menus por perfil (espelham as telas do app real)
@@ -36,6 +36,7 @@ const MENUS = {
     { to: '/professor/salas', label: 'Salas', icon: School },
     { to: '/professor/alunos', label: 'Alunos', icon: Users },
     { to: '/professor/observacoes', label: 'Observações', icon: Eye },
+    { to: '/professor/chat', label: 'Chat', icon: MessageCircle },
     { to: '/professor/equipes', label: 'Equipes', icon: UsersRound },
     { to: '/professor/insignias', label: 'Insígnias', icon: Award },
     { to: '/professor/desafios', label: 'Desafios', icon: Target },

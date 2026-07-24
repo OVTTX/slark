@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { MessageCircle, Send, Loader2 } from 'lucide-react'
+import { MessageCircle, Send, Loader2, ShieldAlert } from 'lucide-react'
 
 export default function AlunoChat() {
   const { perfil } = useAuth()
@@ -11,6 +11,7 @@ export default function AlunoChat() {
   const [carregando, setCarregando] = useState(true)
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState('')
+  const [aviso, setAviso] = useState('')
   const fimRef = useRef(null)
 
   async function carregar() {
@@ -56,8 +57,17 @@ export default function AlunoChat() {
     e.preventDefault()
     if (!texto.trim() || !professor) return
     setEnviando(true)
+    setAviso('')
     try {
-      const { error } = await supabase.from('mensagens').insert({ remetente_id: perfil.id, destinatario_id: professor.id, texto: texto.trim() })
+      const textoEnviar = texto.trim()
+      const { data: moderacao } = await supabase.functions.invoke('moderar-mensagem', {
+        body: { texto: textoEnviar, destinatario_id: professor.id },
+      })
+      if (moderacao && moderacao.permitido === false) {
+        setAviso('Essa mensagem não pode ser enviada por conter conteúdo impróprio ou perigoso. Se algo estiver errado, procure um adulto de confiança ou o professor pessoalmente.')
+        return
+      }
+      const { error } = await supabase.from('mensagens').insert({ remetente_id: perfil.id, destinatario_id: professor.id, texto: textoEnviar })
       if (error) throw error
       setTexto('')
       await carregar()
@@ -103,6 +113,12 @@ export default function AlunoChat() {
             })}
             <div ref={fimRef} />
           </div>
+          {aviso && (
+            <div className="mx-4 mb-3 rounded-xl bg-red-400/10 border border-red-400/25 px-4 py-3 text-sm text-red-300 flex items-start gap-2">
+              <ShieldAlert size={16} className="shrink-0 mt-0.5" />
+              <span>{aviso}</span>
+            </div>
+          )}
           <form onSubmit={enviar} className="p-4 border-t flex gap-2">
             <input
               value={texto} onChange={(e) => setTexto(e.target.value)}
