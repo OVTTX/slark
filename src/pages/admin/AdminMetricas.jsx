@@ -5,6 +5,8 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ComposedChart, Line, Cell,
 } from 'recharts'
+import { TermometroBarra, TermometroGrande } from '../../components/Termometro'
+import { calcularScoreAluno, agregarScores } from '../../lib/engajamento'
 
 const MESES_JANELA = 6 // quantos meses mostrar na evolução de pontos/selos
 
@@ -56,6 +58,8 @@ export default function AdminMetricas() {
   const [distribuicaoCaracteristicas, setDistribuicaoCaracteristicas] = useState([])
   const [evolucao, setEvolucao] = useState([])
   const [engajamento, setEngajamento] = useState([])
+  const [termometroGeral, setTermometroGeral] = useState({ geral: 0, semDados: true })
+  const [termometroPorEscola, setTermometroPorEscola] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
 
@@ -168,6 +172,85 @@ export default function AdminMetricas() {
           return { nome: sala.nome, taxaEntrega, pontosMedios }
         })
         setEngajamento(listaEngajamento)
+
+        // ---------- Termômetro de engajamento por escola (pontos + trilhas + presença) ----------
+        const [
+          { data: escolasData, error: eEscolas },
+          { data: salasEscolaData, error: eSalasEsc },
+          { data: alunosEscolaData, error: eAlunosEsc },
+          { data: trilhasEngData, error: eTrilhasEng },
+          { data: progressoEngData, error: eProgEng },
+          { data: presencasEngData, error: ePresEng },
+        ] = await Promise.all([
+          supabase.from('escolas').select('id, nome'),
+          supabase.from('salas').select('id, escola_id'),
+          supabase.from('alunos').select('id, sala_id, escola_id, pontos'),
+          supabase.from('trilhas').select('id, escola_id, sala_id, status, trilha_blocos(id)').eq('status', 'publicado'),
+          supabase.from('trilha_bloco_progresso').select('aluno_id, bloco_id'),
+          supabase.from('presencas').select('aluno_id, sala_id, data, presente'),
+        ])
+        if (eEscolas) throw eEscolas
+        if (eSalasEsc) throw eSalasEsc
+        if (eAlunosEsc) throw eAlunosEsc
+        if (eTrilhasEng) throw eTrilhasEng
+        if (eProgEng) throw eProgEng
+        if (ePresEng) throw ePresEng
+
+        const blocosGeralPorEscola = {}
+        for (const t of trilhasEngData || []) {
+          if (t.sala_id) continue
+          blocosGeralPorEscola[t.escola_id] = (blocosGeralPorEscola[t.escola_id] || 0) + (t.trilha_blocos?.length || 0)
+        }
+        const blocosPorSala2 = {}
+        for (const s of salasEscolaData || []) blocosPorSala2[s.id] = blocosGeralPorEscola[s.escola_id] || 0
+        for (const t of trilhasEngData || []) {
+          if (!t.sala_id) continue
+          blocosPorSala2[t.sala_id] = (blocosPorSala2[t.sala_id] || 0) + (t.trilha_blocos?.length || 0)
+        }
+
+        const blocosFeitosPorAluno2 = {}
+        for (const p of progressoEngData || []) {
+          if (!blocosFeitosPorAluno2[p.aluno_id]) blocosFeitosPorAluno2[p.aluno_id] = new Set()
+          blocosFeitosPorAluno2[p.aluno_id].add(p.bloco_id)
+        }
+
+        const chamadasPorSala2 = {}
+        const presentesPorAluno2 = {}
+        for (const p of presencasEngData || []) {
+          if (!chamadasPorSala2[p.sala_id]) chamadasPorSala2[p.sala_id] = new Set()
+          chamadasPorSala2[p.sala_id].add(p.data)
+          if (p.presente) presentesPorAluno2[p.aluno_id] = (presentesPorAluno2[p.aluno_id] || 0) + 1
+        }
+
+        const maxPontosPorEscola = {}
+        for (const a of alunosEscolaData || []) {
+          maxPontosPorEscola[a.escola_id] = Math.max(maxPontosPorEscola[a.escola_id] || 0, a.pontos || 0)
+        }
+
+        const scoresPorAluno2 = (alunosEscolaData || []).map((a) => calcularScoreAluno({
+          pontos: a.pontos || 0,
+          maxPontos: maxPontosPorEscola[a.escola_id] || 0,
+          blocosFeitos: blocosFeitosPorAluno2[a.id]?.size || 0,
+          blocosTotais: blocosPorSala2[a.sala_id] || 0,
+          presentes: presentesPorAluno2[a.id] || 0,
+          totalChamadas: chamadasPorSala2[a.sala_id]?.size || 0,
+        }))
+        setTermometroGeral(agregarScores(scoresPorAluno2))
+
+        setTermometroPorEscola(
+          (escolasData || [])
+            .map((esc) => {
+              const scoresDaEscola = (alunosEscolaData || [])
+                .map((a, i) => ({ a, score: scoresPorAluno2[i] }))
+                .filter((x) => x.a.escola_id === esc.id)
+              return {
+                nome: esc.nome,
+                qtdAlunos: scoresDaEscola.length,
+                score: agregarScores(scoresDaEscola.map((x) => x.score)),
+              }
+            })
+            .filter((e) => e.qtdAlunos > 0),
+        )
       } catch (e) {
         console.error(e)
         setErro('Não foi possível carregar as métricas. Confira a conexão com o Supabase.')
@@ -271,6 +354,28 @@ export default function AdminMetricas() {
                 </ResponsiveContainer>
               )}
             </CardGrafico>
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-card border p-6">
+            <div className="font-semibold text-white">Termômetro de engajamento por escola</div>
+            <p className="text-xs text-texto/50 mt-0.5">Combina pontos (relativos à escola), progresso em trilhas e presença</p>
+
+            <div className="mt-5">
+              <TermometroGrande valor={termometroGeral.geral} semDados={termometroGeral.semDados} label="Engajamento médio da rede" />
+            </div>
+
+            <div className="mt-6 divide-y divide-white/5">
+              {termometroPorEscola.length === 0 ? (
+                <div className="text-sm text-texto/45 py-8 text-center">Nenhuma escola com alunos cadastrados ainda.</div>
+              ) : (
+                termometroPorEscola
+                  .slice()
+                  .sort((a, b) => b.score.geral - a.score.geral)
+                  .map((e) => (
+                    <TermometroBarra key={e.nome} nome={e.nome} sub={`${e.qtdAlunos} aluno(s)`} valor={e.score.geral} semDados={e.score.semDados} />
+                  ))
+              )}
+            </div>
           </div>
         </>
       )}

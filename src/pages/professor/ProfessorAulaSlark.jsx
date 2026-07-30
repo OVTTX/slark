@@ -3,6 +3,24 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { GraduationCap, Sparkles, Clock, Package, Plus, X, Loader2, Trash2, Wand2 } from 'lucide-react'
 
+function formatarAulaIA(aula) {
+  const partes = [
+    `Objetivo da aula:\n${aula.objetivo || '-'}`,
+    `Introdução:\n${aula.introducao || '-'}`,
+    `Desenvolvimento:\n${aula.desenvolvimento || '-'}`,
+    `Prática guiada:\n${aula.pratica_guiada || '-'}`,
+    `Avaliação / fechamento:\n${aula.avaliacao || '-'}`,
+  ]
+  if (aula.dinamica_gamificada?.titulo) {
+    const d = aula.dinamica_gamificada
+    partes.push(`Dinâmica gamificada — ${d.titulo} (${d.duracao || '—'}, material: ${d.material || 'nenhum'}):\n${d.descricao || '-'}`)
+  }
+  if (aula.competencia_foco) {
+    partes.push(`Competência trabalhada: ${aula.competencia_foco}`)
+  }
+  return partes.join('\n\n')
+}
+
 const MODELO_SUGERIDO = `Objetivo da aula:
 -
 
@@ -62,7 +80,7 @@ export default function ProfessorAulaSlark() {
         <GraduationCap className="text-azul" size={28} />
         <h1 className="text-4xl font-bold text-white tracking-tight">Aula Slark</h1>
       </div>
-      <p className="mt-2 text-texto/60">Planeje suas aulas e encontre dinâmicas prontas para deixá-las mais leves.</p>
+      <p className="mt-2 text-texto/60">Planeje suas aulas com a IA da Slark ou encontre dinâmicas prontas para deixá-las mais leves.</p>
 
       <div className="mt-6 inline-flex rounded-xl bg-card border p-1">
         <button onClick={() => setAba('planos')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'planos' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>Planos de aula</button>
@@ -123,6 +141,9 @@ function PlanosDeAula() {
   const [salaId, setSalaId] = useState('')
   const [conteudo, setConteudo] = useState('')
   const [salvando, setSalvando] = useState(false)
+  const [temaIA, setTemaIA] = useState('')
+  const [gerandoIA, setGerandoIA] = useState(false)
+  const [avisoIA, setAvisoIA] = useState('')
 
   async function carregar() {
     if (!perfil?.id) return
@@ -153,7 +174,35 @@ function PlanosDeAula() {
     setTitulo('')
     setSalaId(salas[0]?.id || '')
     setConteudo('')
+    setTemaIA('')
+    setAvisoIA('')
     setModalAberto(true)
+  }
+
+  async function gerarComIA() {
+    if (!temaIA.trim()) {
+      setAvisoIA('Escreva o tema da aula para a IA gerar o plano.')
+      return
+    }
+    setGerandoIA(true)
+    setAvisoIA('')
+    try {
+      const salaSelecionada = salas.find((s) => s.id === salaId)
+      const { data, error } = await supabase.functions.invoke('gerar-aula-slark', {
+        body: { tema: temaIA.trim(), serie: salaSelecionada?.nome || '' },
+      })
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+
+      const aula = data.aula
+      setTitulo(aula.titulo || temaIA.trim())
+      setConteudo(formatarAulaIA(aula))
+    } catch (e) {
+      console.error(e)
+      setAvisoIA(e.message || 'Não foi possível gerar a aula com IA agora. Tente novamente.')
+    } finally {
+      setGerandoIA(false)
+    }
   }
 
   function abrirEdicao(p) {
@@ -161,6 +210,8 @@ function PlanosDeAula() {
     setTitulo(p.titulo)
     setSalaId(p.sala_id || '')
     setConteudo(p.conteudo?.texto || '')
+    setTemaIA('')
+    setAvisoIA('')
     setModalAberto(true)
   }
 
@@ -241,6 +292,29 @@ function PlanosDeAula() {
               <h2 className="text-xl font-bold text-white">{editandoId ? 'Editar plano' : 'Novo plano de aula'}</h2>
               <button onClick={() => setModalAberto(false)} className="text-texto/50 hover:text-white transition"><X size={20} /></button>
             </div>
+            {!editandoId && (
+              <div className="mb-5 rounded-xl bg-azul/10 border border-azul/20 p-4">
+                <div className="flex items-center gap-1.5 text-sm font-semibold text-white">
+                  <Sparkles size={14} className="text-azul" /> Gerar com IA no molde Slark
+                </div>
+                <p className="text-xs text-texto/60 mt-1">Diga o tema e a IA monta a aula seguindo o Método Slark — gamificada, personalizada e sem decoreba.</p>
+                <div className="mt-3 flex gap-2">
+                  <input
+                    value={temaIA} onChange={(e) => setTemaIA(e.target.value)}
+                    placeholder="Ex: Frações, Revolução Francesa, Ciclo da água…"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-card border border-azul/15 text-white placeholder:text-texto/30 text-sm focus:outline-none focus:border-azul transition"
+                  />
+                  <button
+                    type="button" onClick={gerarComIA} disabled={gerandoIA}
+                    className="shrink-0 flex items-center gap-1.5 px-4 rounded-xl bg-azul hover:bg-azul-puro text-white text-sm font-semibold transition disabled:opacity-60"
+                  >
+                    {gerandoIA ? <Loader2 size={15} className="animate-spin" /> : <Wand2 size={15} />}
+                    {gerandoIA ? 'Gerando…' : 'Gerar'}
+                  </button>
+                </div>
+                {avisoIA && <p className="mt-2.5 text-xs text-[#F5C451]">{avisoIA}</p>}
+              </div>
+            )}
             <form onSubmit={salvar} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Título</label>
