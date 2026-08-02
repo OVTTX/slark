@@ -17,6 +17,7 @@ import AdminFeceap from './pages/admin/AdminFeceap'
 import AdminLeads from './pages/admin/AdminLeads'
 import AdminUsuarios from './pages/admin/AdminUsuarios'
 import DiretorInicio from './pages/diretor/DiretorInicio'
+import DiretorAlunos from './pages/diretor/DiretorAlunos'
 import DiretorSalas from './pages/diretor/DiretorSalas'
 import DiretorProfessores from './pages/diretor/DiretorProfessores'
 import DiretorFinanceiro from './pages/diretor/DiretorFinanceiro'
@@ -68,6 +69,7 @@ export default function App() {
 
           {/* ---------- DIRETOR ---------- */}
           <Route path="/diretor" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorInicio /></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/alunos" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorAlunos /></AppLayout></RotaProtegida>} />
           <Route path="/diretor/salas" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorSalas /></AppLayout></RotaProtegida>} />
           <Route path="/diretor/professores" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorProfessores /></AppLayout></RotaProtegida>} />
           <Route path="/diretor/financeiro" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorFinanceiro /></AppLayout></RotaProtegida>} />

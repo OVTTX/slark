@@ -21,6 +21,7 @@ const MENUS = {
   ],
   diretor: [
     { to: '/diretor', label: 'Início', icon: LayoutGrid, end: true },
+    { to: '/diretor/alunos', label: 'Alunos', icon: Users },
     { to: '/diretor/salas', label: 'Salas', icon: School },
     { to: '/diretor/professores', label: 'Professores', icon: Users },
     { to: '/diretor/financeiro', label: 'Financeiro', icon: DollarSign },
