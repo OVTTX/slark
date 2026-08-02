@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { DollarSign, CreditCard } from 'lucide-react'
+import FolhaPagamento from '../../components/financeiro/FolhaPagamento'
+import CobrancasAlunos from '../../components/financeiro/CobrancasAlunos'
 
 const STATUS_PAGAMENTO = {
   pendente: { rotulo: 'Pendente', cor: '#F5C451' },
@@ -11,6 +13,49 @@ const STATUS_PAGAMENTO = {
 }
 
 export default function DiretorFinanceiro() {
+  const [aba, setAba] = useState('assinatura')
+
+  return (
+    <div>
+      <h1 className="text-4xl font-bold text-white tracking-tight">Financeiro</h1>
+      <p className="mt-2 text-texto/60">Assinatura com a Slark, folha de pagamento, ponto, mensalidades e apostilas Runaway.</p>
+
+      <div className="mt-6 inline-flex rounded-xl bg-card border p-1 flex-wrap">
+        {[
+          ['assinatura', 'Assinatura Slark'],
+          ['folha', 'Folha de pagamento'],
+          ['mensalidades', 'Mensalidades e matrículas'],
+          ['apostilas', 'Apostilas Runaway'],
+        ].map(([valor, rotulo]) => (
+          <button key={valor} onClick={() => setAba(valor)} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aba === valor ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
+            {rotulo}
+          </button>
+        ))}
+      </div>
+
+      {aba === 'assinatura' && <AssinaturaSlark />}
+      {aba === 'folha' && <FolhaPagamento />}
+      {aba === 'mensalidades' && (
+        <CobrancasAlunos
+          tipo="mensalidade"
+          titulo="Mensalidades"
+          descricaoGerar="Gere as mensalidades do mês para todos os alunos (ou só de uma sala) de uma vez. Quem passar do vencimento sem pagar aparece como atrasado automaticamente."
+          descricaoVazio="Nenhuma mensalidade gerada ainda."
+        />
+      )}
+      {aba === 'apostilas' && (
+        <CobrancasAlunos
+          tipo="apostila_runaway"
+          titulo="Apostilas Runaway"
+          descricaoGerar="Gere a cobrança da apostila Runaway para os alunos que vão receber o material."
+          descricaoVazio="Nenhuma cobrança de apostila Runaway gerada ainda."
+        />
+      )}
+    </div>
+  )
+}
+
+function AssinaturaSlark() {
   const { perfil } = useAuth()
   const [assinatura, setAssinatura] = useState(null)
   const [pagamentos, setPagamentos] = useState([])
@@ -46,8 +91,7 @@ export default function DiretorFinanceiro() {
 
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white tracking-tight">Financeiro</h1>
-      <p className="mt-2 text-texto/60">Assinatura e histórico de cobranças da sua escola com a Slark.</p>
+      <p className="mt-6 text-texto/60">Assinatura e histórico de cobranças da sua escola com a Slark.</p>
 
       {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 

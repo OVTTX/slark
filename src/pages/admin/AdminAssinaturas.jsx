@@ -27,7 +27,7 @@ export default function AdminAssinaturas() {
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [editando, setEditando] = useState(null)
-  const [form, setForm] = useState({ status: 'trial', preco_por_aluno: '0', qtd_alunos_contratada: '0', proxima_cobranca: '' })
+  const [form, setForm] = useState({ status: 'trial', plano: 'base', preco_por_aluno: '0', qtd_alunos_contratada: '0', proxima_cobranca: '' })
   const [salvando, setSalvando] = useState(false)
 
   async function carregar() {
@@ -57,6 +57,7 @@ export default function AdminAssinaturas() {
     setEditando(a)
     setForm({
       status: a.status,
+      plano: a.plano || 'base',
       preco_por_aluno: a.preco_por_aluno ?? '0',
       qtd_alunos_contratada: a.qtd_alunos_contratada ?? '0',
       proxima_cobranca: a.proxima_cobranca || '',
@@ -69,6 +70,7 @@ export default function AdminAssinaturas() {
     try {
       const { error } = await supabase.from('assinaturas').update({
         status: form.status,
+        plano: form.plano,
         preco_por_aluno: Number(form.preco_por_aluno),
         qtd_alunos_contratada: Number(form.qtd_alunos_contratada),
         proxima_cobranca: form.proxima_cobranca || null,
@@ -107,6 +109,7 @@ export default function AdminAssinaturas() {
               <tr className="text-left text-texto/50 border-b">
                 <th className="px-6 py-4 font-medium">Escola</th>
                 <th className="px-6 py-4 font-medium">Status</th>
+                <th className="px-6 py-4 font-medium">Plano</th>
                 <th className="px-6 py-4 font-medium">R$ / aluno</th>
                 <th className="px-6 py-4 font-medium">Alunos contratados</th>
                 <th className="px-6 py-4 font-medium">Próxima cobrança</th>
@@ -118,6 +121,11 @@ export default function AdminAssinaturas() {
                 <tr key={a.id} className="border-b last:border-0 hover:bg-white/[0.02] transition">
                   <td className="px-6 py-4 font-semibold text-white">{a.escolaNome}</td>
                   <td className="px-6 py-4">{badge(a.status)}</td>
+                  <td className="px-6 py-4">
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${a.plano === 'pro' ? 'bg-[#2E5BFF]/20 text-azul' : 'bg-white/10 text-texto/60'}`}>
+                      {a.plano === 'pro' ? 'Slark Pro' : 'Slark Base'}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 text-texto/70">R$ {Number(a.preco_por_aluno).toLocaleString('pt-BR')}</td>
                   <td className="px-6 py-4 text-texto/70">{a.qtd_alunos_contratada}</td>
                   <td className="px-6 py-4 text-texto/70">
@@ -157,6 +165,15 @@ export default function AdminAssinaturas() {
                 >
                   {STATUS_ASSINATURA.map((s) => <option key={s.valor} value={s.valor}>{s.rotulo}</option>)}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-texto/70 mb-1.5">Plano</label>
+                <div className="flex rounded-xl bg-card border border-azul/15 p-1">
+                  <button type="button" onClick={() => setForm({ ...form, plano: 'base' })} className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${form.plano === 'base' ? 'bg-azul text-white' : 'text-texto/60'}`}>Slark Base</button>
+                  <button type="button" onClick={() => setForm({ ...form, plano: 'pro' })} className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${form.plano === 'pro' ? 'bg-azul text-white' : 'text-texto/60'}`}>Slark Pro</button>
+                </div>
+                <p className="mt-1.5 text-xs text-texto/45">O plano Pro libera o material das apostilas Runaway pra escola.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

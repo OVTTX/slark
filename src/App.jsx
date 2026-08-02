@@ -20,6 +20,7 @@ import DiretorInicio from './pages/diretor/DiretorInicio'
 import DiretorAlunos from './pages/diretor/DiretorAlunos'
 import DiretorSalas from './pages/diretor/DiretorSalas'
 import DiretorProfessores from './pages/diretor/DiretorProfessores'
+import DiretorMaterias from './pages/diretor/DiretorMaterias'
 import DiretorFinanceiro from './pages/diretor/DiretorFinanceiro'
 import DiretorCalendario from './pages/diretor/DiretorCalendario'
 import DiretorNotas from './pages/diretor/DiretorNotas'
@@ -34,9 +35,14 @@ import ProfessorDesafios from './pages/professor/ProfessorDesafios'
 import ProfessorRelatorios from './pages/professor/ProfessorRelatorios'
 import ProfessorTrilhas from './pages/professor/ProfessorTrilhas'
 import ProfessorGabaritos from './pages/professor/ProfessorGabaritos'
+import ProfessorAprendizado from './pages/professor/ProfessorAprendizado'
+import ProfessorRunaway from './pages/professor/ProfessorRunaway'
 import ProfessorAulaSlark from './pages/professor/ProfessorAulaSlark'
 import ProfessorRanking from './pages/professor/ProfessorRanking'
 import AlunoInicio from './pages/aluno/AlunoInicio'
+import AlunoBoletim from './pages/aluno/AlunoBoletim'
+import AlunoRunaway from './pages/aluno/AlunoRunaway'
+import AlunoAtividades from './pages/aluno/AlunoAtividades'
 import AlunoCompetencias from './pages/aluno/AlunoCompetencias'
 import AlunoTrilhas from './pages/aluno/AlunoTrilhas'
 import AlunoTime from './pages/aluno/AlunoTime'
@@ -72,9 +78,10 @@ export default function App() {
           <Route path="/diretor/alunos" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorAlunos /></AppLayout></RotaProtegida>} />
           <Route path="/diretor/salas" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorSalas /></AppLayout></RotaProtegida>} />
           <Route path="/diretor/professores" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorProfessores /></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/materias" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorMaterias /></AppLayout></RotaProtegida>} />
           <Route path="/diretor/financeiro" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorFinanceiro /></AppLayout></RotaProtegida>} />
           <Route path="/diretor/calendario" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorCalendario /></AppLayout></RotaProtegida>} />
-          <Route path="/diretor/notas" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorNotas /></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/aprendizado" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorNotas /></AppLayout></RotaProtegida>} />
           <Route path="/diretor/ranking" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorRanking /></AppLayout></RotaProtegida>} />
 
           {/* ---------- PROFESSOR ---------- */}
@@ -88,11 +95,16 @@ export default function App() {
           <Route path="/professor/relatorios" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorRelatorios /></AppLayout></RotaProtegida>} />
           <Route path="/professor/trilhas" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorTrilhas /></AppLayout></RotaProtegida>} />
           <Route path="/professor/gabaritos" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorGabaritos /></AppLayout></RotaProtegida>} />
+          <Route path="/professor/aprendizado" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorAprendizado /></AppLayout></RotaProtegida>} />
+          <Route path="/professor/runaway" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorRunaway /></AppLayout></RotaProtegida>} />
           <Route path="/professor/aula-slark" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorAulaSlark /></AppLayout></RotaProtegida>} />
           <Route path="/professor/ranking" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorRanking /></AppLayout></RotaProtegida>} />
 
           {/* ---------- ALUNO ---------- */}
           <Route path="/aluno" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoInicio /></AppLayout></RotaProtegida>} />
+          <Route path="/aluno/boletim" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoBoletim /></AppLayout></RotaProtegida>} />
+          <Route path="/aluno/runaway" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoRunaway /></AppLayout></RotaProtegida>} />
+          <Route path="/aluno/atividades" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoAtividades /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/competencias" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoCompetencias /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/trilhas" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoTrilhas /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/time" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoTime /></AppLayout></RotaProtegida>} />

@@ -1,33 +1,191 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { ClipboardList, School, Thermometer, Users, UsersRound } from 'lucide-react'
+import { ClipboardList, School, Thermometer, Users, UsersRound, GaugeCircle, Radio } from 'lucide-react'
 import { TermometroBarra, TermometroGrande } from '../../components/Termometro'
 import { calcularScoreAluno, agregarScores } from '../../lib/engajamento'
 
 export default function DiretorNotas() {
-  const [aba, setAba] = useState('notas')
+  const [aba, setAba] = useState('boletim')
 
   return (
     <div>
-      <h1 className="text-4xl font-bold text-white tracking-tight">Notas</h1>
-      <p className="mt-2 text-texto/60">Notas lançadas pelos professores e engajamento de toda a escola.</p>
+      <h1 className="text-4xl font-bold text-white tracking-tight">Aprendizado</h1>
+      <p className="mt-2 text-texto/60">Boletim em porcentagem, atividades corrigidas e engajamento de toda a escola.</p>
 
-      <div className="mt-6 inline-flex rounded-xl bg-card border p-1">
-        <button onClick={() => setAba('notas')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'notas' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
-          Notas
+      <div className="mt-6 inline-flex rounded-xl bg-card border p-1 flex-wrap">
+        <button onClick={() => setAba('boletim')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'boletim' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
+          Boletim
+        </button>
+        <button onClick={() => setAba('atividades')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'atividades' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
+          Atividades corrigidas
         </button>
         <button onClick={() => setAba('engajamento')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'engajamento' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
           Termômetro de engajamento
         </button>
       </div>
 
-      {aba === 'notas' ? <NotasLancadas /> : <Engajamento />}
+      {aba === 'boletim' && <Boletim />}
+      {aba === 'atividades' && <AtividadesCorrigidas />}
+      {aba === 'engajamento' && <Engajamento />}
     </div>
   )
 }
 
-function NotasLancadas() {
+function corDoValor(v) {
+  if (v >= 70) return '#3FD08A'
+  if (v >= 40) return '#F5C451'
+  return '#FF6B6B'
+}
+
+function Boletim() {
+  const { perfil } = useAuth()
+  const [nivel, setNivel] = useState('salas') // alunos | salas
+  const [materiaId, setMateriaId] = useState('todas')
+  const [materias, setMaterias] = useState([])
+  const [salas, setSalas] = useState([])
+  const [alunos, setAlunos] = useState([])
+  const [avaliacoes, setAvaliacoes] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
+
+  async function carregar() {
+    if (!perfil?.escola_id) return
+    setErro('')
+    try {
+      const [{ data: materiasData, error: e1 }, { data: salasData, error: e2 }, { data: alunosData, error: e3 }, { data: avData, error: e4 }] = await Promise.all([
+        supabase.from('materias').select('id, nome').eq('escola_id', perfil.escola_id).order('nome'),
+        supabase.from('salas').select('id, nome').eq('escola_id', perfil.escola_id).order('nome'),
+        supabase.from('alunos').select('id, nome, sala_id').eq('escola_id', perfil.escola_id),
+        supabase.from('avaliacoes_aprendizado').select('aluno_id, materia_id, sala_id, valor').eq('escola_id', perfil.escola_id),
+      ])
+      if (e1) throw e1
+      if (e2) throw e2
+      if (e3) throw e3
+      if (e4) throw e4
+      setMaterias(materiasData || [])
+      setSalas(salasData || [])
+      setAlunos(alunosData || [])
+      setAvaliacoes(avData || [])
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível carregar o boletim. Confira a conexão com o Supabase.')
+    } finally {
+      setCarregando(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!perfil?.escola_id) return
+    setCarregando(true)
+    carregar()
+
+    // Tempo real: qualquer lançamento novo de professor atualiza o boletim do diretor na hora.
+    const canal = supabase
+      .channel(`boletim-escola-${perfil.escola_id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'avaliacoes_aprendizado', filter: `escola_id=eq.${perfil.escola_id}` }, () => {
+        carregar()
+      })
+      .subscribe()
+    return () => supabase.removeChannel(canal)
+  }, [perfil?.escola_id])
+
+  const avaliacoesFiltradas = useMemo(
+    () => avaliacoes.filter((a) => materiaId === 'todas' || a.materia_id === materiaId),
+    [avaliacoes, materiaId],
+  )
+
+  const mediaPorAluno = useMemo(() => {
+    const mapa = {}
+    for (const a of avaliacoesFiltradas) {
+      if (!mapa[a.aluno_id]) mapa[a.aluno_id] = []
+      mapa[a.aluno_id].push(a.valor)
+    }
+    return Object.fromEntries(Object.entries(mapa).map(([id, vals]) => [id, Math.round(vals.reduce((s, v) => s + v, 0) / vals.length)]))
+  }, [avaliacoesFiltradas])
+
+  const alunosComMedia = useMemo(
+    () => alunos.map((a) => ({ ...a, media: mediaPorAluno[a.id], salaNome: salas.find((s) => s.id === a.sala_id)?.nome || '—' }))
+      .filter((a) => a.media != null),
+    [alunos, mediaPorAluno, salas],
+  )
+
+  const mediaPorSala = useMemo(() => {
+    return salas.map((s) => {
+      const doGrupo = alunosComMedia.filter((a) => a.sala_id === s.id)
+      const media = doGrupo.length ? Math.round(doGrupo.reduce((sum, a) => sum + a.media, 0) / doGrupo.length) : null
+      return { ...s, media, qtd: doGrupo.length }
+    }).filter((s) => s.media != null)
+  }, [salas, alunosComMedia])
+
+  return (
+    <div>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="inline-flex rounded-xl bg-card border p-1">
+          <button onClick={() => setNivel('alunos')} className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition ${nivel === 'alunos' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
+            <Users size={14} /> Alunos
+          </button>
+          <button onClick={() => setNivel('salas')} className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition ${nivel === 'salas' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
+            <School size={14} /> Salas
+          </button>
+        </div>
+        <div className="flex items-center gap-3">
+          <select
+            value={materiaId} onChange={(e) => setMateriaId(e.target.value)}
+            className="px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
+          >
+            <option value="todas">Todas as matérias</option>
+            {materias.map((m) => <option key={m.id} value={m.id}>{m.nome}</option>)}
+          </select>
+          <span className="flex items-center gap-1.5 text-xs text-[#3FD08A] bg-[#3FD08A]/10 px-3 py-1.5 rounded-full">
+            <Radio size={12} className="animate-pulse" /> Ao vivo
+          </span>
+        </div>
+      </div>
+
+      {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
+
+      {carregando ? (
+        <div className="mt-10 text-texto/50">Carregando boletim…</div>
+      ) : alunosComMedia.length === 0 ? (
+        <div className="mt-10 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
+          <GaugeCircle className="mx-auto text-azul/60" size={40} />
+          <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">Nenhuma avaliação de aprendizado lançada ainda.</p>
+        </div>
+      ) : (
+        <div className="mt-6 rounded-2xl bg-card border p-6 divide-y divide-white/5">
+          {nivel === 'alunos' && alunosComMedia
+            .slice()
+            .sort((a, b) => b.media - a.media)
+            .map((a) => (
+              <div key={a.id} className="py-3 flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-white font-medium">{a.nome}</div>
+                  <div className="text-xs text-texto/45">{a.salaNome}</div>
+                </div>
+                <span className="font-bold text-lg" style={{ color: corDoValor(a.media) }}>{a.media}%</span>
+              </div>
+            ))}
+
+          {nivel === 'salas' && mediaPorSala
+            .slice()
+            .sort((a, b) => b.media - a.media)
+            .map((s) => (
+              <div key={s.id} className="py-3 flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-white font-medium">{s.nome}</div>
+                  <div className="text-xs text-texto/45">{s.qtd} aluno(s) avaliado(s)</div>
+                </div>
+                <span className="font-bold text-lg" style={{ color: corDoValor(s.media) }}>{s.media}%</span>
+              </div>
+            ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function AtividadesCorrigidas() {
   const { perfil } = useAuth()
   const [entregas, setEntregas] = useState([])
   const [carregando, setCarregando] = useState(true)
@@ -76,7 +234,7 @@ function NotasLancadas() {
         }))
       } catch (e) {
         console.error(e)
-        setErro('Não foi possível carregar as notas. Confira a conexão com o Supabase.')
+        setErro('Não foi possível carregar as atividades corrigidas. Confira a conexão com o Supabase.')
       } finally {
         setCarregando(false)
       }
@@ -111,11 +269,11 @@ function NotasLancadas() {
       {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 
       {carregando ? (
-        <div className="mt-10 text-texto/50">Carregando notas…</div>
+        <div className="mt-10 text-texto/50">Carregando…</div>
       ) : listaFiltrada.length === 0 ? (
         <div className="mt-10 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
           <ClipboardList className="mx-auto text-azul/60" size={40} />
-          <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">Nenhuma nota lançada ainda.</p>
+          <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">Nenhuma atividade corrigida ainda.</p>
         </div>
       ) : (
         <div className="mt-6 rounded-2xl bg-card border overflow-hidden overflow-x-auto">

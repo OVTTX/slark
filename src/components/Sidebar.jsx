@@ -4,7 +4,7 @@ import {
   LayoutGrid, School, Users, Eye, UsersRound, Award, Target, Trophy,
   BarChart3, BookOpen, ClipboardList, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ArrowLeft, ListChecks,
-  Settings, Kanban, UserPlus,
+  Settings, Kanban, UserPlus, BookMarked,
 } from 'lucide-react'
 
 // Menus por perfil (espelham as telas do app real)
@@ -24,9 +24,10 @@ const MENUS = {
     { to: '/diretor/alunos', label: 'Alunos', icon: Users },
     { to: '/diretor/salas', label: 'Salas', icon: School },
     { to: '/diretor/professores', label: 'Professores', icon: Users },
+    { to: '/diretor/materias', label: 'Matérias', icon: BookOpen },
     { to: '/diretor/financeiro', label: 'Financeiro', icon: DollarSign },
     { to: '/diretor/calendario', label: 'Calendário', icon: Calendar },
-    { to: '/diretor/notas', label: 'Notas', icon: FileText },
+    { to: '/diretor/aprendizado', label: 'Aprendizado', icon: FileText },
     { to: '/diretor/ranking', label: 'Ranking', icon: Trophy },
   ],
   professor: [
@@ -41,14 +42,17 @@ const MENUS = {
     { to: '/professor/relatorios', label: 'Relatórios', icon: BarChart3 },
     { to: '/professor/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/professor/gabaritos', label: 'Gabaritos', icon: ListChecks },
-    { to: '/professor/notas', label: 'Notas', icon: ClipboardList },
+    { to: '/professor/aprendizado', label: 'Aprendizado', icon: ClipboardList },
+    { to: '/professor/runaway', label: 'Apostilas Runaway', icon: BookMarked },
     { to: '/professor/aula-slark', label: 'Aula Slark', icon: GraduationCap },
     { to: '/professor/ranking', label: 'Ranking', icon: Trophy },
   ],
   aluno: [
     { to: '/aluno', label: 'Meu Painel', icon: LayoutGrid, end: true },
+    { to: '/aluno/boletim', label: 'Boletim', icon: ClipboardList },
     { to: '/aluno/competencias', label: 'Mapa de Competências', icon: Target },
-    { to: '/aluno/atividades', label: 'Atividades', icon: ClipboardList },
+    { to: '/aluno/atividades', label: 'Atividades', icon: BarChart3 },
+    { to: '/aluno/runaway', label: 'Apostilas Runaway', icon: BookMarked },
     { to: '/aluno/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/aluno/time', label: 'Meu Time', icon: UsersRound },
     { to: '/aluno/chat', label: 'Chat', icon: Eye },
