@@ -13,8 +13,7 @@ function corDoValor(v) {
 
 export default function ProfessorAprendizado() {
   const { perfil } = useAuth()
-  const [salas, setSalas] = useState([])
-  const [materias, setMaterias] = useState([])
+  const [atribuicoes, setAtribuicoes] = useState([]) // linhas de sala_materias com sala+matéria já resolvidas
   const [salaId, setSalaId] = useState('')
   const [materiaId, setMateriaId] = useState('')
   const [alunos, setAlunos] = useState([])
@@ -32,16 +31,14 @@ export default function ProfessorAprendizado() {
       setCarregando(true)
       setErro('')
       try {
-        const [{ data: salasData, error: e1 }, { data: vinculosData, error: e2 }] = await Promise.all([
-          supabase.from('salas').select('id, nome').eq('professor_id', perfil.id).order('nome'),
-          supabase.from('materia_professores').select('materia_id, materias(id, nome)').eq('professor_id', perfil.id),
-        ])
-        if (e1) throw e1
-        if (e2) throw e2
-        setSalas(salasData || [])
-        setMaterias((vinculosData || []).map((v) => v.materias).filter(Boolean))
-        if (salasData?.[0]) setSalaId(salasData[0].id)
-        if (vinculosData?.[0]?.materias) setMateriaId(vinculosData[0].materias.id)
+        const { data, error } = await supabase
+          .from('sala_materias')
+          .select('sala_id, materia_id, salas(id, nome), materias(id, nome)')
+          .eq('professor_id', perfil.id)
+        if (error) throw error
+        const linhas = (data || []).filter((r) => r.salas && r.materias)
+        setAtribuicoes(linhas)
+        if (linhas[0]) { setSalaId(linhas[0].sala_id); setMateriaId(linhas[0].materia_id) }
       } catch (e) {
         console.error(e)
         setErro('Não foi possível carregar suas salas e matérias. Confira a conexão com o Supabase.')
@@ -51,6 +48,26 @@ export default function ProfessorAprendizado() {
     }
     carregarBase()
   }, [perfil?.id])
+
+  // Salas em que o professor leciona alguma matéria (deduplicadas).
+  const salas = useMemo(() => {
+    const mapa = new Map()
+    for (const a of atribuicoes) if (!mapa.has(a.sala_id)) mapa.set(a.sala_id, a.salas)
+    return [...mapa.values()]
+  }, [atribuicoes])
+
+  // Matérias que o professor leciona na sala selecionada.
+  const materiasDisponiveis = useMemo(
+    () => atribuicoes.filter((a) => a.sala_id === salaId).map((a) => a.materias),
+    [atribuicoes, salaId],
+  )
+
+  useEffect(() => {
+    // Se a sala mudar e a matéria selecionada não for lecionada nela, troca pra primeira disponível.
+    if (materiasDisponiveis.length > 0 && !materiasDisponiveis.some((m) => m.id === materiaId)) {
+      setMateriaId(materiasDisponiveis[0].id)
+    }
+  }, [salaId, materiasDisponiveis]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!salaId || !materiaId) { setAlunos([]); return }
@@ -80,8 +97,6 @@ export default function ProfessorAprendizado() {
     }
     carregarAlunos()
   }, [salaId, materiaId])
-
-  const materiasDisponiveis = useMemo(() => materias, [materias])
 
   async function salvar(alunoId) {
     setSalvandoId(alunoId)
@@ -122,13 +137,15 @@ export default function ProfessorAprendizado() {
       ) : salas.length === 0 ? (
         <div className="mt-10 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
           <School className="mx-auto text-azul/60" size={40} />
-          <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">Você ainda não é responsável por nenhuma sala.</p>
+          <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">
+            Você ainda não está atribuído a nenhuma matéria em nenhuma sala. Peça pro diretor te atribuir em "Matérias e Professores".
+          </p>
         </div>
       ) : materiasDisponiveis.length === 0 ? (
         <div className="mt-10 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
           <BookMarked className="mx-auto text-azul/60" size={40} />
           <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">
-            Você ainda não está vinculado a nenhuma matéria. Peça pro diretor te vincular em "Matérias e Professores".
+            Essa sala ainda não tem matéria sua atribuída.
           </p>
         </div>
       ) : (
