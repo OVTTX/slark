@@ -9,6 +9,7 @@ const EMAIL_DEMO_SUFIXO = '@slarkdemo.com.br'
 
 // Fundo em degradê nas cores da marca (profundo → azul → quase-branco), com um
 // feixe curvo mais claro cruzando a tela — mesma linguagem visual do mockup.
+// Fica dentro do cartão arredondado (glassmorphism retangular) que envolve a tela toda.
 function FundoLogin() {
   return (
     <svg
@@ -76,11 +77,11 @@ function CampoComBotao({ tipo = 'text', valor, onChange, placeholder, carregando
       <input
         type={tipo} required autoFocus={autoFocus} value={valor} onChange={onChange}
         placeholder={placeholder}
-        className="flex-1 min-w-0 h-14 px-6 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-black/5 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/30 focus:border-white/50 transition"
+        className="flex-1 min-w-0 h-14 px-6 rounded-full bg-white/25 backdrop-blur-md border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/35 focus:border-white/50 transition"
       />
       <button
         type="submit" disabled={carregando}
-        className="shrink-0 w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-black/5 flex items-center justify-center text-white hover:bg-white/30 transition disabled:opacity-60"
+        className="shrink-0 w-14 h-14 rounded-full bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white/35 transition disabled:opacity-60"
       >
         {carregando ? <Loader2 size={20} className="animate-spin" /> : <ArrowRight size={20} />}
       </button>
@@ -203,25 +204,26 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen w-full relative font-display overflow-hidden">
-      <FundoLogin />
+    <div className="min-h-screen w-full bg-[#050510] font-display flex items-center justify-center p-3 sm:p-6 lg:p-10">
+      <div className="relative w-full max-w-7xl aspect-[3/2] sm:aspect-[16/10] rounded-[28px] sm:rounded-[40px] overflow-hidden shadow-2xl shadow-black/60 border border-white/10">
+        <FundoLogin />
 
-      <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
-        {/* Coluna esquerda: chamada de marca (some em telas pequenas) */}
-        <div className="hidden lg:flex w-1/2 flex-col justify-end p-16">
-          <h1 className="font-mono text-5xl xl:text-6xl font-medium text-white leading-[1.05] tracking-tight">
-            O método que<br />enxega cada aluno.
-          </h1>
-        </div>
-
-        {/* Coluna direita: marca + formulário */}
-        <div className="flex-1 flex flex-col justify-between p-8 sm:p-12 lg:p-16">
-          <div>
-            <p className="font-mono text-3xl sm:text-4xl font-medium text-white leading-tight">Conheça a</p>
-            <LogoSlark className="w-52 sm:w-64 h-auto -mt-1" />
+        <div className="relative z-10 h-full flex flex-col lg:flex-row">
+          {/* Coluna esquerda: chamada de marca (some em telas pequenas) */}
+          <div className="hidden lg:flex w-1/2 flex-col justify-end p-10 xl:p-16">
+            <h1 className="font-mono text-4xl xl:text-6xl font-medium text-white leading-[1.05] tracking-tight">
+              O método que<br />enxega cada aluno.
+            </h1>
           </div>
 
-          <div className="w-full max-w-md lg:ml-auto">
+          {/* Coluna direita: marca + formulário */}
+          <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 lg:p-16 overflow-y-auto">
+            <div>
+              <p className="font-mono text-2xl sm:text-4xl font-medium text-white leading-tight">Conheça a</p>
+              <LogoSlark className="w-40 sm:w-64 h-auto -mt-1" />
+            </div>
+
+            <div className="w-full max-w-md lg:ml-auto">
           {etapa === 'email' && (
             <>
               <p className="font-mono text-lg font-medium text-white/90">Faça Log-in</p>
@@ -259,16 +261,16 @@ export default function Login() {
                 <input
                   type="password" required autoFocus value={senha} onChange={(e) => setSenha(e.target.value)}
                   placeholder="Mínimo 6 caracteres"
-                  className="w-full h-14 px-6 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-black/5 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/30 focus:border-white/50 transition"
+                  className="w-full h-14 px-6 rounded-full bg-white/25 backdrop-blur-md border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/35 focus:border-white/50 transition"
                 />
                 <input
                   type="password" required value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)}
                   placeholder="Repita a senha"
-                  className="w-full h-14 px-6 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-black/5 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/30 focus:border-white/50 transition"
+                  className="w-full h-14 px-6 rounded-full bg-white/25 backdrop-blur-md border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/35 focus:border-white/50 transition"
                 />
                 <button
                   type="submit" disabled={carregando}
-                  className="w-full h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-black/5 text-white font-semibold hover:bg-white/30 transition disabled:opacity-60 flex items-center justify-center gap-2"
+                  className="w-full h-14 rounded-full bg-white/25 backdrop-blur-md border border-white/30 text-white font-semibold hover:bg-white/35 transition disabled:opacity-60 flex items-center justify-center gap-2"
                 >
                   {carregando ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
                   {carregando ? 'Criando…' : 'Criar senha e entrar'}
@@ -289,6 +291,7 @@ export default function Login() {
               Entre em contato.
             </a>
           </p>
+            </div>
           </div>
         </div>
       </div>
