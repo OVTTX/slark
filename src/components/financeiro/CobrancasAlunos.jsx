@@ -16,7 +16,7 @@ export default function CobrancasAlunos({ tipo, titulo, descricaoVazio, descrica
   const [filtroStatus, setFiltroStatus] = useState('todos')
   const [modalGerar, setModalGerar] = useState(false)
   const [gerando, setGerando] = useState(false)
-  const [formGerar, setFormGerar] = useState({ sala_id: 'todas', valor: '', vencimento: '', descricao: '' })
+  const [formGerar, setFormGerar] = useState({ alvo: 'todas', sala_id: 'todas', aluno_id: '', valor: '', vencimento: '', descricao: '' })
 
   async function carregar() {
     if (!perfil?.escola_id) return
@@ -57,16 +57,30 @@ export default function CobrancasAlunos({ tipo, titulo, descricaoVazio, descrica
   }, [cobrancas])
 
   function abrirGerar() {
-    setFormGerar({ sala_id: 'todas', valor: '', vencimento: '', descricao: '' })
+    setFormGerar({ alvo: 'todas', sala_id: 'todas', aluno_id: alunos[0]?.id || '', valor: '', vencimento: '', descricao: '' })
     setModalGerar(true)
   }
+
+  const alunosOrdenados = useMemo(() => {
+    const salaPorId = Object.fromEntries(salas.map((s) => [s.id, s.nome]))
+    return alunos
+      .map((a) => ({ ...a, salaNome: salaPorId[a.sala_id] || 'Sem sala' }))
+      .sort((a, b) => a.nome.localeCompare(b.nome))
+  }, [alunos, salas])
 
   async function gerarCobrancas(e) {
     e.preventDefault()
     setGerando(true)
     setErro('')
     try {
-      const alvoAlunos = formGerar.sala_id === 'todas' ? alunos : alunos.filter((a) => a.sala_id === formGerar.sala_id)
+      let alvoAlunos
+      if (formGerar.alvo === 'aluno') {
+        alvoAlunos = alunos.filter((a) => a.id === formGerar.aluno_id)
+      } else if (formGerar.alvo === 'sala') {
+        alvoAlunos = alunos.filter((a) => a.sala_id === formGerar.sala_id)
+      } else {
+        alvoAlunos = alunos
+      }
       // Evita duplicar: pula quem já tem cobrança desse tipo com o mesmo vencimento.
       const jaTem = new Set(cobrancas.filter((c) => c.vencimento === formGerar.vencimento).map((c) => c.aluno_id))
       const novas = alvoAlunos.filter((a) => !jaTem.has(a.id)).map((a) => ({
@@ -78,7 +92,7 @@ export default function CobrancasAlunos({ tipo, titulo, descricaoVazio, descrica
         vencimento: formGerar.vencimento,
         status: 'pendente',
       }))
-      if (novas.length === 0) { setErro('Todos os alunos selecionados já têm uma cobrança com esse vencimento.'); setGerando(false); return }
+      if (novas.length === 0) { setErro('Esse(s) aluno(s) já tem uma cobrança com esse vencimento.'); setGerando(false); return }
       const { error } = await supabase.from('cobrancas_alunos').insert(novas)
       if (error) throw error
       setModalGerar(false)
@@ -196,10 +210,27 @@ export default function CobrancasAlunos({ tipo, titulo, descricaoVazio, descrica
             <form onSubmit={gerarCobrancas} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Para quem</label>
-                <select value={formGerar.sala_id} onChange={(e) => setFormGerar({ ...formGerar, sala_id: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition">
-                  <option value="todas">Todos os alunos da escola</option>
-                  {salas.map((s) => <option key={s.id} value={s.id}>Só a sala {s.nome}</option>)}
-                </select>
+                <div className="flex rounded-xl bg-card border border-azul/15 p-1 mb-2">
+                  <button type="button" onClick={() => setFormGerar({ ...formGerar, alvo: 'todas' })} className={`flex-1 py-2 rounded-lg text-xs font-medium transition ${formGerar.alvo === 'todas' ? 'bg-azul text-white' : 'text-texto/60'}`}>Escola inteira</button>
+                  <button type="button" onClick={() => setFormGerar({ ...formGerar, alvo: 'sala' })} className={`flex-1 py-2 rounded-lg text-xs font-medium transition ${formGerar.alvo === 'sala' ? 'bg-azul text-white' : 'text-texto/60'}`}>Uma sala</button>
+                  <button type="button" onClick={() => setFormGerar({ ...formGerar, alvo: 'aluno' })} className={`flex-1 py-2 rounded-lg text-xs font-medium transition ${formGerar.alvo === 'aluno' ? 'bg-azul text-white' : 'text-texto/60'}`}>Um aluno</button>
+                </div>
+
+                {formGerar.alvo === 'sala' && (
+                  <select value={formGerar.sala_id} onChange={(e) => setFormGerar({ ...formGerar, sala_id: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition">
+                    {salas.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                  </select>
+                )}
+
+                {formGerar.alvo === 'aluno' && (
+                  <>
+                    <select value={formGerar.aluno_id} onChange={(e) => setFormGerar({ ...formGerar, aluno_id: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition">
+                      {alunosOrdenados.length === 0 && <option value="">Nenhum aluno cadastrado</option>}
+                      {alunosOrdenados.map((a) => <option key={a.id} value={a.id}>{a.nome} — {a.salaNome}</option>)}
+                    </select>
+                    <p className="mt-1.5 text-xs text-texto/45">Útil pra casos de bolsa: gera a cobrança só desse aluno, com o valor que você definir abaixo, sem mexer na do resto da turma.</p>
+                  </>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Descrição (opcional)</label>
