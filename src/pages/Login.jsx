@@ -55,16 +55,16 @@ function FundoLogin() {
   )
 }
 
-// Wordmark "SLARK" com o traço diagonal característico da marca cruzando o "A".
+// Wordmark oficial "SLARK" (SVG da marca)
 function LogoSlark({ className = '' }) {
   return (
-    <span className={`relative inline-block font-mono font-medium tracking-tight ${className}`}>
-      SLARK
-      <span
-        className="absolute left-[6%] top-1/2 w-[92%] h-[10%] bg-white/95 pointer-events-none"
-        style={{ transform: 'translateY(-50%) rotate(-16deg)' }}
-      />
-    </span>
+    <svg viewBox="0 0 409 86" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M0 57.064H14.6822C15.1205 60.3561 16.4718 63.2459 18.7363 65.7333C21.0737 68.2207 24.1417 70.1594 27.94 71.5494C31.7384 72.8663 36.1212 73.5247 41.0883 73.5247C48.4659 73.5247 54.3096 72.3908 58.6193 70.1228C62.929 67.7818 65.0839 64.6359 65.0839 60.6853C65.0839 57.4664 63.8421 55.0521 61.3585 53.4426C58.875 51.8331 54.3826 50.626 47.8816 49.8212L30.1314 47.5167C20.1972 46.1999 12.9656 43.749 8.4368 40.1643C3.981 36.5063 1.7531 31.3486 1.7531 24.6911C1.7531 19.6432 3.25054 15.2902 6.24542 11.6323C9.31335 7.90117 13.6231 5.04797 19.1745 3.07268C24.726 1.02423 31.2271 0 38.6778 0C46.0554 0 52.593 1.09739 58.2906 3.29216C63.9882 5.48692 68.517 8.5596 71.8771 12.5102C75.3103 16.3876 77.173 20.96 77.4651 26.2275H62.7829C62.4177 23.3011 61.1759 20.7771 59.0576 18.6555C57.0123 16.5339 54.2366 14.8878 50.7304 13.7173C47.2242 12.4736 43.0971 11.8518 38.3491 11.8518C31.6289 11.8518 26.26 12.9491 22.2425 15.1439C18.2249 17.3387 16.2162 20.3382 16.2162 24.1425C16.2162 27.0688 17.3849 29.3367 19.7224 30.9462C22.1329 32.4826 26.2965 33.6531 32.2132 34.4579L50.1825 36.9818C57.5601 38.0061 63.3673 39.3961 67.604 41.1519C71.9137 42.8346 74.9816 45.1391 76.8077 48.0654C78.6339 50.9186 79.547 54.6132 79.547 59.149C79.547 64.4164 77.9399 69.0255 74.7259 72.976C71.5119 76.9266 66.9831 79.9993 61.1394 82.1941C55.3688 84.3157 48.612 85.3765 40.8692 85.3765C32.9802 85.3765 26.0043 84.2059 19.9415 81.8649C13.9518 79.4506 9.20378 76.1219 5.69758 71.8787C2.19138 67.6354 0.292183 62.6972 0 57.064Z" fill="white"/>
+      <path d="M98.6924 1.53634V77.3656L92.2278 71.1105H154.134V83.8401H84.2293V1.53634H98.6924Z" fill="white"/>
+      <path d="M123.781 63.2701V50.9186H197.352L210.355 63.1044L123.781 63.2701ZM205.443 1.53634L244.888 83.8401H229.439L193.61 7.02326H199.198L163.369 83.8401H147.92L187.364 1.53634H205.443Z" fill="white"/>
+      <path d="M184.758 39.3342L289.637 38.6279C294.458 38.6279 298.257 37.5305 301.033 35.3358C303.881 33.141 305.306 30.1415 305.306 26.3372C305.306 22.4598 303.881 19.4603 301.033 17.3387C298.257 15.1439 294.458 14.0465 289.637 14.0465H268.09H260.602V83.8401H246.139V1.53634H290.952C296.723 1.53634 301.763 2.59714 306.073 4.71876C310.455 6.76721 313.852 9.65698 316.263 13.3881C318.746 17.046 319.988 21.3624 319.988 26.3372C319.988 31.1657 318.746 35.4455 316.263 39.1766C313.852 42.8346 310.455 45.7243 306.073 47.8459C301.763 49.8944 296.723 50.9186 290.952 50.9186H197.352L184.758 39.3342ZM272.435 45.322H289.418L322.07 83.8401H304.758L272.435 45.322Z" fill="white"/>
+      <path d="M326.184 83.8401V1.53634H340.647V71.6592L336.264 68.9157L391.268 1.53634H406.936L339.113 83.8401H326.184ZM365.3 42.4688L375.49 32.4826L408.141 83.8401H391.596L365.3 42.4688Z" fill="white"/>
+    </svg>
   )
 }
 
@@ -76,11 +76,11 @@ function CampoComBotao({ tipo = 'text', valor, onChange, placeholder, carregando
       <input
         type={tipo} required autoFocus={autoFocus} value={valor} onChange={onChange}
         placeholder={placeholder}
-        className="flex-1 min-w-0 h-14 px-6 rounded-full bg-white/25 backdrop-blur-md border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/35 focus:border-white/50 transition"
+        className="flex-1 min-w-0 h-14 px-6 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-black/5 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/30 focus:border-white/50 transition"
       />
       <button
         type="submit" disabled={carregando}
-        className="shrink-0 w-14 h-14 rounded-full bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white/35 transition disabled:opacity-60"
+        className="shrink-0 w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-black/5 flex items-center justify-center text-white hover:bg-white/30 transition disabled:opacity-60"
       >
         {carregando ? <Loader2 size={20} className="animate-spin" /> : <ArrowRight size={20} />}
       </button>
@@ -209,7 +209,7 @@ export default function Login() {
       <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
         {/* Coluna esquerda: chamada de marca (some em telas pequenas) */}
         <div className="hidden lg:flex w-1/2 flex-col justify-end p-16">
-          <h1 className="text-5xl xl:text-6xl font-medium text-white leading-[1.05] tracking-tight">
+          <h1 className="font-mono text-5xl xl:text-6xl font-medium text-white leading-[1.05] tracking-tight">
             O método que<br />enxega cada aluno.
           </h1>
         </div>
@@ -217,14 +217,14 @@ export default function Login() {
         {/* Coluna direita: marca + formulário */}
         <div className="flex-1 flex flex-col justify-between p-8 sm:p-12 lg:p-16">
           <div>
-            <p className="text-3xl sm:text-4xl font-medium text-white leading-tight">Conheça a</p>
-            <LogoSlark className="text-6xl sm:text-7xl text-white -mt-1" />
+            <p className="font-mono text-3xl sm:text-4xl font-medium text-white leading-tight">Conheça a</p>
+            <LogoSlark className="w-52 sm:w-64 h-auto -mt-1" />
           </div>
 
           <div className="w-full max-w-md lg:ml-auto">
           {etapa === 'email' && (
             <>
-              <p className="text-lg font-medium text-white/90">Faça Log-in</p>
+              <p className="font-mono text-lg font-medium text-white/90">Faça Log-in</p>
               <form onSubmit={continuarComEmail}>
                 <CampoComBotao
                   tipo="email" valor={email} onChange={(e) => setEmail(e.target.value)}
@@ -236,7 +236,7 @@ export default function Login() {
 
           {etapa === 'senha' && (
             <>
-              <p className="text-lg font-medium text-white/90 truncate">{email}</p>
+              <p className="font-mono text-lg font-medium text-white/90 truncate">{email}</p>
               <form onSubmit={entrarComSenha}>
                 <CampoComBotao
                   tipo="password" valor={senha} onChange={(e) => setSenha(e.target.value)}
@@ -252,23 +252,23 @@ export default function Login() {
 
           {etapa === 'criar_senha' && (
             <>
-              <p className="text-lg font-medium text-white/90">
+              <p className="font-mono text-lg font-medium text-white/90">
                 Olá{nomeConvite ? `, ${nomeConvite.split(' ')[0]}` : ''}! Crie sua senha
               </p>
               <form onSubmit={criarSenha} className="mt-4 space-y-3">
                 <input
                   type="password" required autoFocus value={senha} onChange={(e) => setSenha(e.target.value)}
                   placeholder="Mínimo 6 caracteres"
-                  className="w-full h-14 px-6 rounded-full bg-white/25 backdrop-blur-md border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/35 focus:border-white/50 transition"
+                  className="w-full h-14 px-6 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-black/5 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/30 focus:border-white/50 transition"
                 />
                 <input
                   type="password" required value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)}
                   placeholder="Repita a senha"
-                  className="w-full h-14 px-6 rounded-full bg-white/25 backdrop-blur-md border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/35 focus:border-white/50 transition"
+                  className="w-full h-14 px-6 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-black/5 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/30 focus:border-white/50 transition"
                 />
                 <button
                   type="submit" disabled={carregando}
-                  className="w-full h-14 rounded-full bg-white/25 backdrop-blur-md border border-white/30 text-white font-semibold hover:bg-white/35 transition disabled:opacity-60 flex items-center justify-center gap-2"
+                  className="w-full h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-lg shadow-black/5 text-white font-semibold hover:bg-white/30 transition disabled:opacity-60 flex items-center justify-center gap-2"
                 >
                   {carregando ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
                   {carregando ? 'Criando…' : 'Criar senha e entrar'}
