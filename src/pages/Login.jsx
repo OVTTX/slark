@@ -204,26 +204,25 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#050510] font-display flex items-center justify-center p-3 sm:p-6 lg:p-10">
-      <div className="relative w-full max-w-7xl aspect-[3/2] sm:aspect-[16/10] rounded-[28px] sm:rounded-[40px] overflow-hidden shadow-2xl shadow-black/60 border border-white/10">
-        <FundoLogin />
+    <div className="min-h-screen w-full relative font-display overflow-hidden">
+      <FundoLogin />
 
-        <div className="relative z-10 h-full flex flex-col lg:flex-row">
-          {/* Coluna esquerda: chamada de marca (some em telas pequenas) */}
-          <div className="hidden lg:flex w-1/2 flex-col justify-end p-10 xl:p-16">
-            <h1 className="font-mono text-4xl xl:text-6xl font-medium text-white leading-[1.05] tracking-tight">
-              O método que<br />enxega cada aluno.
-            </h1>
+      <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
+        {/* Coluna esquerda: chamada de marca (some em telas pequenas), sobre o degradê cru */}
+        <div className="hidden lg:flex w-1/2 flex-col justify-end p-16">
+          <h1 className="font-mono text-5xl xl:text-6xl font-medium text-white leading-[1.05] tracking-tight">
+            O método que<br />enxega cada aluno.
+          </h1>
+        </div>
+
+        {/* Coluna direita: painel retangular em glassmorphism — a "divisória" entre as duas metades */}
+        <div className="flex-1 flex flex-col justify-between p-8 sm:p-12 lg:p-16 bg-white/10 backdrop-blur-2xl border-l border-white/20">
+          <div>
+            <p className="font-mono text-3xl sm:text-4xl font-medium text-white leading-tight">Conheça a</p>
+            <LogoSlark className="w-52 sm:w-64 h-auto -mt-1" />
           </div>
 
-          {/* Coluna direita: marca + formulário */}
-          <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 lg:p-16 overflow-y-auto">
-            <div>
-              <p className="font-mono text-2xl sm:text-4xl font-medium text-white leading-tight">Conheça a</p>
-              <LogoSlark className="w-40 sm:w-64 h-auto -mt-1" />
-            </div>
-
-            <div className="w-full max-w-md lg:ml-auto">
+          <div className="w-full max-w-md lg:ml-auto">
           {etapa === 'email' && (
             <>
               <p className="font-mono text-lg font-medium text-white/90">Faça Log-in</p>
@@ -291,7 +290,6 @@ export default function Login() {
               Entre em contato.
             </a>
           </p>
-            </div>
           </div>
         </div>
       </div>
