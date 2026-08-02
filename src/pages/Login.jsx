@@ -73,17 +73,17 @@ function LogoSlark({ className = '' }) {
 // da referência visual — usado em cada etapa de um único campo.
 function CampoComBotao({ tipo = 'text', valor, onChange, placeholder, carregando, autoFocus }) {
   return (
-    <div className="mt-4 flex items-center gap-3">
+    <div className="mt-5 flex items-center gap-3">
       <input
         type={tipo} required autoFocus={autoFocus} value={valor} onChange={onChange}
         placeholder={placeholder}
-        className="flex-1 min-w-0 h-14 px-6 rounded-full bg-white/25 backdrop-blur-md border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/35 focus:border-white/50 transition"
+        className="flex-1 min-w-0 h-16 px-7 text-lg rounded-full bg-white/25 backdrop-blur-md border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/35 focus:border-white/50 transition"
       />
       <button
         type="submit" disabled={carregando}
-        className="shrink-0 w-14 h-14 rounded-full bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white/35 transition disabled:opacity-60"
+        className="shrink-0 w-16 h-16 rounded-full bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white/35 transition disabled:opacity-60"
       >
-        {carregando ? <Loader2 size={20} className="animate-spin" /> : <ArrowRight size={20} />}
+        {carregando ? <Loader2 size={24} className="animate-spin" /> : <ArrowRight size={24} />}
       </button>
     </div>
   )
@@ -218,14 +218,14 @@ export default function Login() {
         {/* Coluna direita: painel retangular em glassmorphism — a "divisória" entre as duas metades */}
         <div className="flex-1 flex flex-col justify-between p-8 sm:p-12 lg:p-16 bg-white/10 backdrop-blur-2xl border-l border-white/20">
           <div>
-            <p className="font-mono text-3xl sm:text-4xl font-medium text-white leading-tight">Conheça a</p>
-            <LogoSlark className="w-52 sm:w-64 h-auto -mt-1" />
+            <p className="font-mono text-4xl sm:text-5xl font-medium text-white leading-tight">Conheça a</p>
+            <LogoSlark className="w-72 sm:w-96 h-auto -mt-1" />
           </div>
 
-          <div className="w-full max-w-md lg:ml-auto">
+          <div className="w-full max-w-lg lg:ml-auto">
           {etapa === 'email' && (
             <>
-              <p className="font-mono text-lg font-medium text-white/90">Faça Log-in</p>
+              <p className="font-mono text-2xl sm:text-3xl font-medium text-white/90">Faça Log-in</p>
               <form onSubmit={continuarComEmail}>
                 <CampoComBotao
                   tipo="email" valor={email} onChange={(e) => setEmail(e.target.value)}
@@ -237,7 +237,7 @@ export default function Login() {
 
           {etapa === 'senha' && (
             <>
-              <p className="font-mono text-lg font-medium text-white/90 truncate">{email}</p>
+              <p className="font-mono text-2xl sm:text-3xl font-medium text-white/90 truncate">{email}</p>
               <form onSubmit={entrarComSenha}>
                 <CampoComBotao
                   tipo="password" valor={senha} onChange={(e) => setSenha(e.target.value)}
@@ -253,7 +253,7 @@ export default function Login() {
 
           {etapa === 'criar_senha' && (
             <>
-              <p className="font-mono text-lg font-medium text-white/90">
+              <p className="font-mono text-2xl sm:text-3xl font-medium text-white/90">
                 Olá{nomeConvite ? `, ${nomeConvite.split(' ')[0]}` : ''}! Crie sua senha
               </p>
               <form onSubmit={criarSenha} className="mt-4 space-y-3">
