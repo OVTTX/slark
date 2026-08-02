@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase, carregarPerfil } from '../lib/supabase'
@@ -85,6 +85,54 @@ function CampoComBotao({ tipo = 'text', valor, onChange, placeholder, carregando
       >
         {carregando ? <Loader2 size={24} className="animate-spin" /> : <ArrowRight size={24} />}
       </button>
+    </div>
+  )
+}
+
+// Intro exclusiva do mobile: mostra a logo em tela cheia, um instante de fundo
+// limpo e então revela o painel de login (que já está pronto por baixo).
+// Roda uma única vez ao entrar na tela; não interfere na lógica de login.
+function IntroMobile() {
+  const [fase, setFase] = useState('splash')
+
+  useEffect(() => {
+    const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduz) {
+      setFase('removida')
+      return
+    }
+    const t1 = setTimeout(() => setFase('blank'), 1400)
+    const t2 = setTimeout(() => setFase('revelada'), 2200)
+    const t3 = setTimeout(() => setFase('removida'), 2900)
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(t3)
+    }
+  }, [])
+
+  if (fase === 'removida') return null
+
+  const conteudoVisivel = fase !== 'blank' && fase !== 'revelada'
+
+  return (
+    <div
+      className="lg:hidden fixed inset-0 z-30 transition-opacity duration-700 ease-out"
+      style={{ opacity: fase === 'revelada' ? 0 : 1, pointerEvents: fase === 'revelada' ? 'none' : 'auto' }}
+      aria-hidden="true"
+    >
+      <FundoLogin />
+      <div className="relative z-10 h-full flex flex-col p-8">
+        <div className="transition-opacity duration-500" style={{ opacity: conteudoVisivel ? 1 : 0 }}>
+          <p className="font-mono text-4xl font-medium text-white leading-tight">Conheça a</p>
+          <LogoSlark className="w-64 h-auto -mt-1" />
+        </div>
+        <div className="mt-auto transition-opacity duration-500" style={{ opacity: conteudoVisivel ? 1 : 0 }}>
+          <div className="h-16 rounded-full bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center">
+            <span className="font-mono text-lg font-medium text-white/90">Faça Log-in</span>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -206,6 +254,7 @@ export default function Login() {
   return (
     <div className="min-h-screen w-full relative font-display overflow-hidden">
       <FundoLogin />
+      <IntroMobile />
 
       <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
         {/* Coluna esquerda: chamada de marca (some em telas pequenas), sobre o degradê cru */}
