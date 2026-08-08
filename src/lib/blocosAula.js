@@ -26,6 +26,13 @@ export function numeroAula(blocos, i) {
   return temIntro ? i : i + 1
 }
 
+// Próximo número de aula que ainda não foi publicado (usado no card de
+// "Preparação pra Aula N" — N nunca conta a Aula 0 de introdução).
+export function proximoNumeroAula(blocos) {
+  const reais = blocos.filter((b) => !ehIntroducao(b))
+  return reais.length + 1
+}
+
 export const TEMPLATE_INTRODUCAO = `Oi, turma! 👋
 
 Antes de começarmos, um recadinho rápido pra vocês:

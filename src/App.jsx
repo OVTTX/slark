@@ -45,6 +45,7 @@ import AlunoRunaway from './pages/aluno/AlunoRunaway'
 import AlunoAtividades from './pages/aluno/AlunoAtividades'
 import AlunoCompetencias from './pages/aluno/AlunoCompetencias'
 import AlunoTrilhas from './pages/aluno/AlunoTrilhas'
+import AlunoTrilhaDetalhe from './pages/aluno/AlunoTrilhaDetalhe'
 import AlunoTime from './pages/aluno/AlunoTime'
 import AlunoChat from './pages/aluno/AlunoChat'
 import AlunoRanking from './pages/aluno/AlunoRanking'
@@ -107,6 +108,7 @@ export default function App() {
           <Route path="/aluno/atividades" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoAtividades /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/competencias" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoCompetencias /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/trilhas" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoTrilhas /></AppLayout></RotaProtegida>} />
+          <Route path="/aluno/trilhas/:id" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoTrilhaDetalhe /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/time" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoTime /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/chat" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoChat /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/ranking" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoRanking /></AppLayout></RotaProtegida>} />

@@ -3,9 +3,9 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import {
   BookOpen, Plus, X, Loader2, FileText, Link2, File, Trash2, CheckCircle2, Eye, EyeOff,
-  FolderKanban, Save, Hand,
+  FolderKanban, Save, Hand, Megaphone, Lock, Unlock,
 } from 'lucide-react'
-import { ehIntroducao, rotuloAula, TEMPLATE_INTRODUCAO } from '../../lib/blocosAula'
+import { ehIntroducao, rotuloAula, proximoNumeroAula, TEMPLATE_INTRODUCAO } from '../../lib/blocosAula'
 
 const STATUS_TRILHA = [
   { valor: 'rascunho', rotulo: 'Rascunho', cor: '#8892B0' },
@@ -20,7 +20,7 @@ const TIPOS_BLOCO = [
   { valor: 'canva', rotulo: 'Arte (Canva)', icon: Link2 },
 ]
 
-const FORM_VAZIO = { titulo: '', descricao: '', sala_id: '', status: 'rascunho' }
+const FORM_VAZIO = { titulo: '', descricao: '', sala_id: '', materia_id: '', status: 'rascunho' }
 
 export default function ProfessorTrilhas() {
   const [aba, setAba] = useState('trilhas')
@@ -47,6 +47,7 @@ export default function ProfessorTrilhas() {
 function TrilhasLista() {
   const { perfil } = useAuth()
   const [salas, setSalas] = useState([])
+  const [materias, setMaterias] = useState([])
   const [trilhas, setTrilhas] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
@@ -60,13 +61,17 @@ function TrilhasLista() {
     setCarregando(true)
     setErro('')
     try {
-      const { data: salasData, error: eSalas } = await supabase.from('salas').select('id, nome').eq('professor_id', perfil.id)
+      const [{ data: salasData, error: eSalas }, { data: materiasData }] = await Promise.all([
+        supabase.from('salas').select('id, nome').eq('professor_id', perfil.id),
+        supabase.from('materias').select('id, nome').eq('escola_id', perfil.escola_id),
+      ])
       if (eSalas) throw eSalas
       setSalas(salasData || [])
+      setMaterias(materiasData || [])
       const salaPorId = Object.fromEntries((salasData || []).map((s) => [s.id, s]))
 
       const { data: trilhasData, error: eTrilhas } = await supabase
-        .from('trilhas').select('*').eq('professor_id', perfil.id).order('criada_em', { ascending: false })
+        .from('trilhas').select('*, materias(nome)').eq('professor_id', perfil.id).order('criada_em', { ascending: false })
       if (eTrilhas) throw eTrilhas
 
       const trilhaIds = (trilhasData || []).map((t) => t.id)
@@ -104,6 +109,7 @@ function TrilhasLista() {
         professor_id: perfil.id,
         escola_id: perfil.escola_id,
         sala_id: form.sala_id || null,
+        materia_id: form.materia_id || null,
         titulo: form.titulo,
         descricao: form.descricao,
         status: form.status,
@@ -177,7 +183,10 @@ function TrilhasLista() {
                     {s.rotulo}
                   </span>
                 </div>
-                <div className="text-texto/50 text-sm mt-1">{t.salaNome}</div>
+                <div className="flex items-center gap-2 text-texto/50 text-sm mt-1">
+                  {t.salaNome}
+                  {t.materias?.nome && <span className="text-azul/70">· {t.materias.nome}</span>}
+                </div>
                 {t.descricao && <p className="text-texto/60 text-sm mt-3 line-clamp-2">{t.descricao}</p>}
 
                 <div className="mt-4 flex items-center gap-1.5 text-xs text-texto/50">
@@ -237,6 +246,16 @@ function TrilhasLista() {
                 </select>
               </div>
               <div>
+                <label className="block text-sm font-medium text-texto/70 mb-1.5">Matéria (opcional)</label>
+                <select
+                  value={form.materia_id} onChange={(e) => setForm({ ...form, materia_id: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
+                >
+                  <option value="">Sem matéria vinculada</option>
+                  {materias.map((m) => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                </select>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Descrição (opcional)</label>
                 <textarea
                   value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })}
@@ -257,19 +276,21 @@ function TrilhasLista() {
       )}
 
       {trilhaAberta && (
-        <GerenciarBlocosModal trilha={trilhaAberta} onFechar={() => setTrilhaAberta(null)} />
+        <GerenciarBlocosModal trilha={trilhaAberta} onFechar={() => setTrilhaAberta(null)} onAtualizarTrilha={carregar} />
       )}
     </div>
   )
 }
 
-function GerenciarBlocosModal({ trilha, onFechar }) {
+function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
   const [blocos, setBlocos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [tipo, setTipo] = useState('texto')
   const [conteudo, setConteudo] = useState('')
   const [salvando, setSalvando] = useState(false)
+  const [preparacao, setPreparacao] = useState(trilha.preparacao_texto || '')
+  const [salvandoPreparacao, setSalvandoPreparacao] = useState(false)
 
   async function carregar() {
     setCarregando(true)
@@ -342,6 +363,22 @@ function GerenciarBlocosModal({ trilha, onFechar }) {
       setErro('Não foi possível remover a aula.')
     }
   }
+
+  async function salvarPreparacao() {
+    setSalvandoPreparacao(true)
+    try {
+      const { error } = await supabase.from('trilhas').update({ preparacao_texto: preparacao.trim() || null }).eq('id', trilha.id)
+      if (error) throw error
+      onAtualizarTrilha?.()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível salvar a preparação.')
+    } finally {
+      setSalvandoPreparacao(false)
+    }
+  }
+
+  const proximoNumero = proximoNumeroAula(blocos)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={onFechar}>
@@ -423,6 +460,28 @@ function GerenciarBlocosModal({ trilha, onFechar }) {
             Adicionar aula
           </button>
         </form>
+
+        <div className="mt-6 pt-5 border-t">
+          <div className="flex items-center gap-1.5 text-sm font-semibold text-white">
+            <Megaphone size={14} className="text-[#F5C451]" /> Preparação pra Aula {proximoNumero} (opcional)
+          </div>
+          <p className="text-xs text-texto/50 mt-1 leading-relaxed">
+            Aparece pro aluno como um aviso, antes da Aula {proximoNumero} existir de verdade. Não é obrigatório e não conta pra conclusão da trilha — some sozinho assim que você publicar essa aula.
+          </p>
+          <textarea
+            value={preparacao} onChange={(e) => setPreparacao(e.target.value)}
+            placeholder="Ex: Semana que vem a gente entra em Polinômios — dá uma revisada em produtos notáveis!"
+            rows={2}
+            className="w-full mt-3 px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white placeholder:text-texto/30 focus:outline-none focus:border-azul transition resize-none text-sm"
+          />
+          <button
+            type="button" onClick={salvarPreparacao} disabled={salvandoPreparacao}
+            className="mt-2 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition disabled:opacity-60"
+          >
+            {salvandoPreparacao ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+            {salvandoPreparacao ? 'Salvando…' : 'Salvar preparação'}
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -431,6 +490,7 @@ function GerenciarBlocosModal({ trilha, onFechar }) {
 function Projetos() {
   const { perfil } = useAuth()
   const [salas, setSalas] = useState([])
+  const [trilhas, setTrilhas] = useState([])
   const [projetos, setProjetos] = useState([])
   const [projetoAtivo, setProjetoAtivo] = useState(null)
   const [entregas, setEntregas] = useState([])
@@ -440,20 +500,27 @@ function Projetos() {
   const [modalNovo, setModalNovo] = useState(false)
   const [titulo, setTitulo] = useState('')
   const [salaId, setSalaId] = useState('')
+  const [trilhaId, setTrilhaId] = useState('')
   const [descricao, setDescricao] = useState('')
   const [prazo, setPrazo] = useState('')
   const [salvando, setSalvando] = useState(false)
+  const [alternandoRevelado, setAlternandoRevelado] = useState(false)
 
   async function carregar() {
     if (!perfil?.id) return
     setCarregando(true)
     setErro('')
     try {
-      const { data: salasData, error: eSalas } = await supabase.from('salas').select('id, nome').eq('professor_id', perfil.id)
+      const [{ data: salasData, error: eSalas }, { data: trilhasData }] = await Promise.all([
+        supabase.from('salas').select('id, nome').eq('professor_id', perfil.id),
+        supabase.from('trilhas').select('id, titulo').eq('professor_id', perfil.id),
+      ])
       if (eSalas) throw eSalas
       setSalas(salasData || [])
+      setTrilhas(trilhasData || [])
       const salaIds = (salasData || []).map((s) => s.id)
       const salaPorId = Object.fromEntries((salasData || []).map((s) => [s.id, s]))
+      const trilhaPorId = Object.fromEntries((trilhasData || []).map((t) => [t.id, t]))
       if (salaIds.length === 0) { setProjetos([]); return }
 
       const { data: projetosData, error: eAt } = await supabase
@@ -462,6 +529,7 @@ function Projetos() {
       setProjetos((projetosData || []).map((a) => ({
         ...a,
         salaNome: salaPorId[a.sala_id]?.nome || '—',
+        trilhaNome: a.trilha_id ? trilhaPorId[a.trilha_id]?.titulo : null,
         pendentes: (a.entregas || []).filter((e) => e.status === 'entregue').length,
         total: (a.entregas || []).length,
       })))
@@ -491,7 +559,7 @@ function Projetos() {
   }
 
   function abrirNovo() {
-    setTitulo(''); setSalaId(salas[0]?.id || ''); setDescricao(''); setPrazo('')
+    setTitulo(''); setSalaId(salas[0]?.id || ''); setTrilhaId(''); setDescricao(''); setPrazo('')
     setModalNovo(true)
   }
 
@@ -500,7 +568,7 @@ function Projetos() {
     setSalvando(true)
     try {
       const { error } = await supabase.from('atividades').insert({
-        titulo, sala_id: salaId, professor_id: perfil.id, descricao: descricao || null, prazo: prazo || null,
+        titulo, sala_id: salaId, trilha_id: trilhaId || null, professor_id: perfil.id, descricao: descricao || null, prazo: prazo || null,
       })
       if (error) throw error
       setModalNovo(false)
@@ -510,6 +578,23 @@ function Projetos() {
       setErro('Não foi possível criar o projeto.')
     } finally {
       setSalvando(false)
+    }
+  }
+
+  async function alternarRevelado() {
+    if (!projetoAtivo) return
+    setAlternandoRevelado(true)
+    try {
+      const novoValor = !projetoAtivo.revelado
+      const { error } = await supabase.from('atividades').update({ revelado: novoValor }).eq('id', projetoAtivo.id)
+      if (error) throw error
+      setProjetoAtivo((p) => ({ ...p, revelado: novoValor }))
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível alterar a visibilidade do projeto.')
+    } finally {
+      setAlternandoRevelado(false)
     }
   }
 
@@ -562,8 +647,13 @@ function Projetos() {
                 className={`w-full text-left rounded-xl p-4 transition border ${projetoAtivo?.id === a.id ? 'bg-azul text-white border-azul' : 'bg-card text-white/90 hover:border-azul/40'}`}
               >
                 <div className="font-medium">{a.titulo}</div>
-                <div className={`text-xs mt-0.5 ${projetoAtivo?.id === a.id ? 'text-white/70' : 'text-texto/50'}`}>{a.salaNome}</div>
-                <div className={`text-xs mt-1 ${projetoAtivo?.id === a.id ? 'text-white/70' : 'text-texto/45'}`}>{a.pendentes} para corrigir · {a.total} entregas</div>
+                <div className={`text-xs mt-0.5 ${projetoAtivo?.id === a.id ? 'text-white/70' : 'text-texto/50'}`}>
+                  {a.salaNome}{a.trilhaNome && ` · ${a.trilhaNome}`}
+                </div>
+                <div className={`text-xs mt-1 flex items-center gap-1.5 ${projetoAtivo?.id === a.id ? 'text-white/70' : 'text-texto/45'}`}>
+                  {a.pendentes} para corrigir · {a.total} entregas
+                  {a.trilha_id && (a.revelado ? <Unlock size={11} /> : <Lock size={11} />)}
+                </div>
               </button>
             ))}
           </div>
@@ -573,7 +663,28 @@ function Projetos() {
               <div className="rounded-2xl bg-card border p-12 text-center text-texto/50 h-full flex items-center justify-center">
                 Selecione um projeto para ver os envios.
               </div>
-            ) : carregandoEntregas ? (
+            ) : (
+              <>
+                {projetoAtivo.trilha_id && (
+                  <div className="mb-4 rounded-2xl bg-card border p-4 flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-2 text-sm text-texto/70">
+                      {projetoAtivo.revelado ? <Unlock size={14} className="text-[#3FD08A]" /> : <Lock size={14} className="text-texto/50" />}
+                      {projetoAtivo.revelado
+                        ? 'Data do projeto visível pros alunos na trilha.'
+                        : 'Data do projeto escondida pros alunos (embaçada) até você revelar.'}
+                    </div>
+                    <button
+                      onClick={alternarRevelado} disabled={alternandoRevelado}
+                      className={`shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-60 ${
+                        projetoAtivo.revelado ? 'bg-white/5 text-white hover:bg-white/10' : 'bg-azul hover:bg-azul-puro text-white'
+                      }`}
+                    >
+                      {alternandoRevelado ? <Loader2 size={14} className="animate-spin" /> : projetoAtivo.revelado ? <Lock size={14} /> : <Unlock size={14} />}
+                      {projetoAtivo.revelado ? 'Esconder de novo' : 'Revelar pros alunos'}
+                    </button>
+                  </div>
+                )}
+                {carregandoEntregas ? (
               <div className="text-texto/50">Carregando entregas…</div>
             ) : entregas.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-azul/30 bg-card/40 p-8 text-center text-texto/60 text-sm">
@@ -615,6 +726,8 @@ function Projetos() {
                 ))}
               </div>
             )}
+              </>
+            )}
           </div>
         </div>
       )}
@@ -637,6 +750,14 @@ function Projetos() {
                   <option value="">Selecione…</option>
                   {salas.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-texto/70 mb-1.5">Vincular a uma trilha (opcional)</label>
+                <select value={trilhaId} onChange={(e) => setTrilhaId(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition">
+                  <option value="">Nenhuma</option>
+                  {trilhas.map((t) => <option key={t.id} value={t.id}>{t.titulo}</option>)}
+                </select>
+                {trilhaId && <p className="text-xs text-texto/45 mt-1.5">O prazo abaixo aparece pro aluno na tela da trilha — embaçado até você revelar.</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Descrição (opcional)</label>

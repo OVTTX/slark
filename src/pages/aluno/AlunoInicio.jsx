@@ -221,7 +221,7 @@ export default function AlunoInicio() {
 
                 <div className="mt-5 flex flex-col sm:flex-row sm:items-center gap-3">
                   <button
-                    onClick={() => navigate('/aluno/trilhas', { state: { abrirTrilhaId: trilhaRetomar.trilha.id } })}
+                    onClick={() => navigate(`/aluno/trilhas/${trilhaRetomar.trilha.id}`)}
                     className="shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white text-profundo font-semibold hover:bg-white/90 transition"
                   >
                     Veja trilha teórica <Play size={14} fill="currentColor" />
