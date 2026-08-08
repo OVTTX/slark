@@ -1,4 +1,5 @@
-import { Check, Lock } from 'lucide-react'
+import { Check, Lock, Hand } from 'lucide-react'
+import { ehIntroducao, numeroAula } from '../lib/blocosAula'
 
 // Caminho sinuoso estilo "trilha de jogo": nós numerados conectados por uma
 // linha curva, alternando esquerda/direita. Usado tanto no preview compacto
@@ -70,6 +71,8 @@ export default function CaminhoTrilha({ blocos, concluidos, atual, onSelecionar,
               <Check x={-raio * 0.42} y={-raio * 0.42} size={raio * 0.85} color="white" strokeWidth={3} />
             ) : bloqueado ? (
               <Lock x={-raio * 0.36} y={-raio * 0.36} size={raio * 0.72} color="rgb(var(--c-texto) / .45)" strokeWidth={2} />
+            ) : ehIntroducao(p.bloco) ? (
+              <Hand x={-raio * 0.4} y={-raio * 0.4} size={raio * 0.8} color={ehAtual ? '#fff' : 'rgb(var(--c-texto) / .6)'} strokeWidth={2} />
             ) : (
               <text
                 textAnchor="middle"
@@ -78,7 +81,7 @@ export default function CaminhoTrilha({ blocos, concluidos, atual, onSelecionar,
                 fontWeight="700"
                 fill={ehAtual ? '#fff' : 'rgb(var(--c-texto) / .6)'}
               >
-                {p.i + 1}
+                {numeroAula(blocos, p.i)}
               </text>
             )}
           </g>

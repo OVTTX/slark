@@ -3,8 +3,9 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import {
   BookOpen, Plus, X, Loader2, FileText, Link2, File, Trash2, CheckCircle2, Eye, EyeOff,
-  FolderKanban, Save,
+  FolderKanban, Save, Hand,
 } from 'lucide-react'
+import { ehIntroducao, rotuloAula, TEMPLATE_INTRODUCAO } from '../../lib/blocosAula'
 
 const STATUS_TRILHA = [
   { valor: 'rascunho', rotulo: 'Rascunho', cor: '#8892B0' },
@@ -302,7 +303,30 @@ function GerenciarBlocosModal({ trilha, onFechar }) {
       await carregar()
     } catch (e) {
       console.error(e)
-      setErro('Não foi possível adicionar o bloco.')
+      setErro('Não foi possível adicionar a aula.')
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  const temIntro = blocos.some(ehIntroducao)
+
+  async function adicionarIntroducao() {
+    setSalvando(true)
+    try {
+      // ordem bem negativa pra garantir que a Aula 0 sempre vem antes de tudo,
+      // mesmo se algum bloco já tiver sido criado com ordem 0.
+      const { error } = await supabase.from('trilha_blocos').insert({
+        trilha_id: trilha.id,
+        tipo: 'texto',
+        conteudo: { texto: TEMPLATE_INTRODUCAO, intro: true },
+        ordem: -1,
+      })
+      if (error) throw error
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível adicionar a Aula 0.')
     } finally {
       setSalvando(false)
     }
@@ -315,7 +339,7 @@ function GerenciarBlocosModal({ trilha, onFechar }) {
       await carregar()
     } catch (e) {
       console.error(e)
-      setErro('Não foi possível remover o bloco.')
+      setErro('Não foi possível remover a aula.')
     }
   }
 
@@ -326,25 +350,25 @@ function GerenciarBlocosModal({ trilha, onFechar }) {
           <h2 className="text-xl font-bold text-white">{trilha.titulo}</h2>
           <button onClick={onFechar} className="text-texto/50 hover:text-white transition"><X size={20} /></button>
         </div>
-        <p className="text-sm text-texto/50 mb-6">Conteúdo da trilha</p>
+        <p className="text-sm text-texto/50 mb-6">Conteúdo da trilha, dividido em aulas</p>
 
         {erro && <p className="mb-4 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 
         {carregando ? (
           <div className="text-texto/50 text-sm">Carregando…</div>
         ) : (
-          <div className="space-y-2 mb-6">
-            {blocos.length === 0 && <p className="text-sm text-texto/45">Nenhum bloco adicionado ainda.</p>}
+          <div className="space-y-2 mb-4">
+            {blocos.length === 0 && <p className="text-sm text-texto/45">Nenhuma aula adicionada ainda.</p>}
             {blocos.map((b, i) => {
               const Info = TIPOS_BLOCO.find((t) => t.valor === b.tipo) || TIPOS_BLOCO[0]
-              const Icon = Info.icon
+              const Icon = ehIntroducao(b) ? Hand : Info.icon
               return (
                 <div key={b.id} className="rounded-xl bg-card border p-3.5 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-azul/15 flex items-center justify-center text-azul shrink-0">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${ehIntroducao(b) ? 'bg-[#F5C451]/15 text-[#F5C451]' : 'bg-azul/15 text-azul'}`}>
                     <Icon size={14} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs text-texto/45">{Info.rotulo} · bloco {i + 1}</div>
+                    <div className="text-xs text-texto/45">{rotuloAula(blocos, i)}{!ehIntroducao(b) && ` · ${Info.rotulo}`}</div>
                     <div className="text-sm text-white/90 truncate">{b.conteudo?.texto || b.conteudo?.url}</div>
                   </div>
                   <button onClick={() => remover(b.id)} className="p-1.5 rounded-lg text-texto/40 hover:text-red-400 hover:bg-red-400/10 transition">
@@ -354,6 +378,16 @@ function GerenciarBlocosModal({ trilha, onFechar }) {
               )
             })}
           </div>
+        )}
+
+        {!carregando && !temIntro && (
+          <button
+            type="button" onClick={adicionarIntroducao} disabled={salvando}
+            className="w-full mb-6 flex items-center justify-center gap-2 py-2.5 rounded-full border border-dashed border-[#F5C451]/40 text-[#F5C451] text-sm font-medium hover:bg-[#F5C451]/10 transition disabled:opacity-60"
+          >
+            {salvando ? <Loader2 size={15} className="animate-spin" /> : <Hand size={15} />}
+            Adicionar Aula 0 (Introdução)
+          </button>
         )}
 
         <form onSubmit={adicionar} className="space-y-3 pt-4 border-t">
@@ -386,7 +420,7 @@ function GerenciarBlocosModal({ trilha, onFechar }) {
             className="w-full py-2.5 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {salvando && <Loader2 size={16} className="animate-spin" />}
-            Adicionar bloco
+            Adicionar aula
           </button>
         </form>
       </div>

@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import CaminhoTrilha from '../../components/CaminhoTrilha'
-import { BookOpen, FileText, File, Link2, CheckCircle2, X, Loader2, PartyPopper, ArrowRight } from 'lucide-react'
+import { BookOpen, FileText, File, Link2, CheckCircle2, X, Loader2, PartyPopper, ArrowRight, Hand } from 'lucide-react'
+import { ehIntroducao, rotuloAula } from '../../lib/blocosAula'
 
 const ICONE_TIPO = { texto: FileText, pdf: File, link: Link2, canva: Link2 }
 
@@ -91,7 +92,9 @@ export default function AlunoTrilhas() {
                   {feita && <CheckCircle2 size={20} className="text-[#3FD08A] shrink-0" />}
                 </div>
                 {t.descricao && <p className="text-texto/60 text-sm mt-2 line-clamp-2">{t.descricao}</p>}
-                <div className="mt-4 text-xs text-texto/45">{t.blocos.length} bloco(s) de conteúdo</div>
+                <div className="mt-4 text-xs text-texto/45">
+                  {t.blocos.length} aula{t.blocos.length === 1 ? '' : 's'}{t.blocos.some(ehIntroducao) ? ' (com introdução)' : ''}
+                </div>
               </button>
             )
           })}
@@ -173,7 +176,7 @@ function TrilhaCaminhoModal({ trilha, alunoId, concluida, onFechar, onConcluida 
     }
   }
 
-  const Icon = selecionado ? (ICONE_TIPO[selecionado.bloco.tipo] || FileText) : FileText
+  const Icon = selecionado ? (ehIntroducao(selecionado.bloco) ? Hand : (ICONE_TIPO[selecionado.bloco.tipo] || FileText)) : FileText
   const jaFeito = selecionado && progresso.has(selecionado.bloco.id)
 
   return (
@@ -198,7 +201,7 @@ function TrilhaCaminhoModal({ trilha, alunoId, concluida, onFechar, onConcluida 
           <div className="py-10 text-center">
             <PartyPopper className="mx-auto text-[#3FD08A]" size={40} />
             <p className="mt-4 text-white font-semibold">Trilha concluída!</p>
-            <p className="mt-1 text-sm text-texto/60">Você passou por todos os blocos dessa trilha.</p>
+            <p className="mt-1 text-sm text-texto/60">Você passou por todas as aulas dessa trilha.</p>
           </div>
         ) : (
           <>
@@ -214,7 +217,7 @@ function TrilhaCaminhoModal({ trilha, alunoId, concluida, onFechar, onConcluida 
             {selecionado && (
               <div className="mt-2 rounded-2xl bg-card border p-5">
                 <div className="flex items-center gap-2 text-xs text-texto/45 mb-2">
-                  <Icon size={13} /> Bloco {selecionado.i + 1} de {trilha.blocos.length}
+                  <Icon size={13} /> {rotuloAula(trilha.blocos, selecionado.i)}
                   {jaFeito && <span className="ml-auto flex items-center gap-1 text-[#3FD08A]"><CheckCircle2 size={13} /> Concluído</span>}
                 </div>
                 {selecionado.bloco.tipo === 'texto' ? (
