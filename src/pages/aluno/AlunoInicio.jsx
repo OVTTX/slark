@@ -4,9 +4,9 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import StatCard from '../../components/StatCard'
 import {
-  Trophy, Award, Rocket, GraduationCap, Flame, Clock3, Bell,
+  Award, Rocket, GraduationCap, Flame, Clock3, Bell,
   Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search,
-  Sparkles, ArrowRight, CheckCircle2, Timer, History,
+  Play, ArrowRight, CheckCircle2,
 } from 'lucide-react'
 
 // selos antigos guardam um emoji em "icone"; os ligados a características
@@ -173,7 +173,7 @@ export default function AlunoInicio() {
       </div>
 
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard icon={Rocket} label="Sua Pontuação" value={aluno.pontos} sub="Pontos acumulados" valorCor="text-[#F5C451]" />
+        <StatCard icon={Rocket} label="Sua Pontuação" value={aluno.pontos} sub="Pontos acumulados" />
         <StatCard
           icon={GraduationCap}
           label="Progresso médio das matérias"
@@ -194,65 +194,78 @@ export default function AlunoInicio() {
         />
       </div>
 
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
-          {trilhaRetomar ? (
-            <>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide uppercase px-3 py-1 rounded-full bg-azul/15 text-azul">
-                <Sparkles size={11} /> Módulo recomendado por IA
-              </span>
-              <h2 className="mt-3 text-2xl font-bold text-white">{trilhaRetomar.trilha.titulo}</h2>
-              {trilhaRetomar.trilha.descricao && (
-                <p className="mt-1.5 text-sm text-texto/60 leading-relaxed">{trilhaRetomar.trilha.descricao}</p>
-              )}
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2">
+          <h2 className="text-lg font-bold text-white mb-3">Sua Trilha Recomendada</h2>
+          <div className="rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
+            {trilhaRetomar ? (
+              <>
+                <span className="inline-flex items-center text-[11px] font-semibold tracking-wide uppercase px-3 py-1 rounded-full bg-white/10 text-texto/70">
+                  Módulo recomendado por IA
+                </span>
+                <h2 className="mt-3 text-2xl font-bold text-white">{trilhaRetomar.trilha.titulo}</h2>
+                {trilhaRetomar.trilha.descricao && (
+                  <p className="mt-1.5 text-sm text-texto/60 leading-relaxed">{trilhaRetomar.trilha.descricao}</p>
+                )}
 
-              <div className="mt-5 flex items-center justify-between text-xs text-texto/50">
-                <span>A sua sala está indo bem!</span>
-                <span className="text-white font-semibold">{trilhaRetomar.percentual}% concluído</span>
-              </div>
-              <div className="mt-2 h-2 rounded-full bg-white/5 overflow-hidden">
-                <div className="h-full rounded-full bg-gradient-to-r from-azul to-azul-puro transition-all" style={{ width: `${trilhaRetomar.percentual}%` }} />
-              </div>
+                <div className="mt-5 flex items-center justify-between text-xs text-texto/50">
+                  <span>A sua sala está indo bem!</span>
+                  <span className="text-white font-semibold">{trilhaRetomar.percentual}% concluído</span>
+                </div>
+                <div className="mt-2 h-2 rounded-full bg-white/5 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{ width: `${trilhaRetomar.percentual}%`, background: 'linear-gradient(to right, #FF6FA5, #5B4CFF)' }}
+                  />
+                </div>
 
-              <div className="mt-5 flex flex-col sm:flex-row sm:items-center gap-3">
-                <button
-                  onClick={() => navigate('/aluno/trilhas', { state: { abrirTrilhaId: trilhaRetomar.trilha.id } })}
-                  className="shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white text-profundo font-semibold hover:bg-white/90 transition"
-                >
-                  Veja trilha teórica <ArrowRight size={15} />
-                </button>
-                <p className="text-xs text-texto/45 leading-relaxed">Esteja preparado antes de entrar na sala (não é obrigatório, mas é bom :))</p>
-              </div>
-            </>
-          ) : (
-            <div className="text-sm text-texto/50 py-6 text-center">Nenhuma trilha disponível pra recomendar agora.</div>
-          )}
+                <div className="mt-5 flex flex-col sm:flex-row sm:items-center gap-3">
+                  <button
+                    onClick={() => navigate('/aluno/trilhas', { state: { abrirTrilhaId: trilhaRetomar.trilha.id } })}
+                    className="shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white text-profundo font-semibold hover:bg-white/90 transition"
+                  >
+                    Veja trilha teórica <Play size={14} fill="currentColor" />
+                  </button>
+                  <p className="text-xs text-texto/45 leading-relaxed">Esteja preparado antes de entrar na sala (não é obrigatório, mas é bom :))</p>
+                </div>
+              </>
+            ) : (
+              <div className="text-sm text-texto/50 py-6 text-center">Nenhuma trilha disponível pra recomendar agora.</div>
+            )}
+          </div>
         </div>
 
-        <div className="rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
-          <div className="flex items-center gap-2 text-white font-semibold mb-4">
-            <History size={16} className="text-azul" /> Atividades Recentes
-          </div>
-          {pontuacoesRecentes.length === 0 ? (
-            <p className="text-sm text-texto/45">Ainda sem atividades pontuadas.</p>
-          ) : (
-            <div className="space-y-3">
-              {pontuacoesRecentes.map((p, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <span className="shrink-0 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#3FD08A] mt-0.5">
-                    {p.pontos >= 0 ? <CheckCircle2 size={14} /> : <Timer size={14} />}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm text-white truncate">{p.motivo || 'Pontuação'}</div>
-                    <div className="text-xs text-texto/45">{tempoRelativo(p.criada_em)}</div>
+        <div>
+          <h2 className="text-lg font-bold text-white mb-3">Atividades Recentes</h2>
+          <div className="rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
+            {pontuacoesRecentes.length === 0 ? (
+              <p className="text-sm text-texto/45">Ainda sem atividades pontuadas.</p>
+            ) : (
+              <div className="space-y-3">
+                {pontuacoesRecentes.map((p, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className="shrink-0 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/90 mt-0.5">
+                      <CheckCircle2 size={14} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm text-white truncate">{p.motivo || 'Pontuação'}</div>
+                      <div className="text-xs text-texto/45">{tempoRelativo(p.criada_em)}</div>
+                    </div>
+                    <span className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 text-white">
+                      {p.pontos >= 0 ? '+' : ''}{p.pontos} pts
+                    </span>
                   </div>
-                  <span className={`shrink-0 text-xs font-semibold px-2 py-1 rounded-full ${p.pontos >= 0 ? 'bg-[#3FD08A]/15 text-[#3FD08A]' : 'bg-red-400/15 text-red-400'}`}>
-                    {p.pontos >= 0 ? '+' : ''}{p.pontos} pts
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => navigate('/aluno/competencias')}
+              className="mt-4 flex items-center gap-1.5 text-xs font-medium hover:opacity-80 transition"
+              style={{ color: '#FF6FA5' }}
+            >
+              Ver histórico completo de pontos <ArrowRight size={12} />
+            </button>
+          </div>
         </div>
       </div>
 

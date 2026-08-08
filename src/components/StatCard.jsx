@@ -7,7 +7,7 @@ export default function StatCard({ icon: Icon, label, value, sub, valorCor = 'te
       <div className="relative flex items-start justify-between gap-3">
         <span className="text-sm text-texto/60">{label}</span>
         {Icon && (
-          <span className="shrink-0 w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-azul">
+          <span className="shrink-0 w-9 h-9 rounded-full bg-black/30 border border-white/10 flex items-center justify-center text-white/90">
             <Icon size={15} />
           </span>
         )}
