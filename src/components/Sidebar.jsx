@@ -4,7 +4,7 @@ import {
   LayoutGrid, School, Users, Eye, UsersRound, Award, Target, Trophy,
   BarChart3, BookOpen, ClipboardList, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ArrowLeft, ListChecks,
-  Settings, Kanban, UserPlus,
+  Settings, Kanban, UserPlus, Bell,
 } from 'lucide-react'
 
 // Menus por perfil (espelham as telas do app real)
@@ -48,6 +48,7 @@ const MENUS = {
   ],
   aluno: [
     { to: '/aluno', label: 'Meu Painel', icon: LayoutGrid, end: true },
+    { to: '/aluno/notificacoes', label: 'Notificações', icon: Bell },
     { to: '/aluno/boletim', label: 'Boletim', icon: ClipboardList },
     { to: '/aluno/competencias', label: 'Mapa de Competências', icon: Target },
     { to: '/aluno/trilhas', label: 'Trilhas', icon: BookOpen },

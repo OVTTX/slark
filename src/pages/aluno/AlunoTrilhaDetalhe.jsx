@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import {
-  ArrowLeft, ArrowRight, ArrowUpLeft, Bell, CheckCircle2,
+  ArrowLeft, ArrowRight, ArrowUpLeft, CheckCircle2,
   Loader2, PartyPopper, Hand, Lock, Send,
 } from 'lucide-react'
 import { ehIntroducao, numeroAula, proximoNumeroAula } from '../../lib/blocosAula'
+import SininhoNotificacoes from '../../components/SininhoNotificacoes'
 
 function formatarData(iso) {
   if (!iso) return '—'
@@ -280,9 +281,7 @@ export default function AlunoTrilhaDetalhe() {
             </span>
           )}
         </div>
-        <button className="shrink-0 w-11 h-11 rounded-full bg-white/[0.04] backdrop-blur-xl border border-white/10 flex items-center justify-center text-texto/60 hover:text-white transition">
-          <Bell size={17} />
-        </button>
+        <SininhoNotificacoes />
       </div>
 
       {erro && <p className="mt-4 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}

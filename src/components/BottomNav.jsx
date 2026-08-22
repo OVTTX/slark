@@ -6,7 +6,7 @@ import {
   BarChart3, BookOpen, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ListChecks,
   Kanban, UserPlus, Wallet, ShieldCheck, MessageCircle, Sun, Moon,
-  ClipboardList,
+  ClipboardList, Bell,
 } from 'lucide-react'
 
 // Menus por perfil (espelham as telas do app real)
@@ -52,6 +52,7 @@ const MENUS = {
   ],
   aluno: [
     { to: '/aluno', label: 'Meu Painel', icon: LayoutGrid, end: true },
+    { to: '/aluno/notificacoes', label: 'Notificações', icon: Bell },
     { to: '/aluno/boletim', label: 'Boletim', icon: ClipboardList },
     { to: '/aluno/competencias', label: 'Mapa de Competências', icon: Target },
     { to: '/aluno/trilhas', label: 'Trilhas', icon: BookOpen },

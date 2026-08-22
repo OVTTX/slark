@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import StatCard from '../../components/StatCard'
-import { Rocket, GraduationCap, Flame, Clock3, Bell, Play, ArrowRight, CheckCircle2 } from 'lucide-react'
+import SininhoNotificacoes from '../../components/SininhoNotificacoes'
+import { Rocket, GraduationCap, Flame, Clock3, Play, ArrowRight, CheckCircle2 } from 'lucide-react'
 
 function tempoRelativo(iso) {
   const diffMs = Date.now() - new Date(iso).getTime()
@@ -143,9 +144,7 @@ export default function AlunoInicio() {
           <p className="text-xs text-texto/45">Boas-vindas à Slark, a nova educação.</p>
           <h1 className="mt-1 text-4xl font-bold text-white tracking-tight">Olá, {aluno.nome.split(' ')[0]}!</h1>
         </div>
-        <button className="shrink-0 w-11 h-11 rounded-full bg-white/[0.04] backdrop-blur-xl border border-white/10 flex items-center justify-center text-texto/60 hover:text-white transition">
-          <Bell size={17} />
-        </button>
+        <SininhoNotificacoes />
       </div>
 
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
