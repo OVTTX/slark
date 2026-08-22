@@ -314,6 +314,7 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
   const [erro, setErro] = useState('')
   const [tipo, setTipo] = useState('texto')
   const [conteudo, setConteudo] = useState('')
+  const [editandoBlocoId, setEditandoBlocoId] = useState(null)
   const [salvando, setSalvando] = useState(false)
   const [preparacao, setPreparacao] = useState(trilha.preparacao_texto || '')
   const [salvandoPreparacao, setSalvandoPreparacao] = useState(false)
@@ -339,21 +340,41 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
     if (!conteudo.trim()) return
     setSalvando(true)
     try {
-      const { error } = await supabase.from('trilha_blocos').insert({
-        trilha_id: trilha.id,
-        tipo,
-        conteudo: tipo === 'texto' ? { texto: conteudo } : { url: conteudo },
-        ordem: blocos.length,
-      })
-      if (error) throw error
+      const blocoEditado = editandoBlocoId ? blocos.find((b) => b.id === editandoBlocoId) : null
+      const conteudoBase = tipo === 'texto' ? { texto: conteudo } : { url: conteudo }
+      // preserva a marca de "introdução" (Aula 0) ao editar, senão ela vira uma aula normal
+      const novoConteudo = blocoEditado && ehIntroducao(blocoEditado) ? { ...conteudoBase, intro: true } : conteudoBase
+
+      if (editandoBlocoId) {
+        const { error } = await supabase.from('trilha_blocos').update({ tipo, conteudo: novoConteudo }).eq('id', editandoBlocoId)
+        if (error) throw error
+      } else {
+        const { error } = await supabase.from('trilha_blocos').insert({
+          trilha_id: trilha.id, tipo, conteudo: novoConteudo, ordem: blocos.length,
+        })
+        if (error) throw error
+      }
       setConteudo('')
+      setEditandoBlocoId(null)
       await carregar()
     } catch (e) {
       console.error(e)
-      setErro('Não foi possível adicionar a aula.')
+      setErro(editandoBlocoId ? 'Não foi possível salvar a edição da aula.' : 'Não foi possível adicionar a aula.')
     } finally {
       setSalvando(false)
     }
+  }
+
+  function iniciarEdicao(b) {
+    setEditandoBlocoId(b.id)
+    setTipo(b.tipo)
+    setConteudo(b.conteudo?.texto || b.conteudo?.url || '')
+  }
+
+  function cancelarEdicao() {
+    setEditandoBlocoId(null)
+    setTipo('texto')
+    setConteudo('')
   }
 
   const temIntro = blocos.some(ehIntroducao)
@@ -383,6 +404,7 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
     try {
       const { error } = await supabase.from('trilha_blocos').delete().eq('id', id)
       if (error) throw error
+      if (editandoBlocoId === id) cancelarEdicao()
       await carregar()
     } catch (e) {
       console.error(e)
@@ -454,7 +476,7 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
               const Info = TIPOS_BLOCO.find((t) => t.valor === b.tipo) || TIPOS_BLOCO[0]
               const Icon = ehIntroducao(b) ? Hand : Info.icon
               return (
-                <div key={b.id} className="rounded-xl bg-card border p-3.5 flex items-center gap-3">
+                <div key={b.id} className={`rounded-xl border p-3.5 flex items-center gap-3 ${editandoBlocoId === b.id ? 'bg-azul/10 border-azul/40' : 'bg-card'}`}>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${ehIntroducao(b) ? 'bg-[#F5C451]/15 text-[#F5C451]' : 'bg-azul/15 text-azul'}`}>
                     <Icon size={14} />
                   </div>
@@ -462,6 +484,9 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
                     <div className="text-xs text-texto/45">{rotuloAula(blocos, i)}{!ehIntroducao(b) && ` · ${Info.rotulo}`}</div>
                     <div className="text-sm text-white/90 truncate">{b.conteudo?.texto || b.conteudo?.url}</div>
                   </div>
+                  <button onClick={() => iniciarEdicao(b)} className="p-1.5 rounded-lg text-texto/40 hover:text-white hover:bg-white/10 transition">
+                    <Pencil size={14} />
+                  </button>
                   <button onClick={() => remover(b.id)} className="p-1.5 rounded-lg text-texto/40 hover:text-red-400 hover:bg-red-400/10 transition">
                     <Trash2 size={14} />
                   </button>
@@ -482,6 +507,12 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
         )}
 
         <form onSubmit={adicionar} className="space-y-3 pt-4 border-t">
+          {editandoBlocoId && (
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-azul font-medium">Editando {rotuloAula(blocos, blocos.findIndex((b) => b.id === editandoBlocoId))}</span>
+              <button type="button" onClick={cancelarEdicao} className="text-texto/50 hover:text-white transition">Cancelar edição</button>
+            </div>
+          )}
           <div className="flex gap-2">
             {TIPOS_BLOCO.map((t) => (
               <button
@@ -511,7 +542,7 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
             className="w-full py-2.5 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {salvando && <Loader2 size={16} className="animate-spin" />}
-            Adicionar aula
+            {editandoBlocoId ? 'Salvar edição' : 'Adicionar aula'}
           </button>
         </form>
 
