@@ -3,12 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import {
-  ArrowLeft, ArrowRight, ArrowUpLeft, Bell, CheckCircle2, FileText, File, Link2,
+  ArrowLeft, ArrowRight, ArrowUpLeft, Bell, CheckCircle2,
   Loader2, PartyPopper, Hand, Lock, Send,
 } from 'lucide-react'
-import { ehIntroducao, rotuloAula, numeroAula, proximoNumeroAula } from '../../lib/blocosAula'
-
-const ICONE_TIPO = { texto: FileText, pdf: File, link: Link2, canva: Link2 }
+import { ehIntroducao, numeroAula, proximoNumeroAula } from '../../lib/blocosAula'
 
 function formatarData(iso) {
   if (!iso) return '—'
@@ -154,7 +152,6 @@ export default function AlunoTrilhaDetalhe() {
   // aulas pra exibir na grade, da mais recente pra mais antiga (revisão)
   const aulasParaGrade = [...trilha.blocos].reverse()
   const proximoNumero = proximoNumeroAula(trilha.blocos)
-  const Icon = selecionado ? (ehIntroducao(selecionado.bloco) ? Hand : (ICONE_TIPO[selecionado.bloco.tipo] || FileText)) : FileText
   const jaFeito = selecionado && progresso.has(selecionado.bloco.id)
 
   const blocosCompletos = trilha.blocos.length > 0 && idxAtual === -1
@@ -185,82 +182,127 @@ export default function AlunoTrilhaDetalhe() {
 
       {erro && <p className="mt-4 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <div>
-          <p className="text-white/80 text-base leading-relaxed max-w-md text-justify">
-            {trilha.descricao || `E aí, turma! Chegou a hora de mergulhar em ${trilha.titulo}. Percorra as aulas abaixo no seu ritmo — qualquer dúvida, chama seu professor.`}
-          </p>
+      {!selecionado && (
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div>
+            <p className="text-white/80 text-base leading-relaxed max-w-md text-justify">
+              {trilha.descricao || `E aí, turma! Chegou a hora de mergulhar em ${trilha.titulo}. Percorra as aulas abaixo no seu ritmo — qualquer dúvida, chama seu professor.`}
+            </p>
 
-          {projeto && (
-            <>
-              <h2 className="mt-10 text-4xl sm:text-5xl font-bold text-white leading-[1.05]">Data do<br />projeto:</h2>
-              <div className="mt-5 w-64 h-28 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center px-5">
-                <span className={`text-2xl font-bold text-white ${!projeto.revelado ? 'blur-md select-none' : ''}`}>
-                  {formatarData(projeto.prazo)}
-                </span>
-              </div>
-            </>
-          )}
-        </div>
-
-        <div>
-          {trilha.preparacao_texto && (
-            <div className="mb-5">
-              <button
-                onClick={() => setMostrarPrep((v) => !v)}
-                className="w-full h-40 sm:h-44 rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6 flex flex-col justify-between hover:bg-white/[0.06] transition text-left"
-              >
-                <div className="flex justify-end">
-                  <ArrowRight size={56} strokeWidth={2.5} className="text-white" />
+            {projeto && (
+              <>
+                <h2 className="mt-10 text-4xl sm:text-5xl font-bold text-white leading-[1.05]">Data do<br />projeto:</h2>
+                <div className="mt-5 w-64 h-28 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center px-5">
+                  <span className={`text-2xl font-bold text-white ${!projeto.revelado ? 'blur-md select-none' : ''}`}>
+                    {formatarData(projeto.prazo)}
+                  </span>
                 </div>
-                <div className="text-right text-sm text-texto/60">Acesse: Preparação pra aula {proximoNumero}</div>
-              </button>
-              {mostrarPrep && (
-                <div className="mt-2 rounded-2xl bg-white/[0.02] border border-white/10 p-4 text-sm text-texto/70 leading-relaxed whitespace-pre-wrap">
-                  {trilha.preparacao_texto}
-                </div>
-              )}
-            </div>
-          )}
+              </>
+            )}
+          </div>
 
-          {trilha.blocos.length === 0 ? (
-            <p className="text-sm text-texto/45">Essa trilha ainda não tem aulas publicadas.</p>
-          ) : (
-            <div className="grid grid-cols-3 gap-4">
-              {aulasVisiveis.map((b) => {
-                const i = trilha.blocos.indexOf(b)
-                const feito = progresso.has(b.id)
-                const ativa = selecionado?.bloco.id === b.id
-                return (
-                  <button
-                    key={b.id}
-                    onClick={() => setSelecionado({ bloco: b, i })}
-                    className={`relative rounded-2xl border p-4 h-44 flex flex-col justify-between text-left transition ${
-                      ativa ? 'bg-azul/15 border-azul/40' : 'bg-white/[0.04] border-white/10 hover:bg-white/[0.06]'
-                    }`}
-                  >
-                    {feito && <CheckCircle2 size={13} className="absolute top-2.5 right-2.5 text-[#3FD08A]" />}
-                    <ArrowUpLeft size={18} className="text-white/40" />
-                    {ehIntroducao(b) ? (
-                      <Hand size={40} className="text-[#F5C451]" />
-                    ) : (
-                      <span className="text-6xl sm:text-7xl font-bold text-white leading-none">{numeroAula(trilha.blocos, i)}</span>
-                    )}
-                  </button>
-                )
-              })}
-              {temMais && (
+          <div>
+            {trilha.preparacao_texto && (
+              <div className="mb-5">
                 <button
-                  onClick={() => setMostrarTodas(true)}
-                  className="relative rounded-2xl border p-4 h-44 flex flex-col justify-end bg-white/[0.04] border-white/10 hover:bg-white/[0.06] transition text-left"
+                  onClick={() => setMostrarPrep((v) => !v)}
+                  className="w-full h-40 sm:h-44 rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6 flex flex-col justify-between hover:bg-white/[0.06] transition text-left"
                 >
-                  <span className="text-6xl sm:text-7xl font-bold text-white leading-none">…</span>
+                  <div className="flex justify-end">
+                    <ArrowRight size={56} strokeWidth={2.5} className="text-white" />
+                  </div>
+                  <div className="text-right text-sm text-texto/60">Acesse: Preparação pra aula {proximoNumero}</div>
                 </button>
-              )}
-            </div>
-          )}
+                {mostrarPrep && (
+                  <div className="mt-2 rounded-2xl bg-white/[0.02] border border-white/10 p-4 text-sm text-texto/70 leading-relaxed whitespace-pre-wrap">
+                    {trilha.preparacao_texto}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {trilha.blocos.length === 0 ? (
+              <p className="text-sm text-texto/45">Essa trilha ainda não tem aulas publicadas.</p>
+            ) : (
+              <div className="grid grid-cols-3 gap-4">
+                {aulasVisiveis.map((b) => {
+                  const i = trilha.blocos.indexOf(b)
+                  const feito = progresso.has(b.id)
+                  return (
+                    <button
+                      key={b.id}
+                      onClick={() => setSelecionado({ bloco: b, i })}
+                      className="relative rounded-2xl border p-4 h-44 flex flex-col justify-between text-left transition bg-white/[0.04] border-white/10 hover:bg-white/[0.06]"
+                    >
+                      {feito && <CheckCircle2 size={13} className="absolute top-2.5 right-2.5 text-[#3FD08A]" />}
+                      <ArrowUpLeft size={18} className="text-white/40" />
+                      {ehIntroducao(b) ? (
+                        <Hand size={40} className="text-[#F5C451]" />
+                      ) : (
+                        <span className="text-6xl sm:text-7xl font-bold text-white leading-none">{numeroAula(trilha.blocos, i)}</span>
+                      )}
+                    </button>
+                  )
+                })}
+                {temMais && (
+                  <button
+                    onClick={() => setMostrarTodas(true)}
+                    className="relative rounded-2xl border p-4 h-44 flex flex-col justify-end bg-white/[0.04] border-white/10 hover:bg-white/[0.06] transition text-left"
+                  >
+                    <span className="text-6xl sm:text-7xl font-bold text-white leading-none">…</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {selecionado && (
+        <div className="mt-8 flex items-start gap-6 flex-wrap">
+          <button
+            onClick={() => setSelecionado(null)}
+            title="Voltar pra todas as aulas"
+            className="shrink-0 relative rounded-2xl border p-4 w-52 h-44 flex flex-col justify-between text-left transition bg-white/[0.04] border-white/10 hover:bg-white/[0.06]"
+          >
+            {jaFeito && <CheckCircle2 size={13} className="absolute top-2.5 right-2.5 text-[#3FD08A]" />}
+            <ArrowUpLeft size={18} className="text-white/40" />
+            {ehIntroducao(selecionado.bloco) ? (
+              <Hand size={40} className="text-[#F5C451]" />
+            ) : (
+              <span className="text-6xl sm:text-7xl font-bold text-white leading-none">{numeroAula(trilha.blocos, selecionado.i)}</span>
+            )}
+          </button>
+
+          <div className="flex-1 min-w-[260px]">
+            <h2 className="text-4xl sm:text-5xl font-bold text-white leading-[1.05]">
+              {ehIntroducao(selecionado.bloco) ? 'Introdução:' : 'Título da aula:'}
+            </h2>
+            {selecionado.bloco.tipo === 'texto' ? (
+              <p className="mt-4 text-lg text-white/85 leading-relaxed whitespace-pre-wrap">{selecionado.bloco.conteudo?.texto}</p>
+            ) : (
+              <a href={selecionado.bloco.conteudo?.url} target="_blank" rel="noopener" className="mt-4 inline-block text-lg text-azul hover:underline break-all">
+                {selecionado.bloco.conteudo?.url}
+              </a>
+            )}
+
+            {!jaFeito && (
+              <button
+                onClick={concluirEContinuar}
+                disabled={salvando}
+                className="mt-6 flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/40 disabled:opacity-60"
+              >
+                {salvando ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={16} />}
+                {salvando
+                  ? 'Salvando…'
+                  : idxAtual !== trilha.blocos.length - 1
+                    ? 'Concluir e continuar'
+                    : projetoPendente ? 'Concluir última aula' : 'Concluir trilha'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {tudoConcluido && !selecionado ? (
         <div className="mt-8 rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 py-10 text-center">
@@ -297,35 +339,6 @@ export default function AlunoTrilhaDetalhe() {
             {salvando ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
             Concluir trilha
           </button>
-        </div>
-      ) : selecionado ? (
-        <div className="mt-6 rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
-          <div className="flex items-center gap-2 text-xs text-texto/45 mb-3">
-            <Icon size={13} /> {rotuloAula(trilha.blocos, selecionado.i)}
-            {jaFeito && <span className="ml-auto flex items-center gap-1 text-[#3FD08A]"><CheckCircle2 size={13} /> Concluído</span>}
-          </div>
-          {selecionado.bloco.tipo === 'texto' ? (
-            <p className="text-sm text-white/90 leading-relaxed whitespace-pre-wrap">{selecionado.bloco.conteudo?.texto}</p>
-          ) : (
-            <a href={selecionado.bloco.conteudo?.url} target="_blank" rel="noopener" className="text-sm text-azul hover:underline break-all">
-              {selecionado.bloco.conteudo?.url}
-            </a>
-          )}
-
-          {!jaFeito && (
-            <button
-              onClick={concluirEContinuar}
-              disabled={salvando}
-              className="w-full mt-5 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/40 disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {salvando ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={16} />}
-              {salvando
-                ? 'Salvando…'
-                : idxAtual !== trilha.blocos.length - 1
-                  ? 'Concluir e continuar'
-                  : projetoPendente ? 'Concluir última aula' : 'Concluir trilha'}
-            </button>
-          )}
         </div>
       ) : null}
     </div>
