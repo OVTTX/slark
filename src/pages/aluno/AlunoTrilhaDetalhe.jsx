@@ -13,6 +13,86 @@ function formatarData(iso) {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
 }
 
+const STATUS_ROTULO = { pendente: 'Pendente', entregue: 'Entregue', corrigida: 'Corrigida', atrasada: 'Atrasada' }
+const STATUS_COR = { pendente: '#8892B0', entregue: '#2E5BFF', corrigida: '#3FD08A', atrasada: '#FF6B6B' }
+
+// Card compacto de atividade com formulário de entrega inline. Usado tanto
+// pro projeto final da trilha quanto pras atividades dentro de uma aula.
+function CardAtividade({ atividade, entrega, onEnviar }) {
+  const [texto, setTexto] = useState(entrega?.texto || '')
+  const [arquivoUrl, setArquivoUrl] = useState(entrega?.arquivo_url || '')
+  const [enviando, setEnviando] = useState(false)
+  const [erro, setErro] = useState('')
+
+  const status = entrega?.status || 'pendente'
+  const corrigida = status === 'corrigida'
+
+  async function enviar(e) {
+    e.preventDefault()
+    if (!texto.trim() && !arquivoUrl.trim()) return
+    setEnviando(true)
+    setErro('')
+    try {
+      await onEnviar({ texto: texto || null, arquivo_url: arquivoUrl || null })
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível enviar sua entrega.')
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  return (
+    <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="font-semibold text-white">{atividade.titulo}</div>
+          {atividade.prazo && <div className="text-xs text-texto/45 mt-0.5">Prazo: {formatarData(atividade.prazo)}</div>}
+        </div>
+        <span
+          className="shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+          style={{ background: `${STATUS_COR[status]}22`, color: STATUS_COR[status] }}
+        >
+          {STATUS_ROTULO[status]}
+        </span>
+      </div>
+
+      {atividade.descricao && <p className="text-sm text-texto/60 mt-2 whitespace-pre-wrap">{atividade.descricao}</p>}
+
+      {corrigida ? (
+        <div className="mt-3 rounded-xl bg-[#3FD08A]/10 border border-[#3FD08A]/30 p-3.5">
+          <div className="flex items-center gap-2 text-[#3FD08A] font-semibold text-sm">
+            <CheckCircle2 size={14} /> Corrigida — {Math.round(Number(entrega.nota))}%
+          </div>
+          {entrega.feedback_ia && <p className="text-sm text-white/80 mt-1.5">{entrega.feedback_ia}</p>}
+        </div>
+      ) : (
+        <form onSubmit={enviar} className="mt-3 space-y-2.5">
+          {erro && <p className="text-xs text-red-400">{erro}</p>}
+          <textarea
+            value={texto} onChange={(e) => setTexto(e.target.value)}
+            placeholder="Sua resposta"
+            rows={3}
+            className="w-full px-3.5 py-2.5 rounded-xl bg-card border border-azul/15 text-white text-sm placeholder:text-texto/30 focus:outline-none focus:border-azul transition resize-none"
+          />
+          <input
+            value={arquivoUrl} onChange={(e) => setArquivoUrl(e.target.value)}
+            placeholder="Link do arquivo (opcional)"
+            className="w-full px-3.5 py-2.5 rounded-xl bg-card border border-azul/15 text-white text-sm placeholder:text-texto/30 focus:outline-none focus:border-azul transition"
+          />
+          <button
+            type="submit" disabled={enviando}
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-azul hover:bg-azul-puro text-white text-sm font-semibold transition disabled:opacity-60"
+          >
+            {enviando ? <Loader2 size={15} className="animate-spin" /> : <Send size={13} />}
+            {enviando ? 'Enviando…' : entrega ? 'Reenviar entrega' : 'Enviar entrega'}
+          </button>
+        </form>
+      )}
+    </div>
+  )
+}
+
 export default function AlunoTrilhaDetalhe() {
   const { id } = useParams()
   const { perfil } = useAuth()
@@ -20,7 +100,8 @@ export default function AlunoTrilhaDetalhe() {
 
   const [trilha, setTrilha] = useState(null)
   const [projeto, setProjeto] = useState(null)
-  const [entregaProjeto, setEntregaProjeto] = useState(null)
+  const [atividadesPorBloco, setAtividadesPorBloco] = useState({}) // bloco_id -> atividade
+  const [entregasPorAtividade, setEntregasPorAtividade] = useState({}) // atividade_id -> entrega
   const [alunoId, setAlunoId] = useState(null)
   const [progresso, setProgresso] = useState(new Set())
   const [tudoConcluido, setTudoConcluido] = useState(false)
@@ -49,23 +130,31 @@ export default function AlunoTrilhaDetalhe() {
         const blocos = (trilhaData.trilha_blocos || []).sort((a, b) => a.ordem - b.ordem)
         setTrilha({ ...trilhaData, blocos })
 
-        const { data: projetoData } = await supabase
-          .from('atividades').select('*').eq('trilha_id', id).order('criada_em', { ascending: false }).limit(1)
-        const projetoAtual = projetoData?.[0] || null
+        const { data: atividadesData } = await supabase
+          .from('atividades').select('*').eq('trilha_id', id).order('criada_em', { ascending: false })
+        const todasAtividades = atividadesData || []
+        const projetoAtual = todasAtividades.find((a) => !a.bloco_id) || null
         setProjeto(projetoAtual)
 
+        const porBloco = {}
+        for (const a of todasAtividades) {
+          if (a.bloco_id && !porBloco[a.bloco_id]) porBloco[a.bloco_id] = a
+        }
+        setAtividadesPorBloco(porBloco)
+
         if (alunoData?.id) {
-          const [{ data: progressoData }, { data: conclusaoData }, { data: entregaData }] = await Promise.all([
+          const atividadeIds = todasAtividades.map((a) => a.id)
+          const [{ data: progressoData }, { data: conclusaoData }, { data: entregasData }] = await Promise.all([
             supabase.from('trilha_bloco_progresso').select('bloco_id').eq('trilha_id', id).eq('aluno_id', alunoData.id),
             supabase.from('trilha_conclusoes').select('id').eq('trilha_id', id).eq('aluno_id', alunoData.id).maybeSingle(),
-            projetoAtual
-              ? supabase.from('entregas').select('id, status').eq('atividade_id', projetoAtual.id).eq('aluno_id', alunoData.id).maybeSingle()
-              : Promise.resolve({ data: null }),
+            atividadeIds.length
+              ? supabase.from('entregas').select('*').eq('aluno_id', alunoData.id).in('atividade_id', atividadeIds)
+              : Promise.resolve({ data: [] }),
           ])
           const feitos = new Set((progressoData || []).map((p) => p.bloco_id))
           setProgresso(feitos)
           setTudoConcluido(!!conclusaoData)
-          setEntregaProjeto(entregaData || null)
+          setEntregasPorAtividade(Object.fromEntries((entregasData || []).map((e) => [e.atividade_id, e])))
         }
       } catch (e) {
         console.error(e)
@@ -77,10 +166,28 @@ export default function AlunoTrilhaDetalhe() {
     carregar()
   }, [id, perfil?.id])
 
+  const entregaProjeto = projeto ? entregasPorAtividade[projeto.id] : null
   // Só considera a entrega válida se realmente foi enviada (não basta ter uma
   // linha "pendente" criada só por abrir o formulário).
   const entregaValida = entregaProjeto && ['entregue', 'corrigida'].includes(entregaProjeto.status)
   const projetoPendente = !!projeto && (!projeto.revelado || !entregaValida)
+
+  async function enviarEntrega(atividade, dados) {
+    const entregaAtual = entregasPorAtividade[atividade.id]
+    if (entregaAtual) {
+      const { error } = await supabase.from('entregas').update({
+        ...dados, status: 'entregue', entregue_em: new Date().toISOString(),
+      }).eq('id', entregaAtual.id)
+      if (error) throw error
+    } else {
+      const { error } = await supabase.from('entregas').insert({
+        atividade_id: atividade.id, aluno_id: alunoId, ...dados, status: 'entregue', entregue_em: new Date().toISOString(),
+      })
+      if (error) throw error
+    }
+    const { data } = await supabase.from('entregas').select('*').eq('atividade_id', atividade.id).eq('aluno_id', alunoId).maybeSingle()
+    setEntregasPorAtividade((prev) => ({ ...prev, [atividade.id]: data }))
+  }
 
   async function marcarTrilhaConcluida() {
     if (!alunoId || !trilha || projetoPendente) return
@@ -150,6 +257,7 @@ export default function AlunoTrilhaDetalhe() {
   const aulasParaGrade = [...trilha.blocos].reverse()
   const proximoNumero = proximoNumeroAula(trilha.blocos)
   const jaFeito = selecionado && progresso.has(selecionado.bloco.id)
+  const atividadeDaAula = selecionado ? atividadesPorBloco[selecionado.bloco.id] : null
 
   const blocosCompletos = trilha.blocos.length > 0 && idxAtual === -1
 
@@ -194,6 +302,12 @@ export default function AlunoTrilhaDetalhe() {
                     {formatarData(projeto.prazo)}
                   </span>
                 </div>
+
+                {projeto.revelado && (
+                  <div className="mt-5 max-w-md">
+                    <CardAtividade atividade={projeto} entrega={entregaProjeto} onEnviar={(dados) => enviarEntrega(projeto, dados)} />
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -283,6 +397,16 @@ export default function AlunoTrilhaDetalhe() {
               </a>
             )}
 
+            {atividadeDaAula && (
+              <div className="mt-6 max-w-md">
+                <CardAtividade
+                  atividade={atividadeDaAula}
+                  entrega={entregasPorAtividade[atividadeDaAula.id]}
+                  onEnviar={(dados) => enviarEntrega(atividadeDaAula, dados)}
+                />
+              </div>
+            )}
+
             {!jaFeito && (
               <button
                 onClick={concluirEContinuar}
@@ -314,16 +438,8 @@ export default function AlunoTrilhaDetalhe() {
           <p className="mt-1 text-sm text-texto/60 max-w-md mx-auto leading-relaxed">
             {!projeto.revelado
               ? 'Falta seu professor revelar o projeto dessa trilha pra você poder concluir.'
-              : 'Falta entregar o projeto dessa trilha pra você poder concluir.'}
+              : 'Falta entregar o projeto dessa trilha — o formulário está ali em cima, na seção "Data do projeto".'}
           </p>
-          {projeto.revelado && (
-            <button
-              onClick={() => navigate('/aluno/atividades')}
-              className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition"
-            >
-              <Send size={15} /> Ir pra Atividades
-            </button>
-          )}
         </div>
       ) : blocosCompletos && !selecionado ? (
         <div className="mt-8 rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-8 text-center">

@@ -54,7 +54,6 @@ const MENUS = {
     { to: '/aluno', label: 'Meu Painel', icon: LayoutGrid, end: true },
     { to: '/aluno/boletim', label: 'Boletim', icon: ClipboardList },
     { to: '/aluno/competencias', label: 'Mapa de Competências', icon: Target },
-    { to: '/aluno/atividades', label: 'Atividades', icon: BarChart3 },
     { to: '/aluno/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/aluno/time', label: 'Meu Time', icon: UsersRound },
     { to: '/aluno/chat', label: 'Chat', icon: Eye },

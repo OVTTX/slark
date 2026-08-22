@@ -605,6 +605,8 @@ function Projetos() {
   const [titulo, setTitulo] = useState('')
   const [salaId, setSalaId] = useState('')
   const [trilhaId, setTrilhaId] = useState('')
+  const [blocoId, setBlocoId] = useState('')
+  const [blocosDaTrilha, setBlocosDaTrilha] = useState([])
   const [descricao, setDescricao] = useState('')
   const [prazo, setPrazo] = useState('')
   const [salvando, setSalvando] = useState(false)
@@ -663,8 +665,21 @@ function Projetos() {
   }
 
   function abrirNovo() {
-    setTitulo(''); setSalaId(salas[0]?.id || ''); setTrilhaId(''); setDescricao(''); setPrazo('')
+    setTitulo(''); setSalaId(salas[0]?.id || ''); setTrilhaId(''); setBlocoId(''); setBlocosDaTrilha([]); setDescricao(''); setPrazo('')
     setModalNovo(true)
+  }
+
+  async function selecionarTrilha(novoTrilhaId) {
+    setTrilhaId(novoTrilhaId)
+    setBlocoId('')
+    if (!novoTrilhaId) { setBlocosDaTrilha([]); return }
+    try {
+      const { data } = await supabase.from('trilha_blocos').select('*').eq('trilha_id', novoTrilhaId).order('ordem')
+      setBlocosDaTrilha(data || [])
+    } catch (e) {
+      console.error(e)
+      setBlocosDaTrilha([])
+    }
   }
 
   async function criarProjeto(e) {
@@ -672,7 +687,8 @@ function Projetos() {
     setSalvando(true)
     try {
       const { error } = await supabase.from('atividades').insert({
-        titulo, sala_id: salaId, trilha_id: trilhaId || null, professor_id: perfil.id, descricao: descricao || null, prazo: prazo || null,
+        titulo, sala_id: salaId, trilha_id: trilhaId || null, bloco_id: blocoId || null,
+        professor_id: perfil.id, descricao: descricao || null, prazo: prazo || null,
       })
       if (error) throw error
       setModalNovo(false)
@@ -756,7 +772,8 @@ function Projetos() {
                 </div>
                 <div className={`text-xs mt-1 flex items-center gap-1.5 ${projetoAtivo?.id === a.id ? 'text-white/70' : 'text-texto/45'}`}>
                   {a.pendentes} para corrigir · {a.total} entregas
-                  {a.trilha_id && (a.revelado ? <Unlock size={11} /> : <Lock size={11} />)}
+                  {a.bloco_id && <span className={`text-[10px] px-1.5 py-0.5 rounded ${projetoAtivo?.id === a.id ? 'bg-white/20' : 'bg-azul/15 text-azul'}`}>Dentro de uma aula</span>}
+                  {a.trilha_id && !a.bloco_id && (a.revelado ? <Unlock size={11} /> : <Lock size={11} />)}
                 </div>
               </button>
             ))}
@@ -769,7 +786,7 @@ function Projetos() {
               </div>
             ) : (
               <>
-                {projetoAtivo.trilha_id && (
+                {projetoAtivo.trilha_id && !projetoAtivo.bloco_id && (
                   <div className="mb-4 rounded-2xl bg-card border p-4 flex items-center justify-between gap-3 flex-wrap">
                     <div className="flex items-center gap-2 text-sm text-texto/70">
                       {projetoAtivo.revelado ? <Unlock size={14} className="text-[#3FD08A]" /> : <Lock size={14} className="text-texto/50" />}
@@ -857,12 +874,25 @@ function Projetos() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Vincular a uma trilha (opcional)</label>
-                <select value={trilhaId} onChange={(e) => setTrilhaId(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition">
+                <select value={trilhaId} onChange={(e) => selecionarTrilha(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition">
                   <option value="">Nenhuma</option>
                   {trilhas.map((t) => <option key={t.id} value={t.id}>{t.titulo}</option>)}
                 </select>
-                {trilhaId && <p className="text-xs text-texto/45 mt-1.5">O prazo abaixo aparece pro aluno na tela da trilha — embaçado até você revelar.</p>}
+                {trilhaId && !blocoId && <p className="text-xs text-texto/45 mt-1.5">Sem aula vinculada: vira o projeto final da trilha (prazo embaçado até você revelar, gera a conclusão da trilha).</p>}
               </div>
+
+              {trilhaId && (
+                <div>
+                  <label className="block text-sm font-medium text-texto/70 mb-1.5">Vincular a uma aula específica (opcional)</label>
+                  <select value={blocoId} onChange={(e) => setBlocoId(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition">
+                    <option value="">Nenhuma (projeto final da trilha)</option>
+                    {blocosDaTrilha.map((b, i) => (
+                      <option key={b.id} value={b.id}>{rotuloAula(blocosDaTrilha, i)}</option>
+                    ))}
+                  </select>
+                  {blocoId && <p className="text-xs text-texto/45 mt-1.5">Aparece direto dentro dessa aula pro aluno, com formulário de entrega.</p>}
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Descrição (opcional)</label>
                 <textarea value={descricao} onChange={(e) => setDescricao(e.target.value)} rows={3} className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition resize-none" />
