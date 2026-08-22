@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import {
   ArrowLeft, ArrowRight, ArrowUpLeft, Bell, CheckCircle2, FileText, File, Link2,
-  Loader2, PartyPopper, Hand,
+  Loader2, PartyPopper, Hand, Lock, Send,
 } from 'lucide-react'
 import { ehIntroducao, rotuloAula, numeroAula, proximoNumeroAula } from '../../lib/blocosAula'
 
@@ -22,6 +22,7 @@ export default function AlunoTrilhaDetalhe() {
 
   const [trilha, setTrilha] = useState(null)
   const [projeto, setProjeto] = useState(null)
+  const [entregaProjeto, setEntregaProjeto] = useState(null)
   const [alunoId, setAlunoId] = useState(null)
   const [progresso, setProgresso] = useState(new Set())
   const [tudoConcluido, setTudoConcluido] = useState(false)
@@ -52,16 +53,21 @@ export default function AlunoTrilhaDetalhe() {
 
         const { data: projetoData } = await supabase
           .from('atividades').select('*').eq('trilha_id', id).order('criada_em', { ascending: false }).limit(1)
-        setProjeto(projetoData?.[0] || null)
+        const projetoAtual = projetoData?.[0] || null
+        setProjeto(projetoAtual)
 
         if (alunoData?.id) {
-          const [{ data: progressoData }, { data: conclusaoData }] = await Promise.all([
+          const [{ data: progressoData }, { data: conclusaoData }, { data: entregaData }] = await Promise.all([
             supabase.from('trilha_bloco_progresso').select('bloco_id').eq('trilha_id', id).eq('aluno_id', alunoData.id),
             supabase.from('trilha_conclusoes').select('id').eq('trilha_id', id).eq('aluno_id', alunoData.id).maybeSingle(),
+            projetoAtual
+              ? supabase.from('entregas').select('id, status').eq('atividade_id', projetoAtual.id).eq('aluno_id', alunoData.id).maybeSingle()
+              : Promise.resolve({ data: null }),
           ])
           const feitos = new Set((progressoData || []).map((p) => p.bloco_id))
           setProgresso(feitos)
           setTudoConcluido(!!conclusaoData)
+          setEntregaProjeto(entregaData || null)
 
           const idxAtual = blocos.findIndex((b) => !feitos.has(b.id))
           if (idxAtual !== -1) setSelecionado({ bloco: blocos[idxAtual], i: idxAtual })
@@ -75,6 +81,27 @@ export default function AlunoTrilhaDetalhe() {
     }
     carregar()
   }, [id, perfil?.id])
+
+  // Só considera a entrega válida se realmente foi enviada (não basta ter uma
+  // linha "pendente" criada só por abrir o formulário).
+  const entregaValida = entregaProjeto && ['entregue', 'corrigida'].includes(entregaProjeto.status)
+  const projetoPendente = !!projeto && (!projeto.revelado || !entregaValida)
+
+  async function marcarTrilhaConcluida() {
+    if (!alunoId || !trilha || projetoPendente) return
+    setSalvando(true)
+    setErro('')
+    try {
+      const { error } = await supabase.from('trilha_conclusoes').insert({ trilha_id: trilha.id, aluno_id: alunoId })
+      if (error && error.code !== '23505') throw error
+      setTudoConcluido(true)
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível concluir a trilha agora.')
+    } finally {
+      setSalvando(false)
+    }
+  }
 
   async function concluirEContinuar() {
     if (!selecionado || !alunoId || !trilha) return
@@ -91,9 +118,13 @@ export default function AlunoTrilhaDetalhe() {
 
       const proximoIdx = trilha.blocos.findIndex((b) => !novoProgresso.has(b.id))
       if (proximoIdx === -1) {
-        const { error: eConc } = await supabase.from('trilha_conclusoes').insert({ trilha_id: trilha.id, aluno_id: alunoId })
-        if (eConc && eConc.code !== '23505') throw eConc
-        setTudoConcluido(true)
+        // Todas as aulas feitas. Só marca a trilha como concluída de verdade
+        // se não houver projeto pendente (revelado + entregue).
+        if (!projetoPendente) {
+          const { error: eConc } = await supabase.from('trilha_conclusoes').insert({ trilha_id: trilha.id, aluno_id: alunoId })
+          if (eConc && eConc.code !== '23505') throw eConc
+          setTudoConcluido(true)
+        }
         setSelecionado(null)
       } else {
         setSelecionado({ bloco: trilha.blocos[proximoIdx], i: proximoIdx })
@@ -125,6 +156,8 @@ export default function AlunoTrilhaDetalhe() {
   const proximoNumero = proximoNumeroAula(trilha.blocos)
   const Icon = selecionado ? (ehIntroducao(selecionado.bloco) ? Hand : (ICONE_TIPO[selecionado.bloco.tipo] || FileText)) : FileText
   const jaFeito = selecionado && progresso.has(selecionado.bloco.id)
+
+  const blocosCompletos = trilha.blocos.length > 0 && idxAtual === -1
 
   const LIMITE_GRADE = 5
   const aulasVisiveis = mostrarTodas ? aulasParaGrade : aulasParaGrade.slice(0, LIMITE_GRADE)
@@ -235,6 +268,36 @@ export default function AlunoTrilhaDetalhe() {
           <p className="mt-4 text-white font-semibold">Trilha concluída!</p>
           <p className="mt-1 text-sm text-texto/60">Você passou por todas as aulas dessa trilha.</p>
         </div>
+      ) : blocosCompletos && !selecionado && projetoPendente ? (
+        <div className="mt-8 rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-8 text-center">
+          <Lock className="mx-auto text-[#F5C451]" size={36} />
+          <p className="mt-4 text-white font-semibold">Você terminou todas as aulas!</p>
+          <p className="mt-1 text-sm text-texto/60 max-w-md mx-auto leading-relaxed">
+            {!projeto.revelado
+              ? 'Falta seu professor revelar o projeto dessa trilha pra você poder concluir.'
+              : 'Falta entregar o projeto dessa trilha pra você poder concluir.'}
+          </p>
+          {projeto.revelado && (
+            <button
+              onClick={() => navigate('/aluno/atividades')}
+              className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition"
+            >
+              <Send size={15} /> Ir pra Atividades
+            </button>
+          )}
+        </div>
+      ) : blocosCompletos && !selecionado ? (
+        <div className="mt-8 rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-8 text-center">
+          <PartyPopper className="mx-auto text-[#3FD08A]" size={36} />
+          <p className="mt-4 text-white font-semibold">Você terminou todas as aulas e já entregou o projeto!</p>
+          <button
+            onClick={marcarTrilhaConcluida} disabled={salvando}
+            className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition disabled:opacity-60"
+          >
+            {salvando ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+            Concluir trilha
+          </button>
+        </div>
       ) : selecionado ? (
         <div className="mt-6 rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
           <div className="flex items-center gap-2 text-xs text-texto/45 mb-3">
@@ -256,7 +319,11 @@ export default function AlunoTrilhaDetalhe() {
               className="w-full mt-5 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/40 disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {salvando ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={16} />}
-              {salvando ? 'Salvando…' : idxAtual === trilha.blocos.length - 1 ? 'Concluir trilha' : 'Concluir e continuar'}
+              {salvando
+                ? 'Salvando…'
+                : idxAtual !== trilha.blocos.length - 1
+                  ? 'Concluir e continuar'
+                  : projetoPendente ? 'Concluir última aula' : 'Concluir trilha'}
             </button>
           )}
         </div>
