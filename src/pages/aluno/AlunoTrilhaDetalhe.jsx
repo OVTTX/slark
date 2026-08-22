@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import {
-  ArrowLeft, ArrowRight, Bell, Lock, CheckCircle2, FileText, File, Link2,
-  Loader2, PartyPopper, Hand, CalendarClock,
+  ArrowLeft, ArrowRight, ArrowUpLeft, Bell, CheckCircle2, FileText, File, Link2,
+  Loader2, PartyPopper, Hand,
 } from 'lucide-react'
 import { ehIntroducao, rotuloAula, numeroAula, proximoNumeroAula } from '../../lib/blocosAula'
 
@@ -27,6 +27,7 @@ export default function AlunoTrilhaDetalhe() {
   const [tudoConcluido, setTudoConcluido] = useState(false)
   const [selecionado, setSelecionado] = useState(null) // { bloco, i }
   const [mostrarPrep, setMostrarPrep] = useState(false)
+  const [mostrarTodas, setMostrarTodas] = useState(false)
   const [carregando, setCarregando] = useState(true)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
@@ -125,6 +126,10 @@ export default function AlunoTrilhaDetalhe() {
   const Icon = selecionado ? (ehIntroducao(selecionado.bloco) ? Hand : (ICONE_TIPO[selecionado.bloco.tipo] || FileText)) : FileText
   const jaFeito = selecionado && progresso.has(selecionado.bloco.id)
 
+  const LIMITE_GRADE = 5
+  const aulasVisiveis = mostrarTodas ? aulasParaGrade : aulasParaGrade.slice(0, LIMITE_GRADE)
+  const temMais = !mostrarTodas && aulasParaGrade.length > LIMITE_GRADE
+
   return (
     <div>
       <button onClick={() => navigate('/aluno/trilhas')} className="flex items-center gap-1.5 text-sm text-texto/60 hover:text-white transition mb-4">
@@ -133,7 +138,7 @@ export default function AlunoTrilhaDetalhe() {
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">{trilha.titulo}</h1>
+          <h1 className="text-5xl sm:text-6xl font-bold text-white tracking-tight">{trilha.titulo}</h1>
           {trilha.materias?.nome && (
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-azul/15 text-azul border border-azul/20 uppercase tracking-wide">
               {trilha.materias.nome}
@@ -144,46 +149,38 @@ export default function AlunoTrilhaDetalhe() {
           <Bell size={17} />
         </button>
       </div>
-      <p className="mt-3 text-sm text-texto/60 max-w-2xl leading-relaxed">
-        {trilha.descricao || `E aí, turma! Chegou a hora de mergulhar em ${trilha.titulo}. Percorra as aulas abaixo no seu ritmo — qualquer dúvida, chama seu professor.`}
-      </p>
 
       {erro && <p className="mt-4 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {projeto && (
-          <div>
-            <h2 className="text-lg font-bold text-white mb-3">Data do projeto</h2>
-            <div className="relative rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6 overflow-hidden min-h-[132px]">
-              {!projeto.revelado && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 backdrop-blur-xl bg-black/40">
-                  <Lock size={18} className="text-texto/50" />
-                  <span className="text-xs text-texto/50 text-center px-4">Seu professor ainda não revelou os detalhes desse projeto.</span>
-                </div>
-              )}
-              <div className={!projeto.revelado ? 'opacity-0 select-none' : ''}>
-                <div className="flex items-center gap-1.5 text-xs text-texto/50">
-                  <CalendarClock size={13} /> {projeto.titulo}
-                </div>
-                <div className="mt-2 text-2xl font-bold text-white">{formatarData(projeto.prazo)}</div>
-                {projeto.descricao && <p className="mt-2 text-sm text-texto/60 leading-relaxed">{projeto.descricao}</p>}
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div>
+          <p className="text-white/80 text-base leading-relaxed max-w-md text-justify">
+            {trilha.descricao || `E aí, turma! Chegou a hora de mergulhar em ${trilha.titulo}. Percorra as aulas abaixo no seu ritmo — qualquer dúvida, chama seu professor.`}
+          </p>
 
-        <div className={projeto ? '' : 'lg:col-span-2'}>
+          {projeto && (
+            <>
+              <h2 className="mt-10 text-4xl sm:text-5xl font-bold text-white leading-[1.05]">Data do<br />projeto:</h2>
+              <div className="mt-5 w-64 h-28 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center px-5">
+                <span className={`text-2xl font-bold text-white ${!projeto.revelado ? 'blur-md select-none' : ''}`}>
+                  {formatarData(projeto.prazo)}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div>
           {trilha.preparacao_texto && (
             <div className="mb-5">
               <button
                 onClick={() => setMostrarPrep((v) => !v)}
-                className="w-full text-left rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-5 flex items-center justify-between gap-3 hover:bg-white/[0.06] transition"
+                className="w-full h-40 sm:h-44 rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6 flex flex-col justify-between hover:bg-white/[0.06] transition text-left"
               >
-                <div>
-                  <div className="text-[11px] font-semibold tracking-wide uppercase text-texto/45">Preparação · não obrigatório</div>
-                  <div className="text-white font-semibold mt-0.5">Se prepare pra Aula {proximoNumero}</div>
+                <div className="flex justify-end">
+                  <ArrowRight size={56} strokeWidth={2.5} className="text-white" />
                 </div>
-                <ArrowRight size={16} className={`shrink-0 text-texto/50 transition-transform ${mostrarPrep ? 'rotate-90' : ''}`} />
+                <div className="text-right text-sm text-texto/60">Acesse: Preparação pra aula {proximoNumero}</div>
               </button>
               {mostrarPrep && (
                 <div className="mt-2 rounded-2xl bg-white/[0.02] border border-white/10 p-4 text-sm text-texto/70 leading-relaxed whitespace-pre-wrap">
@@ -193,12 +190,11 @@ export default function AlunoTrilhaDetalhe() {
             </div>
           )}
 
-          <h2 className="text-lg font-bold text-white mb-3">Aulas</h2>
           {trilha.blocos.length === 0 ? (
             <p className="text-sm text-texto/45">Essa trilha ainda não tem aulas publicadas.</p>
           ) : (
-            <div className="grid grid-cols-3 gap-3">
-              {aulasParaGrade.map((b) => {
+            <div className="grid grid-cols-3 gap-4">
+              {aulasVisiveis.map((b) => {
                 const i = trilha.blocos.indexOf(b)
                 const feito = progresso.has(b.id)
                 const ativa = selecionado?.bloco.id === b.id
@@ -206,20 +202,28 @@ export default function AlunoTrilhaDetalhe() {
                   <button
                     key={b.id}
                     onClick={() => setSelecionado({ bloco: b, i })}
-                    className={`relative rounded-2xl border p-4 text-left transition ${
+                    className={`relative rounded-2xl border p-4 h-44 flex flex-col justify-between text-left transition ${
                       ativa ? 'bg-azul/15 border-azul/40' : 'bg-white/[0.04] border-white/10 hover:bg-white/[0.06]'
                     }`}
                   >
                     {feito && <CheckCircle2 size={13} className="absolute top-2.5 right-2.5 text-[#3FD08A]" />}
+                    <ArrowUpLeft size={18} className="text-white/40" />
                     {ehIntroducao(b) ? (
-                      <Hand size={20} className="text-[#F5C451]" />
+                      <Hand size={40} className="text-[#F5C451]" />
                     ) : (
-                      <div className="text-2xl font-bold text-white">{numeroAula(trilha.blocos, i)}</div>
+                      <span className="text-6xl sm:text-7xl font-bold text-white leading-none">{numeroAula(trilha.blocos, i)}</span>
                     )}
-                    <div className="mt-1 text-[11px] text-texto/45 truncate">{rotuloAula(trilha.blocos, i)}</div>
                   </button>
                 )
               })}
+              {temMais && (
+                <button
+                  onClick={() => setMostrarTodas(true)}
+                  className="relative rounded-2xl border p-4 h-44 flex flex-col justify-end bg-white/[0.04] border-white/10 hover:bg-white/[0.06] transition text-left"
+                >
+                  <span className="text-6xl sm:text-7xl font-bold text-white leading-none">…</span>
+                </button>
+              )}
             </div>
           )}
         </div>
