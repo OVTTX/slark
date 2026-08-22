@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import {
   BookOpen, Plus, X, Loader2, FileText, Link2, File, Trash2, CheckCircle2, Eye, EyeOff,
-  FolderKanban, Save, Hand, Megaphone, Lock, Unlock,
+  FolderKanban, Save, Hand, Megaphone, Lock, Unlock, Pencil, Sparkles,
 } from 'lucide-react'
 import { ehIntroducao, rotuloAula, proximoNumeroAula, TEMPLATE_INTRODUCAO } from '../../lib/blocosAula'
 
@@ -52,6 +52,7 @@ function TrilhasLista() {
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [modalNova, setModalNova] = useState(false)
+  const [editandoId, setEditandoId] = useState(null)
   const [form, setForm] = useState(FORM_VAZIO)
   const [salvando, setSalvando] = useState(false)
   const [trilhaAberta, setTrilhaAberta] = useState(null) // trilha sendo gerenciada (blocos)
@@ -97,29 +98,46 @@ function TrilhasLista() {
   useEffect(() => { carregar() }, [perfil?.id])
 
   function abrirNova() {
+    setEditandoId(null)
     setForm({ ...FORM_VAZIO, sala_id: salas[0]?.id || '' })
     setModalNova(true)
   }
 
-  async function criarTrilha(e) {
+  function abrirEdicao(t) {
+    setEditandoId(t.id)
+    setForm({
+      titulo: t.titulo,
+      descricao: t.descricao || '',
+      sala_id: t.sala_id || '',
+      materia_id: t.materia_id || '',
+      status: t.status,
+    })
+    setModalNova(true)
+  }
+
+  async function salvarTrilha(e) {
     e.preventDefault()
     setSalvando(true)
     try {
-      const { error } = await supabase.from('trilhas').insert({
-        professor_id: perfil.id,
-        escola_id: perfil.escola_id,
+      const payload = {
         sala_id: form.sala_id || null,
         materia_id: form.materia_id || null,
         titulo: form.titulo,
         descricao: form.descricao,
         status: form.status,
-      })
-      if (error) throw error
+      }
+      if (editandoId) {
+        const { error } = await supabase.from('trilhas').update(payload).eq('id', editandoId)
+        if (error) throw error
+      } else {
+        const { error } = await supabase.from('trilhas').insert({ ...payload, professor_id: perfil.id, escola_id: perfil.escola_id })
+        if (error) throw error
+      }
       setModalNova(false)
       await carregar()
     } catch (e) {
       console.error(e)
-      setErro('Não foi possível criar a trilha.')
+      setErro(editandoId ? 'Não foi possível salvar as alterações da trilha.' : 'Não foi possível criar a trilha.')
     } finally {
       setSalvando(false)
     }
@@ -187,7 +205,7 @@ function TrilhasLista() {
                   {t.salaNome}
                   {t.materias?.nome && <span className="text-azul/70">· {t.materias.nome}</span>}
                 </div>
-                {t.descricao && <p className="text-texto/60 text-sm mt-3 line-clamp-2">{t.descricao}</p>}
+                <p className="text-texto/60 text-sm mt-3 line-clamp-2">{t.descricao || 'Sem descrição — o aluno vê um texto genérico de apresentação.'}</p>
 
                 <div className="mt-4 flex items-center gap-1.5 text-xs text-texto/50">
                   <CheckCircle2 size={13} /> {t.qtdConclusoes} aluno(s) concluíram
@@ -199,6 +217,13 @@ function TrilhasLista() {
                     className="flex-1 text-sm font-medium px-3 py-2 rounded-lg bg-white/5 text-white hover:bg-white/10 transition"
                   >
                     Gerenciar conteúdo
+                  </button>
+                  <button
+                    onClick={() => abrirEdicao(t)}
+                    title="Editar trilha"
+                    className="p-2 rounded-lg text-texto/60 hover:text-white hover:bg-white/5 transition"
+                  >
+                    <Pencil size={16} />
                   </button>
                   <button
                     onClick={() => alternarStatus(t)}
@@ -224,10 +249,10 @@ function TrilhasLista() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setModalNova(false)}>
           <div className="w-full max-w-md rounded-2xl bg-bg-2 border p-7" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white">Nova trilha</h2>
+              <h2 className="text-xl font-bold text-white">{editandoId ? 'Editar trilha' : 'Nova trilha'}</h2>
               <button onClick={() => setModalNova(false)} className="text-texto/50 hover:text-white transition"><X size={20} /></button>
             </div>
-            <form onSubmit={criarTrilha} className="space-y-4">
+            <form onSubmit={salvarTrilha} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Título</label>
                 <input
@@ -259,8 +284,9 @@ function TrilhasLista() {
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Descrição (opcional)</label>
                 <textarea
                   value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })}
+                  placeholder="Se deixar em branco, o aluno vê um texto genérico de apresentação"
                   rows={3}
-                  className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition resize-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white placeholder:text-texto/30 focus:outline-none focus:border-azul transition resize-none"
                 />
               </div>
               <button
@@ -268,7 +294,7 @@ function TrilhasLista() {
                 className="w-full mt-2 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/40 disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {salvando && <Loader2 size={18} className="animate-spin" />}
-                {salvando ? 'Criando…' : 'Criar trilha'}
+                {salvando ? 'Salvando…' : editandoId ? 'Salvar alterações' : 'Criar trilha'}
               </button>
             </form>
           </div>
@@ -364,17 +390,45 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
     }
   }
 
-  async function salvarPreparacao() {
+  async function salvarPreparacao(texto) {
     setSalvandoPreparacao(true)
     try {
-      const { error } = await supabase.from('trilhas').update({ preparacao_texto: preparacao.trim() || null }).eq('id', trilha.id)
+      const { error } = await supabase.from('trilhas').update({ preparacao_texto: texto }).eq('id', trilha.id)
       if (error) throw error
+      setPreparacao(texto || '')
       onAtualizarTrilha?.()
     } catch (e) {
       console.error(e)
       setErro('Não foi possível salvar a preparação.')
     } finally {
       setSalvandoPreparacao(false)
+    }
+  }
+
+  // "ele edita para ser as aulas da trilha": promove o texto de preparação pra
+  // virar a próxima aula de verdade, e desliga o aviso de preparação (que só
+  // fazia sentido enquanto a aula não existia).
+  async function transformarEmAula() {
+    if (!preparacao.trim()) return
+    setSalvando(true)
+    try {
+      const { error: eBloco } = await supabase.from('trilha_blocos').insert({
+        trilha_id: trilha.id,
+        tipo: 'texto',
+        conteudo: { texto: preparacao.trim() },
+        ordem: blocos.length,
+      })
+      if (eBloco) throw eBloco
+      const { error: eTrilha } = await supabase.from('trilhas').update({ preparacao_texto: null }).eq('id', trilha.id)
+      if (eTrilha) throw eTrilha
+      setPreparacao('')
+      onAtualizarTrilha?.()
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível transformar a preparação em aula.')
+    } finally {
+      setSalvando(false)
     }
   }
 
@@ -466,7 +520,7 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
             <Megaphone size={14} className="text-[#F5C451]" /> Preparação pra Aula {proximoNumero} (opcional)
           </div>
           <p className="text-xs text-texto/50 mt-1 leading-relaxed">
-            Aparece pro aluno como um aviso, antes da Aula {proximoNumero} existir de verdade. Não é obrigatório e não conta pra conclusão da trilha — some sozinho assim que você publicar essa aula.
+            Aparece pro aluno como um aviso temporário, antes da Aula {proximoNumero} existir de verdade. Não é obrigatório e não conta pra conclusão da trilha. Some sozinho quando você desativar, ou você pode transformá-la direto na Aula {proximoNumero} quando estiver pronta.
           </p>
           <textarea
             value={preparacao} onChange={(e) => setPreparacao(e.target.value)}
@@ -474,13 +528,32 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
             rows={2}
             className="w-full mt-3 px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white placeholder:text-texto/30 focus:outline-none focus:border-azul transition resize-none text-sm"
           />
-          <button
-            type="button" onClick={salvarPreparacao} disabled={salvandoPreparacao}
-            className="mt-2 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition disabled:opacity-60"
-          >
-            {salvandoPreparacao ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-            {salvandoPreparacao ? 'Salvando…' : 'Salvar preparação'}
-          </button>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button" onClick={() => salvarPreparacao(preparacao.trim() || null)} disabled={salvandoPreparacao}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition disabled:opacity-60"
+            >
+              {salvandoPreparacao ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+              {salvandoPreparacao ? 'Salvando…' : 'Salvar preparação'}
+            </button>
+            {trilha.preparacao_texto && (
+              <button
+                type="button" onClick={() => salvarPreparacao(null)} disabled={salvandoPreparacao}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/5 hover:bg-red-400/10 text-texto/60 hover:text-red-400 text-sm font-medium transition disabled:opacity-60"
+              >
+                <X size={14} /> Desativar
+              </button>
+            )}
+            {preparacao.trim() && (
+              <button
+                type="button" onClick={transformarEmAula} disabled={salvando}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#F5C451]/15 hover:bg-[#F5C451]/25 text-[#F5C451] text-sm font-medium transition disabled:opacity-60"
+              >
+                {salvando ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                Transformar em Aula {proximoNumero}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

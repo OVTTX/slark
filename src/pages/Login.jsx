@@ -141,6 +141,15 @@ export default function Login() {
   const { entrar } = useAuth()
   const navigate = useNavigate()
 
+  // A tela de login tem identidade visual própria (degradê escuro fixo) e não
+  // deve mudar com o tema claro/escuro do resto do app — força o fundo do
+  // <body> pra escuro enquanto essa tela estiver montada, e devolve ao sair.
+  useEffect(() => {
+    const anterior = document.body.style.background
+    document.body.style.background = '#03002E'
+    return () => { document.body.style.background = anterior }
+  }, [])
+
   // etapa: 'email' -> 'senha' (conta existente) -> 'criar_senha' (convite pendente)
   const [etapa, setEtapa] = useState('email')
   const [email, setEmail] = useState('')
@@ -260,7 +269,7 @@ export default function Login() {
         {/* Coluna esquerda: chamada de marca (some em telas pequenas), sobre o degradê cru */}
         <div className="hidden lg:flex w-1/2 flex-col justify-end p-16">
           <h1 className="font-mono text-5xl xl:text-6xl font-medium text-white leading-[1.05] tracking-tight">
-            O método que<br />enxega cada aluno.
+            O método que<br />enxerga cada aluno.
           </h1>
         </div>
 

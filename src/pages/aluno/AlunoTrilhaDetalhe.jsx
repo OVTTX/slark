@@ -144,7 +144,9 @@ export default function AlunoTrilhaDetalhe() {
           <Bell size={17} />
         </button>
       </div>
-      {trilha.descricao && <p className="mt-3 text-sm text-texto/60 max-w-2xl leading-relaxed">{trilha.descricao}</p>}
+      <p className="mt-3 text-sm text-texto/60 max-w-2xl leading-relaxed">
+        {trilha.descricao || `E aí, turma! Chegou a hora de mergulhar em ${trilha.titulo}. Percorra as aulas abaixo no seu ritmo — qualquer dúvida, chama seu professor.`}
+      </p>
 
       {erro && <p className="mt-4 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 
