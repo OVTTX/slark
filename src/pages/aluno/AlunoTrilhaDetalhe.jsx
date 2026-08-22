@@ -66,9 +66,6 @@ export default function AlunoTrilhaDetalhe() {
           setProgresso(feitos)
           setTudoConcluido(!!conclusaoData)
           setEntregaProjeto(entregaData || null)
-
-          const idxAtual = blocos.findIndex((b) => !feitos.has(b.id))
-          if (idxAtual !== -1) setSelecionado({ bloco: blocos[idxAtual], i: idxAtual })
         }
       } catch (e) {
         console.error(e)
