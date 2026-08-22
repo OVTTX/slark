@@ -3,22 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import StatCard from '../../components/StatCard'
-import {
-  Award, Rocket, GraduationCap, Flame, Clock3, Bell,
-  Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search,
-  Play, ArrowRight, CheckCircle2,
-} from 'lucide-react'
-
-// selos antigos guardam um emoji em "icone"; os ligados a características
-// guardam o nome de um ícone lucide (ex: "Lightbulb").
-const ICONES_LUCIDE = { Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search }
-
-function IconeSelo({ icone, size = 32, className = '' }) {
-  const Comp = icone && ICONES_LUCIDE[icone]
-  if (Comp) return <Comp size={size} className={className} />
-  if (!icone) return <Award size={size} className={className} />
-  return <span className="leading-none" style={{ fontSize: size }}>{icone}</span>
-}
+import { Rocket, GraduationCap, Flame, Clock3, Bell, Play, ArrowRight, CheckCircle2 } from 'lucide-react'
 
 function tempoRelativo(iso) {
   const diffMs = Date.now() - new Date(iso).getTime()
@@ -36,8 +21,6 @@ export default function AlunoInicio() {
   const { perfil } = useAuth()
   const navigate = useNavigate()
   const [aluno, setAluno] = useState(null)
-  const [sala, setSala] = useState(null)
-  const [selos, setSelos] = useState([])
   const [trilhaRetomar, setTrilhaRetomar] = useState(null) // { trilha, percentual }
   const [materiaPorId, setMateriaPorId] = useState({})
   const [aprendizado, setAprendizado] = useState([]) // avaliacoes_aprendizado do aluno
@@ -56,19 +39,12 @@ export default function AlunoInicio() {
         if (eAluno) throw eAluno
         setAluno(alunoData)
 
-        if (alunoData?.sala_id) {
-          const { data: salaData } = await supabase.from('salas').select('nome, serie').eq('id', alunoData.sala_id).maybeSingle()
-          setSala(salaData)
-        }
-
         if (alunoData?.id) {
-          const [{ data: selosData }, { data: materiasData }, { data: aprendizadoData }, { data: pontData }] = await Promise.all([
-            supabase.from('aluno_selos').select('concedido_em, selos(nome, descricao, icone, pontos_necessarios)').eq('aluno_id', alunoData.id),
+          const [{ data: materiasData }, { data: aprendizadoData }, { data: pontData }] = await Promise.all([
             supabase.from('materias').select('id, nome').eq('escola_id', perfil.escola_id),
             supabase.from('avaliacoes_aprendizado').select('materia_id, valor, data').eq('aluno_id', alunoData.id),
             supabase.from('pontuacoes').select('pontos, motivo, criada_em').eq('aluno_id', alunoData.id).order('criada_em', { ascending: false }).limit(4),
           ])
-          setSelos(selosData || [])
           setMateriaPorId(Object.fromEntries((materiasData || []).map((m) => [m.id, m.nome])))
           setAprendizado(aprendizadoData || [])
           setPontuacoesRecentes(pontData || [])
@@ -267,42 +243,6 @@ export default function AlunoInicio() {
             </button>
           </div>
         </div>
-      </div>
-
-      {aluno.caracteristicas?.descricao && (
-        <div className="mt-6 rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
-          <div className="text-sm text-texto/60 mb-2">Sobre sua característica</div>
-          <span
-            className="inline-flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded-full"
-            style={{ background: `${aluno.caracteristicas.cor}22`, color: aluno.caracteristicas.cor }}
-          >
-            {aluno.caracteristicas.nome}
-          </span>
-          <p className="mt-3 text-sm text-texto/60 leading-relaxed">{aluno.caracteristicas.descricao}</p>
-        </div>
-      )}
-
-      <div className="mt-6">
-        <div className="flex items-center gap-2 text-white font-semibold mb-3">
-          <Award size={18} className="text-azul" /> Meus selos
-        </div>
-        {selos.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-azul/30 bg-white/[0.02] backdrop-blur-xl p-8 text-center text-texto/60 text-sm">
-            Ainda sem selos — continue somando pontos!
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {selos.map((s, i) => (
-              <div key={i} className="rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-5 text-center">
-                <div className="h-9 flex items-center justify-center">
-                  <IconeSelo icone={s.selos.icone} size={30} className="text-azul/80" />
-                </div>
-                <div className="mt-2 font-semibold text-white text-sm">{s.selos.nome}</div>
-                <div className="text-xs text-texto/50 mt-1">{s.selos.descricao}</div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )
