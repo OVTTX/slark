@@ -6,7 +6,7 @@ import {
   BarChart3, BookOpen, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ListChecks,
   Kanban, UserPlus, Wallet, ShieldCheck, MessageCircle, Sun, Moon,
-  ClipboardList, BookMarked,
+  ClipboardList,
 } from 'lucide-react'
 
 // Menus por perfil (espelham as telas do app real)
@@ -47,7 +47,6 @@ const MENUS = {
     { to: '/professor/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/professor/gabaritos', label: 'Gabaritos', icon: ListChecks },
     { to: '/professor/aprendizado', label: 'Aprendizado', icon: ClipboardList },
-    { to: '/professor/runaway', label: 'Apostilas Runaway', icon: BookMarked },
     { to: '/professor/aula-slark', label: 'Aula Slark', icon: GraduationCap },
     { to: '/professor/ranking', label: 'Ranking', icon: Trophy },
   ],
@@ -56,7 +55,6 @@ const MENUS = {
     { to: '/aluno/boletim', label: 'Boletim', icon: ClipboardList },
     { to: '/aluno/competencias', label: 'Mapa de Competências', icon: Target },
     { to: '/aluno/atividades', label: 'Atividades', icon: BarChart3 },
-    { to: '/aluno/runaway', label: 'Apostilas Runaway', icon: BookMarked },
     { to: '/aluno/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/aluno/time', label: 'Meu Time', icon: UsersRound },
     { to: '/aluno/chat', label: 'Chat', icon: Eye },
