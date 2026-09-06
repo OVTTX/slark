@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { Target, BookOpen, Award, Trophy } from 'lucide-react'
+import MapaRadial from '../../components/MapaRadial'
 
 export default function AlunoCompetencias() {
   const { perfil } = useAuth()
@@ -66,7 +67,6 @@ export default function AlunoCompetencias() {
 
   const pctTrilhas = progressoTrilhas.total ? Math.round((progressoTrilhas.concluidas / progressoTrilhas.total) * 100) : 0
   const pctSelos = selosTotal ? Math.round((selosConquistados / selosTotal) * 100) : 0
-  const maiorArea = areas[0]?.[1] || 1
 
   return (
     <div>
@@ -115,21 +115,14 @@ export default function AlunoCompetencias() {
           <div className="rounded-2xl border border-dashed border-azul/30 bg-card/40 p-8 text-center text-texto/60 text-sm">
             Ainda sem pontos registrados por motivo. Continue participando das atividades!
           </div>
+        ) : areas.length === 1 ? (
+          <div className="rounded-2xl bg-card border p-6 flex items-center justify-between">
+            <span className="text-white/90">{areas[0][0]}</span>
+            <span className="flex items-center gap-1.5 font-bold text-white text-lg"><Trophy size={16} className="text-[#F5C451]" /> {areas[0][1]}</span>
+          </div>
         ) : (
-          <div className="space-y-3">
-            {areas.map(([motivo, pontos]) => (
-              <div key={motivo} className="rounded-2xl bg-card border p-5 flex items-center gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-white/90 truncate">{motivo}</div>
-                  <div className="mt-2 h-1.5 rounded-full bg-white/5 overflow-hidden">
-                    <div className="h-full rounded-full bg-azul transition-all" style={{ width: `${Math.max(4, (pontos / maiorArea) * 100)}%` }} />
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 font-bold text-white shrink-0">
-                  <Trophy size={14} className="text-[#F5C451]" /> {pontos}
-                </div>
-              </div>
-            ))}
+          <div className="rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
+            <MapaRadial dados={areas.map(([motivo, pontos]) => ({ label: motivo, valor: pontos }))} />
           </div>
         )}
       </div>
