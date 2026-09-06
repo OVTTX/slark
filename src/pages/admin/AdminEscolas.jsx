@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import {
   Building2, Plus, X, Loader2, Users, Pencil, Power, MapPin, Trash2, AlertTriangle,
-  Search, ChevronLeft, ChevronRight,
+  Search, ChevronLeft, ChevronRight, KeyRound, Check,
 } from 'lucide-react'
 
 const POR_PAGINA = 10
@@ -51,6 +51,8 @@ export default function AdminEscolas() {
   const [excluindo, setExcluindo] = useState(false)
   const [busca, setBusca] = useState('')
   const [pagina, setPagina] = useState(1)
+  const [criandoAcessoId, setCriandoAcessoId] = useState(null)
+  const [acessoCriado, setAcessoCriado] = useState(null) // { nome, email, escolaNome }
 
   async function carregar() {
     setCarregando(true)
@@ -192,6 +194,34 @@ export default function AdminEscolas() {
     }
   }
 
+  // O campo "responsável" da escola é só um contato (nome/e-mail/telefone) —
+  // não cria login sozinho. Esse botão fecha esse buraco: cria de fato a conta
+  // de diretor pra esse e-mail, igual ao que "Usuários de Suporte" faz.
+  async function criarAcessoDiretor(esc) {
+    if (!esc.responsavel_email) return
+    setCriandoAcessoId(esc.id)
+    setErro('')
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-usuarios', {
+        body: {
+          acao: 'criar',
+          nome: esc.responsavel_nome || esc.nome,
+          email: esc.responsavel_email.trim().toLowerCase(),
+          funcao: 'diretor',
+          escola_id: esc.id,
+        },
+      })
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+      setAcessoCriado({ nome: esc.responsavel_nome, email: esc.responsavel_email.trim().toLowerCase(), escolaNome: esc.nome })
+    } catch (e) {
+      console.error(e)
+      setErro(e.message || 'Não foi possível criar o acesso do responsável.')
+    } finally {
+      setCriandoAcessoId(null)
+    }
+  }
+
   function abrirExclusao(escola) {
     setEscolaParaExcluir(escola)
     setConfirmacaoNome('')
@@ -241,6 +271,23 @@ export default function AdminEscolas() {
 
       {erro && (
         <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>
+      )}
+
+      {acessoCriado && (
+        <div className="mt-6 rounded-2xl bg-[#3FD08A]/10 border border-[#3FD08A]/25 p-5">
+          <div className="flex items-center gap-2 text-[#3FD08A] font-semibold">
+            <Check size={16} /> Acesso de diretor criado{acessoCriado.nome ? ` para ${acessoCriado.nome}` : ''}
+          </div>
+          <p className="mt-1.5 text-sm text-texto/70">
+            Login: <span className="text-white">{acessoCriado.email}</span> · Senha provisória:{' '}
+            <span className="text-white font-mono">Slark@2026</span>
+          </p>
+          <p className="mt-1 text-sm text-texto/70">
+            Entra como diretor(a) de <span className="text-white font-semibold">{acessoCriado.escolaNome}</span>.
+          </p>
+          <p className="mt-1 text-xs text-texto/50">Peça pra pessoa trocar a senha em "Perfil" assim que acessar.</p>
+          <button onClick={() => setAcessoCriado(null)} className="mt-3 text-xs text-texto/50 hover:text-white transition">Ok, entendi</button>
+        </div>
       )}
 
       {carregando ? (
@@ -304,6 +351,16 @@ export default function AdminEscolas() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
+                      {esc.responsavel_email && (
+                        <button
+                          onClick={() => criarAcessoDiretor(esc)}
+                          disabled={criandoAcessoId === esc.id}
+                          title="Criar login de diretor pra esse responsável (o campo de e-mail sozinho não cria acesso)"
+                          className="p-2 rounded-lg text-texto/60 hover:text-azul hover:bg-azul/10 transition disabled:opacity-50 disabled:pointer-events-none"
+                        >
+                          {criandoAcessoId === esc.id ? <Loader2 size={16} className="animate-spin" /> : <KeyRound size={16} />}
+                        </button>
+                      )}
                       <button
                         onClick={() => abrirEdicao(esc)}
                         title="Editar"
@@ -411,6 +468,9 @@ export default function AdminEscolas() {
                   type="email" value={form.responsavel_email} onChange={(e) => setForm({ ...form, responsavel_email: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
                 />
+                <p className="mt-1.5 text-xs text-texto/45">
+                  Isso aqui é só contato — não cria login sozinho. Depois de salvar, use o botão <KeyRound size={11} className="inline -mt-0.5" /> na lista pra criar o acesso de diretor pra esse e-mail.
+                </p>
               </div>
 
               <div className="pt-2 border-t">

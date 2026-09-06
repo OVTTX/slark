@@ -4,9 +4,11 @@ import { useAuth } from '../../context/AuthContext'
 import { Users, Search, Trophy, School, Clock, Mail, X } from 'lucide-react'
 import ConvidarAlunoModal from '../../components/ConvidarAlunoModal'
 import ImportarAlunosModal from '../../components/ImportarAlunosModal'
+import useLimiteAlunos from '../../hooks/useLimiteAlunos'
 
 export default function DiretorAlunos() {
   const { perfil } = useAuth()
+  const { limite, usados, recarregar: recarregarLimite } = useLimiteAlunos()
   const [alunos, setAlunos] = useState([])
   const [salas, setSalas] = useState([])
   const [convitesPendentes, setConvitesPendentes] = useState([])
@@ -69,10 +71,21 @@ export default function DiretorAlunos() {
         <div>
           <h1 className="text-4xl font-bold text-white tracking-tight">Alunos</h1>
           <p className="mt-2 text-texto/60">Cadastre alunos um a um ou importe uma turma inteira por planilha.</p>
+          {limite != null && (
+            <p className="mt-1 text-xs text-texto/45">
+              {usados}/{limite} alunos usados na escola
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <ImportarAlunosModal salas={salas} onImportado={carregar} />
-          <ConvidarAlunoModal salas={salas} onConvidado={carregar} />
+          <ImportarAlunosModal
+            salas={salas} limite={limite} usados={usados}
+            onImportado={() => { carregar(); recarregarLimite() }}
+          />
+          <ConvidarAlunoModal
+            salas={salas} limite={limite} usados={usados}
+            onConvidado={() => { carregar(); recarregarLimite() }}
+          />
         </div>
       </div>
 

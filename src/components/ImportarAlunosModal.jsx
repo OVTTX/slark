@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { FileSpreadsheet, X, Loader2, UploadCloud, Download, CheckCircle2, AlertTriangle } from 'lucide-react'
+import LimiteAlunosCard from './LimiteAlunosCard'
 
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -46,8 +47,10 @@ function processarPlanilha(dados, salas) {
   })
 }
 
-export default function ImportarAlunosModal({ salas = [], onImportado }) {
+export default function ImportarAlunosModal({ salas = [], onImportado, limite = null, usados = null }) {
   const { perfil } = useAuth()
+  const limiteAtingido = limite != null && usados != null && usados >= limite
+  const vagasRestantes = limite != null && usados != null ? Math.max(0, limite - usados) : null
   const inputRef = useRef(null)
   const [aberto, setAberto] = useState(false)
   const [linhas, setLinhas] = useState([])
@@ -127,6 +130,8 @@ export default function ImportarAlunosModal({ salas = [], onImportado }) {
         if (error) {
           if (error.code === '23505') {
             falhas.push({ nome: l.nome, email: l.email, motivo: 'Já existe convite ou conta com esse e-mail' })
+          } else if (error.message?.includes('LIMITE_ALUNOS_ATINGIDO')) {
+            falhas.push({ nome: l.nome, email: l.email, motivo: 'Limite de alunos da escola atingido' })
           } else {
             falhas.push({ nome: l.nome, email: l.email, motivo: 'Erro ao importar' })
           }
@@ -169,10 +174,18 @@ export default function ImportarAlunosModal({ salas = [], onImportado }) {
               Envie um .xlsx com as colunas <span className="text-white font-mono text-xs">nome</span>, <span className="text-white font-mono text-xs">email</span> e <span className="text-white font-mono text-xs">sala</span> (opcional). Cada aluno recebe um convite e cria a própria senha no primeiro login — igual ao "Convidar aluno".
             </p>
 
+            {limiteAtingido ? (
+              <LimiteAlunosCard limite={limite} usados={usados} />
+            ) : (
+              <>
             {!resultado && (
               <button onClick={baixarModelo} className="mt-4 flex items-center gap-2 text-sm text-azul hover:text-white transition">
                 <Download size={15} /> Baixar planilha modelo
               </button>
+            )}
+
+            {vagasRestantes != null && !resultado && (
+              <p className="mt-3 text-xs text-texto/45">Vagas restantes no plano: <span className="text-white font-semibold">{vagasRestantes}</span></p>
             )}
 
             {erro && <p className="mt-4 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
@@ -236,6 +249,8 @@ export default function ImportarAlunosModal({ salas = [], onImportado }) {
                   {importando && <Loader2 size={18} className="animate-spin" />}
                   {importando ? 'Importando…' : `Importar ${validas.length} aluno${validas.length === 1 ? '' : 's'}`}
                 </button>
+              </>
+            )}
               </>
             )}
 

@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import ConvidarAlunoModal from '../../components/ConvidarAlunoModal'
+import useLimiteAlunos from '../../hooks/useLimiteAlunos'
 import { Users, School, Trophy, Mail, Clock, X } from 'lucide-react'
 
 export default function ProfessorAlunos() {
   const { perfil } = useAuth()
+  const { limite, usados, recarregar: recarregarLimite } = useLimiteAlunos()
   const [alunos, setAlunos] = useState([])
   const [convites, setConvites] = useState([])
   const [salas, setSalas] = useState([])
@@ -62,8 +64,16 @@ export default function ProfessorAlunos() {
         <div>
           <h1 className="text-4xl font-bold text-white tracking-tight">Alunos</h1>
           <p className="mt-2 text-texto/60">Os alunos das suas turmas.</p>
+          {limite != null && (
+            <p className="mt-1 text-xs text-texto/45">
+              {usados}/{limite} alunos usados na escola
+            </p>
+          )}
         </div>
-        <ConvidarAlunoModal salas={salas} onConvidado={carregar} />
+        <ConvidarAlunoModal
+          salas={salas} limite={limite} usados={usados}
+          onConvidado={() => { carregar(); recarregarLimite() }}
+        />
       </div>
 
       {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}

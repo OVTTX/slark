@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { UserPlus, X, Loader2 } from 'lucide-react'
+import LimiteAlunosCard from './LimiteAlunosCard'
 
 // Botão + modal reutilizável: diretor ou professor cadastram um aluno pelo e-mail.
 // Na primeira vez que o aluno usar esse e-mail na tela de login, ele cria a própria senha.
-export default function ConvidarAlunoModal({ salas = [], onConvidado }) {
+export default function ConvidarAlunoModal({ salas = [], onConvidado, limite = null, usados = null }) {
+  const limiteAtingido = limite != null && usados != null && usados >= limite
   const { perfil } = useAuth()
   const [aberto, setAberto] = useState(false)
   const [form, setForm] = useState({ nome: '', email: '', sala_id: salas[0]?.id || '' })
@@ -35,6 +37,7 @@ export default function ConvidarAlunoModal({ salas = [], onConvidado }) {
       })
       if (error) {
         if (error.code === '23505') throw new Error('Já existe um convite ou conta com esse e-mail.')
+        if (error.message?.includes('LIMITE_ALUNOS_ATINGIDO')) throw new Error('LIMITE_ATINGIDO')
         throw error
       }
       setSucesso(`Convite criado para ${form.nome}. Peça para ele acessar a tela de login com o e-mail ${form.email} e criar a senha.`)
@@ -74,6 +77,8 @@ export default function ConvidarAlunoModal({ salas = [], onConvidado }) {
                   Fechar
                 </button>
               </div>
+            ) : limiteAtingido || erro === 'LIMITE_ATINGIDO' ? (
+              <LimiteAlunosCard limite={limite} usados={usados} />
             ) : (
               <form onSubmit={enviar} className="space-y-4">
                 <div>
