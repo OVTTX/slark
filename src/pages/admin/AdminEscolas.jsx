@@ -131,6 +131,12 @@ export default function AdminEscolas() {
     try {
       let escolaId = editandoId
 
+      // guarda o e-mail antigo (antes de salvar) pra saber se é novo/mudou —
+      // só tenta criar o acesso de diretor automaticamente nesse caso
+      const emailAntigo = (escolas.find((x) => x.id === editandoId)?.responsavel_email || '').trim().toLowerCase()
+      const emailNovo = form.responsavel_email.trim().toLowerCase()
+      const precisaCriarAcesso = emailNovo && emailNovo !== emailAntigo
+
       if (editandoId) {
         const { error } = await supabase.from('escolas').update({
           nome: form.nome,
@@ -171,6 +177,28 @@ export default function AdminEscolas() {
           qtd_alunos_contratada: Number(form.qtd_alunos_contratada),
         })
         if (error) throw error
+      }
+
+      // cria o login de diretor de verdade pro e-mail do responsável assim que
+      // ele é cadastrado ou trocado — sem isso, o e-mail salvo aqui era só um
+      // contato e a pessoa nunca conseguia entrar no login.
+      if (precisaCriarAcesso) {
+        const { data: dataAcesso, error: erroAcesso } = await supabase.functions.invoke('admin-usuarios', {
+          body: {
+            acao: 'criar',
+            nome: form.responsavel_nome || form.nome,
+            email: emailNovo,
+            funcao: 'diretor',
+            escola_id: escolaId,
+          },
+        })
+        if (!erroAcesso && !dataAcesso?.error) {
+          setAcessoCriado({ nome: form.responsavel_nome, email: emailNovo, escolaNome: form.nome })
+        } else {
+          // a escola já foi salva com sucesso — só avisa que o acesso automático não rolou
+          // (ex: já existe conta com esse e-mail) sem travar o fluxo
+          console.warn('Não foi possível criar o acesso automático do responsável:', erroAcesso || dataAcesso?.error)
+        }
       }
 
       setModalAberto(false)
@@ -469,7 +497,7 @@ export default function AdminEscolas() {
                   className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
                 />
                 <p className="mt-1.5 text-xs text-texto/45">
-                  Isso aqui é só contato — não cria login sozinho. Depois de salvar, use o botão <KeyRound size={11} className="inline -mt-0.5" /> na lista pra criar o acesso de diretor pra esse e-mail.
+                  Ao salvar, esse e-mail já vira login de diretor (senha provisória Slark@2026). Se precisar recriar depois, use o botão <KeyRound size={11} className="inline -mt-0.5" /> na lista.
                 </p>
               </div>
 
