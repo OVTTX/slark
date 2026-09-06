@@ -130,12 +130,17 @@ export default function AdminEscolas() {
     setErro('')
     try {
       let escolaId = editandoId
-
-      // guarda o e-mail antigo (antes de salvar) pra saber se é novo/mudou —
-      // só tenta criar o acesso de diretor automaticamente nesse caso
-      const emailAntigo = (escolas.find((x) => x.id === editandoId)?.responsavel_email || '').trim().toLowerCase()
       const emailNovo = form.responsavel_email.trim().toLowerCase()
-      const precisaCriarAcesso = emailNovo && emailNovo !== emailAntigo
+
+      // Confere de verdade se já existe login pra esse e-mail (em vez de só
+      // olhar se o texto mudou) — assim, se uma escola antiga já tinha o
+      // e-mail salvo mas nunca ganhou conta, salvar de novo sem mexer no
+      // e-mail também cria o acesso.
+      let precisaCriarAcesso = false
+      if (emailNovo) {
+        const { data: usuarioExistente } = await supabase.from('usuarios').select('id').eq('email', emailNovo).maybeSingle()
+        precisaCriarAcesso = !usuarioExistente
+      }
 
       if (editandoId) {
         const { error } = await supabase.from('escolas').update({
