@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import ConvidarAlunoModal from '../../components/ConvidarAlunoModal'
-import { Users, School, Trophy, Mail, Clock } from 'lucide-react'
+import { Users, School, Trophy, Mail, Clock, X } from 'lucide-react'
 
 export default function ProfessorAlunos() {
   const { perfil } = useAuth()
@@ -44,6 +44,18 @@ export default function ProfessorAlunos() {
 
   useEffect(() => { carregar() }, [perfil?.id])
 
+  async function cancelarConvite(id) {
+    if (!confirm('Cancelar esse convite? Se o e-mail estiver errado, você pode criar um novo convite com o e-mail certo depois.')) return
+    try {
+      const { error } = await supabase.from('convites_aluno').delete().eq('id', id)
+      if (error) throw error
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível cancelar o convite.')
+    }
+  }
+
   return (
     <div>
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -74,6 +86,13 @@ export default function ProfessorAlunos() {
                       <div className="flex items-center gap-1 text-texto/50 text-xs"><Mail size={11} /> {c.email}</div>
                     </div>
                     <span className="text-xs text-texto/45">{c.salaNome}</span>
+                    <button
+                      onClick={() => cancelarConvite(c.id)}
+                      title="Cancelar convite (ex: e-mail digitado errado)"
+                      className="shrink-0 p-1.5 rounded-lg text-texto/40 hover:text-red-400 hover:bg-red-400/10 transition"
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
                 ))}
               </div>

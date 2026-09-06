@@ -53,7 +53,6 @@ const MENUS = {
     { to: '/aluno/competencias', label: 'Mapa de Competências', icon: Target },
     { to: '/aluno/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/aluno/time', label: 'Meu Time', icon: UsersRound },
-    { to: '/aluno/chat', label: 'Chat', icon: Eye },
     { to: '/aluno/ranking', label: 'Ranking', icon: Trophy },
   ],
 }

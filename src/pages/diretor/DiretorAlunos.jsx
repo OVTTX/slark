@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { Users, Search, Trophy, School, Clock, Mail } from 'lucide-react'
+import { Users, Search, Trophy, School, Clock, Mail, X } from 'lucide-react'
 import ConvidarAlunoModal from '../../components/ConvidarAlunoModal'
 import ImportarAlunosModal from '../../components/ImportarAlunosModal'
 
@@ -42,6 +42,18 @@ export default function DiretorAlunos() {
   }
 
   useEffect(() => { carregar() }, [perfil?.escola_id])
+
+  async function cancelarConvite(id) {
+    if (!confirm('Cancelar esse convite? Se o e-mail estiver errado, você pode criar um novo convite com o e-mail certo depois.')) return
+    try {
+      const { error } = await supabase.from('convites_aluno').delete().eq('id', id)
+      if (error) throw error
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível cancelar o convite.')
+    }
+  }
 
   const listaFiltrada = useMemo(() => {
     return alunos.filter((a) => {
@@ -91,8 +103,15 @@ export default function DiretorAlunos() {
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
             {convitesPendentes.slice(0, 12).map((c) => (
-              <span key={c.id} className="inline-flex items-center gap-1.5 text-xs text-texto/70 bg-white/5 px-2.5 py-1 rounded-full">
-                <Mail size={11} /> {c.nome} · {c.salaNome}
+              <span key={c.id} className="inline-flex items-center gap-1.5 text-xs text-texto/70 bg-white/5 pl-2.5 pr-1.5 py-1 rounded-full">
+                <Mail size={11} /> {c.nome} · {c.email}
+                <button
+                  onClick={() => cancelarConvite(c.id)}
+                  title="Cancelar convite (ex: e-mail digitado errado)"
+                  className="p-0.5 rounded-full text-texto/40 hover:text-red-400 hover:bg-red-400/10 transition"
+                >
+                  <X size={11} />
+                </button>
               </span>
             ))}
             {convitesPendentes.length > 12 && (

@@ -5,7 +5,7 @@ import {
   LayoutGrid, School, Users, Eye, UsersRound, Target, Trophy,
   BarChart3, BookOpen, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ListChecks,
-  Kanban, UserPlus, Wallet, ShieldCheck, MessageCircle, Sun, Moon,
+  Kanban, UserPlus, Wallet, ShieldCheck, Sun, Moon,
   ClipboardList, Bell,
 } from 'lucide-react'
 
@@ -40,7 +40,6 @@ const MENUS = {
     { to: '/professor/salas', label: 'Salas', icon: School },
     { to: '/professor/alunos', label: 'Alunos', icon: Users },
     { to: '/professor/observacoes', label: 'Observações', icon: Eye },
-    { to: '/professor/chat', label: 'Chat', icon: MessageCircle },
     { to: '/professor/equipes', label: 'Equipes', icon: UsersRound },
     { to: '/professor/desafios', label: 'Desafios', icon: Target },
     { to: '/professor/relatorios', label: 'Relatórios', icon: BarChart3 },
@@ -57,7 +56,6 @@ const MENUS = {
     { to: '/aluno/competencias', label: 'Mapa de Competências', icon: Target },
     { to: '/aluno/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/aluno/time', label: 'Meu Time', icon: UsersRound },
-    { to: '/aluno/chat', label: 'Chat', icon: Eye },
     { to: '/aluno/ranking', label: 'Ranking', icon: Trophy },
   ],
 }
