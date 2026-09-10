@@ -1,8 +1,16 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { Target, BookOpen, Award, Trophy } from 'lucide-react'
+import { Target, BookOpen, Award } from 'lucide-react'
 import MapaRadial from '../../components/MapaRadial'
+
+// Ordem fixa dos eixos do radar (bate com o mockup: topo, direita, baixo, esquerda).
+const ORDEM_TRACOS = ['Criativo', 'Detalhista', 'Observador', 'Raciocínio']
+// Todo aluno começa com uma base em cada traço (o losango nunca aparece
+// "quebrado"/vazio); cada observação de professor que sugeriu aquele traço
+// empurra o eixo pra frente, até o teto de 100.
+const BASE_TRACO = 30
+const INCREMENTO_POR_OBSERVACAO = 18
 
 export default function AlunoCompetencias() {
   const { perfil } = useAuth()
@@ -10,7 +18,7 @@ export default function AlunoCompetencias() {
   const [progressoTrilhas, setProgressoTrilhas] = useState({ concluidas: 0, total: 0 })
   const [selosConquistados, setSelosConquistados] = useState(0)
   const [selosTotal, setSelosTotal] = useState(0)
-  const [areas, setAreas] = useState([])
+  const [tracos, setTracos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
 
@@ -26,24 +34,37 @@ export default function AlunoCompetencias() {
         setAluno(alunoData)
         if (!alunoData) return
 
-        const [{ data: trilhasData }, { count: concluidasCount }, { count: selosTotalCount }, { count: selosConquistadosCount }, { data: pontuacoesData }] = await Promise.all([
+        const [{ data: trilhasData }, { count: concluidasCount }, { count: selosTotalCount }, { count: selosConquistadosCount }, { data: catalogoTracos }, { data: observacoesData }] = await Promise.all([
           supabase.from('trilhas').select('id', { count: 'exact', head: true }).eq('escola_id', perfil.escola_id).eq('status', 'publicado'),
           supabase.from('trilha_conclusoes').select('id', { count: 'exact', head: true }).eq('aluno_id', alunoData.id),
           supabase.from('selos').select('id', { count: 'exact', head: true }),
           supabase.from('aluno_selos').select('id', { count: 'exact', head: true }).eq('aluno_id', alunoData.id),
-          supabase.from('pontuacoes').select('pontos, motivo').eq('aluno_id', alunoData.id),
+          supabase.from('caracteristicas').select('id, nome, cor, descricao'),
+          supabase.from('observacoes').select('caracteristica_sugerida_id').eq('aluno_id', alunoData.id).not('caracteristica_sugerida_id', 'is', null),
         ])
 
         setProgressoTrilhas({ concluidas: concluidasCount || 0, total: trilhasData?.count || 0 })
         setSelosTotal(selosTotalCount || 0)
         setSelosConquistados(selosConquistadosCount || 0)
 
-        const grupos = {}
-        for (const p of pontuacoesData || []) {
-          const chave = p.motivo || 'Outros'
-          grupos[chave] = (grupos[chave] || 0) + p.pontos
+        // Conta quantas vezes cada característica foi sugerida pela IA nas
+        // observações do professor sobre esse aluno — é o que dá o "relevo"
+        // do losango, em vez de todo mundo sair igual.
+        const contagem = {}
+        for (const o of observacoesData || []) {
+          contagem[o.caracteristica_sugerida_id] = (contagem[o.caracteristica_sugerida_id] || 0) + 1
         }
-        setAreas(Object.entries(grupos).sort((a, b) => b[1] - a[1]).slice(0, 6))
+
+        const tracosOrdenados = [...(catalogoTracos || [])].sort(
+          (a, b) => ORDEM_TRACOS.indexOf(a.nome) - ORDEM_TRACOS.indexOf(b.nome)
+        )
+
+        setTracos(
+          tracosOrdenados.map((c) => ({
+            label: c.nome,
+            valor: Math.min(100, BASE_TRACO + INCREMENTO_POR_OBSERVACAO * (contagem[c.id] || 0)),
+          }))
+        )
       } catch (e) {
         console.error(e)
         setErro('Não foi possível carregar seu mapa. Confira a conexão com o Supabase.')
@@ -110,21 +131,19 @@ export default function AlunoCompetencias() {
       </div>
 
       <div className="mt-6">
-        <div className="flex items-center gap-2 text-white font-semibold mb-3"><Target size={18} className="text-azul" /> Áreas em que você mais se destacou</div>
-        {areas.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-azul/30 bg-card/40 p-8 text-center text-texto/60 text-sm">
-            Ainda sem pontos registrados por motivo. Continue participando das atividades!
-          </div>
-        ) : areas.length === 1 ? (
-          <div className="rounded-2xl bg-card border p-6 flex items-center justify-between">
-            <span className="text-white/90">{areas[0][0]}</span>
-            <span className="flex items-center gap-1.5 font-bold text-white text-lg"><Trophy size={16} className="text-[#F5C451]" /> {areas[0][1]}</span>
-          </div>
-        ) : (
-          <div className="rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
-            <MapaRadial dados={areas.map(([motivo, pontos]) => ({ label: motivo, valor: pontos }))} />
-          </div>
-        )}
+        <div className="flex items-center gap-2 text-white font-semibold mb-3"><Target size={18} className="text-azul" /> Seus Traços</div>
+        <div className="rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
+          <MapaRadial dados={tracos} />
+          {aluno.caracteristicas ? (
+            <p className="mt-6 text-center text-sm text-texto/60 italic leading-relaxed max-w-md mx-auto">
+              "{aluno.nome} se destaca por {aluno.caracteristicas.nome.toLowerCase()}: {aluno.caracteristicas.descricao}"
+            </p>
+          ) : (
+            <p className="mt-6 text-center text-sm text-texto/45 leading-relaxed max-w-md mx-auto">
+              Seu professor ainda está te conhecendo — continue participando das aulas para seus traços ficarem mais nítidos aqui.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )
