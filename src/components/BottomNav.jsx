@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
@@ -68,73 +69,140 @@ export default function BottomNav() {
   const navigate = useNavigate()
   const menu = MENUS[perfil?.perfil] || []
   const landing = import.meta.env.VITE_LANDING_URL || '#'
+  const [aberto, setAberto] = useState(false)
 
   const handleSair = async () => {
+    setAberto(false)
     await sair()
     navigate('/login')
   }
 
   return (
-    <nav
-      className="fixed left-1/2 -translate-x-1/2 z-50 max-w-[95vw]"
-      style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-    >
-      <div className="flex items-center gap-0.5 sm:gap-1 px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-x-auto">
-        {/* Logo pequeno */}
-        <a
-          href={landing}
-          title="Site da Slark"
-          className={`${botaoBase} font-mono font-bold text-white/80 hover:text-white hover:bg-white/10`}
-        >
-          S
-        </a>
+    <>
+      {/* Desktop/tablet: menu em pílula, como antes */}
+      <nav
+        className="hidden sm:block fixed left-1/2 -translate-x-1/2 z-50 max-w-[95vw]"
+        style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+      >
+        <div className="flex items-center gap-1 px-2.5 py-2 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-x-auto">
+          {/* Logo pequeno */}
+          <a
+            href={landing}
+            title="Site da Slark"
+            className={`${botaoBase} font-mono font-bold text-white/80 hover:text-white hover:bg-white/10`}
+          >
+            S
+          </a>
 
-        <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
+          <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
 
-        {menu.map(({ to, label, icon: Icon, end }) => (
+          {menu.map(({ to, label, icon: Icon, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              title={label}
+              className={({ isActive }) =>
+                `${botaoBase} ${isActive ? 'bg-azul text-white shadow-lg shadow-azul/40' : 'text-texto/60 hover:text-white hover:bg-white/10'}`
+              }
+            >
+              <Icon size={18} />
+            </NavLink>
+          ))}
+
+          <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
+
           <NavLink
-            key={to}
-            to={to}
-            end={end}
-            title={label}
+            to="/perfil"
+            title={perfil?.nome || 'Perfil'}
             className={({ isActive }) =>
-              `${botaoBase} ${isActive ? 'bg-azul text-white shadow-lg shadow-azul/40' : 'text-texto/60 hover:text-white hover:bg-white/10'}`
+              `shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center overflow-hidden transition ${isActive ? 'ring-2 ring-azul' : 'hover:ring-2 hover:ring-white/20'}`
             }
           >
-            <Icon size={18} />
+            {perfil?.avatar_url ? (
+              <img src={perfil.avatar_url} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span className="w-full h-full bg-azul/30 flex items-center justify-center text-white text-xs font-mono">
+                {perfil?.nome?.[0]?.toUpperCase() || 'U'}
+              </span>
+            )}
           </NavLink>
-        ))}
 
-        <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
+          <button
+            onClick={alternarTema}
+            title={tema === 'claro' ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
+            className={`${botaoBase} text-texto/50 hover:text-white hover:bg-white/10`}
+          >
+            {tema === 'claro' ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
 
-        <NavLink
-          to="/perfil"
-          title={perfil?.nome || 'Perfil'}
-          className={({ isActive }) =>
-            `shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center overflow-hidden transition ${isActive ? 'ring-2 ring-azul' : 'hover:ring-2 hover:ring-white/20'}`
-          }
-        >
-          {perfil?.avatar_url ? (
-            <img src={perfil.avatar_url} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <span className="w-full h-full bg-azul/30 flex items-center justify-center text-white text-xs font-mono">
-              {perfil?.nome?.[0]?.toUpperCase() || 'U'}
-            </span>
-          )}
-        </NavLink>
+          <button onClick={handleSair} title="Sair" className={`${botaoBase} text-texto/50 hover:text-red-400 hover:bg-red-400/10`}>
+            <LogOut size={17} />
+          </button>
+        </div>
+      </nav>
 
-        <button
-          onClick={alternarTema}
-          title={tema === 'claro' ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
-          className={`${botaoBase} text-texto/50 hover:text-white hover:bg-white/10`}
-        >
-          {tema === 'claro' ? <Moon size={16} /> : <Sun size={16} />}
-        </button>
+      {/* Mobile: bolinha no canto que abre um menu retrátil, só com texto */}
+      <button
+        onClick={() => setAberto((v) => !v)}
+        className="sm:hidden fixed right-4 z-[60] w-14 h-14 rounded-full bg-azul text-white font-display font-semibold text-[13px] tracking-tight shadow-2xl shadow-azul/40 border border-white/10 flex items-center justify-center active:scale-95 transition"
+        style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+      >
+        {aberto ? 'Fechar' : 'Menu'}
+      </button>
 
-        <button onClick={handleSair} title="Sair" className={`${botaoBase} text-texto/50 hover:text-red-400 hover:bg-red-400/10`}>
-          <LogOut size={17} />
-        </button>
-      </div>
-    </nav>
+      {aberto && (
+        <div className="sm:hidden fixed inset-0 z-50 bg-bg/97 backdrop-blur-xl flex flex-col" onClick={() => setAberto(false)}>
+          <div className="flex-1 overflow-y-auto px-8 pt-20 pb-8" onClick={(e) => e.stopPropagation()}>
+            <a href={landing} className="block text-texto/40 font-mono text-sm mb-8" onClick={() => setAberto(false)}>
+              Slark
+            </a>
+
+            <div className="flex flex-col gap-1">
+              {menu.map(({ to, label, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  onClick={() => setAberto(false)}
+                  className={({ isActive }) =>
+                    `py-3 text-3xl font-display font-semibold tracking-tight transition ${isActive ? 'text-azul' : 'text-white/90'}`
+                  }
+                >
+                  {label}
+                </NavLink>
+              ))}
+
+              <NavLink
+                to="/perfil"
+                onClick={() => setAberto(false)}
+                className={({ isActive }) => `py-3 text-3xl font-display font-semibold tracking-tight transition ${isActive ? 'text-azul' : 'text-white/90'}`}
+              >
+                Perfil
+              </NavLink>
+            </div>
+          </div>
+
+          <div
+            className="px-8 pb-8 flex items-center gap-3"
+            style={{ paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom) + 1.5rem))' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={alternarTema}
+              className="flex-1 py-3.5 rounded-full bg-white/5 border border-white/10 text-texto/70 font-semibold text-sm"
+            >
+              {tema === 'claro' ? 'Modo escuro' : 'Modo claro'}
+            </button>
+            <button
+              onClick={handleSair}
+              className="flex-1 py-3.5 rounded-full bg-white/10 border border-white/10 text-white font-semibold text-sm"
+            >
+              Sair
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
