@@ -7,10 +7,10 @@ import {
   Camera, Loader2, Save, KeyRound, Check, User, ShieldCheck,
   Award, Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search,
 } from 'lucide-react'
-import seloCriativo from '../assets/selos/selo-criativo.svg'
-import seloDetalhista from '../assets/selos/selo-detalhista.svg'
-import seloObservador from '../assets/selos/selo-observador.svg'
-import seloRaciocinio from '../assets/selos/selo-raciocinio.svg'
+import seloCriativo from '../assets/selos/criativo.svg'
+import seloDetalhista from '../assets/selos/detalhista.svg'
+import seloObservador from '../assets/selos/observador.svg'
+import seloRaciocinio from '../assets/selos/raciocinio.svg'
 
 const ROTULO_PERFIL = {
   admin_slark: 'Equipe Slark',

@@ -5,14 +5,28 @@
 // Sinal sem dados suficientes (ex.: nenhuma chamada feita ainda) fica como
 // null e não entra na média — evita punir quem ainda não teve chance.
 
+// Pesos do termômetro: presença e trilha pesam o dobro de pontos.
+const PESO_PONTOS = 0.2
+const PESO_TRILHA = 0.4
+const PESO_PRESENCA = 0.4
+
 export function calcularScoreAluno({ pontos = 0, maxPontos = 0, blocosFeitos = 0, blocosTotais = 0, presentes = 0, totalChamadas = 0 }) {
   const pontosScore = maxPontos > 0 ? Math.round(Math.min(100, (pontos / maxPontos) * 100)) : null
   const trilhaScore = blocosTotais > 0 ? Math.round(Math.min(100, (blocosFeitos / blocosTotais) * 100)) : null
   const presencaScore = totalChamadas > 0 ? Math.round(Math.min(100, (presentes / totalChamadas) * 100)) : null
 
-  const partes = [pontosScore, trilhaScore, presencaScore].filter((v) => v != null)
-  const semDados = partes.length === 0
-  const geral = semDados ? 0 : Math.round(partes.reduce((s, v) => s + v, 0) / partes.length)
+  // Média ponderada só com os sinais que têm dado — os pesos dos sinais
+  // ausentes são redistribuídos proporcionalmente, pra não punir quem ainda
+  // não teve chamada feita, por exemplo.
+  const sinais = [
+    { valor: pontosScore, peso: PESO_PONTOS },
+    { valor: trilhaScore, peso: PESO_TRILHA },
+    { valor: presencaScore, peso: PESO_PRESENCA },
+  ].filter((s) => s.valor != null)
+
+  const semDados = sinais.length === 0
+  const pesoTotal = sinais.reduce((s, v) => s + v.peso, 0)
+  const geral = semDados ? 0 : Math.round(sinais.reduce((s, v) => s + v.valor * v.peso, 0) / pesoTotal)
 
   return { pontosScore, trilhaScore, presencaScore, geral, semDados }
 }
