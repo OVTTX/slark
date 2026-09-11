@@ -3,29 +3,17 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import AppLayout from '../components/AppLayout'
 import SeloFlor from '../components/SeloFlor'
+import SeloCaracteristica from '../components/SeloCaracteristica'
 import {
   Camera, Loader2, Save, KeyRound, Check, User, ShieldCheck,
   Award, Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search,
 } from 'lucide-react'
-import seloCriativo from '../assets/selos/criativo.svg'
-import seloDetalhista from '../assets/selos/detalhista.svg'
-import seloObservador from '../assets/selos/observador.svg'
-import seloRaciocinio from '../assets/selos/raciocinio.svg'
 
 const ROTULO_PERFIL = {
   admin_slark: 'Equipe Slark',
   diretor: 'Diretor',
   professor: 'Professor',
   aluno: 'Aluno',
-}
-
-// Selo de característica (o mesmo selo em formato de flor, com a letra da
-// característica) que aparece sobreposto na foto de perfil do aluno.
-const SELO_CARACTERISTICA = {
-  Criativo: seloCriativo,
-  Detalhista: seloDetalhista,
-  Observador: seloObservador,
-  Raciocínio: seloRaciocinio,
 }
 
 // selos antigos guardam um emoji em "icone" (ex: 🏆); os selos ligados a
@@ -169,7 +157,7 @@ export default function Perfil() {
     }
   }
 
-  const seloUrl = SELO_CARACTERISTICA[aluno?.caracteristicas?.nome]
+  const nomeCaracteristica = aluno?.caracteristicas?.nome
   const meses = mesesDesde(perfil?.criado_em)
   const admitidoEm = perfil?.criado_em
     ? new Date(perfil.criado_em).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
@@ -204,16 +192,16 @@ export default function Perfil() {
                 </button>
                 <input ref={inputArquivoRef} type="file" accept="image/*" onChange={trocarFoto} className="hidden" />
 
-                {seloUrl && (
-                  <img
-                    src={seloUrl}
-                    alt={`Selo ${aluno.caracteristicas.nome}`}
-                    className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-14 h-14 drop-shadow-lg"
+                {nomeCaracteristica && (
+                  <SeloCaracteristica
+                    nome={nomeCaracteristica}
+                    tamanho={56}
+                    className="absolute -bottom-4 left-1/2 -translate-x-1/2 drop-shadow-lg"
                   />
                 )}
               </div>
 
-              <div className={seloUrl ? 'mt-6' : 'mt-4'}>
+              <div className={nomeCaracteristica ? 'mt-6' : 'mt-4'}>
                 <div className="font-bold text-white text-lg">{perfil?.nome}</div>
                 <div className="text-sm text-texto/50">{perfil?.email}</div>
                 <span className="inline-flex mt-2 items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-azul/20 text-azul">
