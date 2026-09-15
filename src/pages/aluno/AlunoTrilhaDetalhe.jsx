@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import {
   ArrowLeft, ArrowRight, ArrowUpLeft, CheckCircle2,
-  Loader2, PartyPopper, Hand, Lock, Send,
+  Loader2, PartyPopper, Hand, Lock, Send, Paperclip, X as XIcon,
 } from 'lucide-react'
 import { ehIntroducao, numeroAula, proximoNumeroAula } from '../../lib/blocosAula'
 import SininhoNotificacoes from '../../components/SininhoNotificacoes'
@@ -19,9 +19,10 @@ const STATUS_COR = { pendente: '#8892B0', entregue: '#2E5BFF', corrigida: '#3FD0
 
 // Card compacto de atividade com formulário de entrega inline. Usado tanto
 // pro projeto final da trilha quanto pras atividades dentro de uma aula.
-function CardAtividade({ atividade, entrega, onEnviar }) {
+function CardAtividade({ atividade, entrega, alunoId, onEnviar }) {
   const [texto, setTexto] = useState(entrega?.texto || '')
   const [arquivoUrl, setArquivoUrl] = useState(entrega?.arquivo_url || '')
+  const [arquivo, setArquivo] = useState(null) // File escolhido agora, ainda não enviado
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState('')
 
@@ -30,14 +31,25 @@ function CardAtividade({ atividade, entrega, onEnviar }) {
 
   async function enviar(e) {
     e.preventDefault()
-    if (!texto.trim() && !arquivoUrl.trim()) return
+    if (!texto.trim() && !arquivoUrl.trim() && !arquivo) return
     setEnviando(true)
     setErro('')
     try {
-      await onEnviar({ texto: texto || null, arquivo_url: arquivoUrl || null })
+      let urlFinal = arquivoUrl || null
+      if (arquivo) {
+        const extensao = arquivo.name.split('.').pop()
+        const caminho = `${alunoId}/${atividade.id}-${Date.now()}.${extensao}`
+        const { error: eUpload } = await supabase.storage.from('entregas').upload(caminho, arquivo, { upsert: true })
+        if (eUpload) throw eUpload
+        const { data: publicUrlData } = supabase.storage.from('entregas').getPublicUrl(caminho)
+        urlFinal = publicUrlData.publicUrl
+      }
+      await onEnviar({ texto: texto || null, arquivo_url: urlFinal })
+      setArquivoUrl(urlFinal || '')
+      setArquivo(null)
     } catch (e) {
       console.error(e)
-      setErro('Não foi possível enviar sua entrega.')
+      setErro('Não foi possível enviar sua entrega. Tente um arquivo menor (até 10MB).')
     } finally {
       setEnviando(false)
     }
@@ -72,15 +84,30 @@ function CardAtividade({ atividade, entrega, onEnviar }) {
           {erro && <p className="text-xs text-red-400">{erro}</p>}
           <textarea
             value={texto} onChange={(e) => setTexto(e.target.value)}
-            placeholder="Sua resposta"
+            placeholder="Seu pitch"
             rows={3}
             className="w-full px-3.5 py-2.5 rounded-xl bg-card border border-azul/15 text-white text-sm placeholder:text-texto/30 focus:outline-none focus:border-azul transition resize-none"
           />
-          <input
-            value={arquivoUrl} onChange={(e) => setArquivoUrl(e.target.value)}
-            placeholder="Link do arquivo (opcional)"
-            className="w-full px-3.5 py-2.5 rounded-xl bg-card border border-azul/15 text-white text-sm placeholder:text-texto/30 focus:outline-none focus:border-azul transition"
-          />
+
+          <div>
+            <label className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-card border border-dashed border-azul/25 text-texto/60 text-sm cursor-pointer hover:border-azul/50 hover:text-white transition">
+              <Paperclip size={14} className="shrink-0" />
+              <span className="truncate">{arquivo ? arquivo.name : 'Anexar documentação (opcional)'}</span>
+              <input
+                type="file" className="hidden"
+                onChange={(e) => setArquivo(e.target.files?.[0] || null)}
+              />
+            </label>
+            {!arquivo && arquivoUrl && (
+              <div className="mt-1.5 flex items-center gap-2 text-xs text-texto/50">
+                <a href={arquivoUrl} target="_blank" rel="noopener" className="text-azul hover:underline truncate">Ver arquivo já enviado</a>
+                <button type="button" onClick={() => setArquivoUrl('')} className="text-texto/40 hover:text-red-400 transition shrink-0">
+                  <XIcon size={12} />
+                </button>
+              </div>
+            )}
+          </div>
+
           <button
             type="submit" disabled={enviando}
             className="flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-azul hover:bg-azul-puro text-white text-sm font-semibold transition disabled:opacity-60"
@@ -304,7 +331,7 @@ export default function AlunoTrilhaDetalhe() {
 
                 {projeto.revelado && (
                   <div className="mt-5 max-w-md">
-                    <CardAtividade atividade={projeto} entrega={entregaProjeto} onEnviar={(dados) => enviarEntrega(projeto, dados)} />
+                    <CardAtividade atividade={projeto} entrega={entregaProjeto} alunoId={alunoId} onEnviar={(dados) => enviarEntrega(projeto, dados)} />
                   </div>
                 )}
               </>
@@ -398,11 +425,19 @@ export default function AlunoTrilhaDetalhe() {
 
             {atividadeDaAula && (
               <div className="mt-6 max-w-md">
-                <CardAtividade
-                  atividade={atividadeDaAula}
-                  entrega={entregasPorAtividade[atividadeDaAula.id]}
-                  onEnviar={(dados) => enviarEntrega(atividadeDaAula, dados)}
-                />
+                {atividadeDaAula.revelado ? (
+                  <CardAtividade
+                    atividade={atividadeDaAula}
+                    entrega={entregasPorAtividade[atividadeDaAula.id]}
+                    alunoId={alunoId}
+                    onEnviar={(dados) => enviarEntrega(atividadeDaAula, dados)}
+                  />
+                ) : (
+                  <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-4 flex items-center gap-3">
+                    <Lock size={16} className="text-texto/40 shrink-0" />
+                    <p className="text-sm text-texto/50">Seu professor ainda vai liberar a missão dessa aula.</p>
+                  </div>
+                )}
               </div>
             )}
 

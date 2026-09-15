@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import {
   BookOpen, Plus, X, Loader2, FileText, Link2, File, Trash2, CheckCircle2, Eye, EyeOff,
-  FolderKanban, Save, Hand, Megaphone, Lock, Unlock, Pencil, Sparkles,
+  FolderKanban, Save, Hand, Megaphone, Lock, Unlock, Pencil, Sparkles, Library, Rocket, Target,
 } from 'lucide-react'
 import { ehIntroducao, rotuloAula, proximoNumeroAula, TEMPLATE_INTRODUCAO } from '../../lib/blocosAula'
 
@@ -37,9 +37,12 @@ export default function ProfessorTrilhas() {
         <button onClick={() => setAba('projetos')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'projetos' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
           Projetos
         </button>
+        <button onClick={() => setAba('biblioteca')} className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'biblioteca' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
+          <Library size={14} /> Biblioteca de Trilhas
+        </button>
       </div>
 
-      {aba === 'trilhas' ? <TrilhasLista /> : <Projetos />}
+      {aba === 'trilhas' ? <TrilhasLista /> : aba === 'projetos' ? <Projetos /> : <BibliotecaTrilhas />}
     </div>
   )
 }
@@ -611,6 +614,8 @@ function Projetos() {
   const [prazo, setPrazo] = useState('')
   const [salvando, setSalvando] = useState(false)
   const [alternandoRevelado, setAlternandoRevelado] = useState(false)
+  const [prazoEdit, setPrazoEdit] = useState('')
+  const [salvandoPrazo, setSalvandoPrazo] = useState(false)
 
   async function carregar() {
     if (!perfil?.id) return
@@ -651,6 +656,7 @@ function Projetos() {
 
   async function abrirProjeto(a) {
     setProjetoAtivo(a)
+    setPrazoEdit(a.prazo ? a.prazo.slice(0, 10) : '')
     setCarregandoEntregas(true)
     try {
       const { data, error } = await supabase.from('entregas').select('*, alunos(nome)').eq('atividade_id', a.id).order('entregue_em', { ascending: false, nullsFirst: false })
@@ -715,6 +721,23 @@ function Projetos() {
       setErro('Não foi possível alterar a visibilidade do projeto.')
     } finally {
       setAlternandoRevelado(false)
+    }
+  }
+
+  async function salvarPrazo() {
+    if (!projetoAtivo) return
+    setSalvandoPrazo(true)
+    try {
+      const novoPrazo = prazoEdit || null
+      const { error } = await supabase.from('atividades').update({ prazo: novoPrazo }).eq('id', projetoAtivo.id)
+      if (error) throw error
+      setProjetoAtivo((p) => ({ ...p, prazo: novoPrazo }))
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível salvar o prazo.')
+    } finally {
+      setSalvandoPrazo(false)
     }
   }
 
@@ -786,23 +809,36 @@ function Projetos() {
               </div>
             ) : (
               <>
-                {projetoAtivo.trilha_id && !projetoAtivo.bloco_id && (
+                {projetoAtivo.trilha_id && (
                   <div className="mb-4 rounded-2xl bg-card border p-4 flex items-center justify-between gap-3 flex-wrap">
                     <div className="flex items-center gap-2 text-sm text-texto/70">
                       {projetoAtivo.revelado ? <Unlock size={14} className="text-[#3FD08A]" /> : <Lock size={14} className="text-texto/50" />}
-                      {projetoAtivo.revelado
-                        ? 'Data do projeto visível pros alunos na trilha.'
-                        : 'Data do projeto escondida pros alunos (embaçada) até você revelar.'}
+                      {projetoAtivo.bloco_id
+                        ? (projetoAtivo.revelado ? 'Missão visível pros alunos dentro da aula.' : 'Missão escondida até você revelar.')
+                        : (projetoAtivo.revelado ? 'Data do projeto visível pros alunos na trilha.' : 'Data do projeto escondida pros alunos (embaçada) até você revelar.')}
                     </div>
-                    <button
-                      onClick={alternarRevelado} disabled={alternandoRevelado}
-                      className={`shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-60 ${
-                        projetoAtivo.revelado ? 'bg-white/5 text-white hover:bg-white/10' : 'bg-azul hover:bg-azul-puro text-white'
-                      }`}
-                    >
-                      {alternandoRevelado ? <Loader2 size={14} className="animate-spin" /> : projetoAtivo.revelado ? <Lock size={14} /> : <Unlock size={14} />}
-                      {projetoAtivo.revelado ? 'Esconder de novo' : 'Revelar pros alunos'}
-                    </button>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <input
+                        type="date" value={prazoEdit} onChange={(e) => setPrazoEdit(e.target.value)}
+                        className="px-3 py-2 rounded-lg bg-white/[0.03] border border-azul/15 text-white text-sm focus:outline-none focus:border-azul transition"
+                      />
+                      <button
+                        onClick={salvarPrazo} disabled={salvandoPrazo}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition disabled:opacity-60"
+                      >
+                        {salvandoPrazo ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                        Prazo
+                      </button>
+                      <button
+                        onClick={alternarRevelado} disabled={alternandoRevelado}
+                        className={`shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-60 ${
+                          projetoAtivo.revelado ? 'bg-white/5 text-white hover:bg-white/10' : 'bg-azul hover:bg-azul-puro text-white'
+                        }`}
+                      >
+                        {alternandoRevelado ? <Loader2 size={14} className="animate-spin" /> : projetoAtivo.revelado ? <Lock size={14} /> : <Unlock size={14} />}
+                        {projetoAtivo.revelado ? 'Esconder de novo' : 'Revelar pros alunos'}
+                      </button>
+                    </div>
                   </div>
                 )}
                 {carregandoEntregas ? (
@@ -906,6 +942,157 @@ function Projetos() {
                 {salvando ? 'Criando…' : 'Criar projeto'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Trilhas-modelo prontas da Slark (livros/apostilas): o professor escolhe uma
+// turma e publica uma cópia independente pra ela — dali em diante é uma
+// trilha normal, gerenciada como qualquer outra em "Trilhas".
+function BibliotecaTrilhas() {
+  const { perfil } = useAuth()
+  const [templates, setTemplates] = useState([])
+  const [salas, setSalas] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
+  const [templateAberto, setTemplateAberto] = useState(null)
+  const [salaEscolhida, setSalaEscolhida] = useState('')
+  const [publicando, setPublicando] = useState(false)
+  const [sucesso, setSucesso] = useState('')
+
+  async function carregar() {
+    if (!perfil?.id) return
+    setCarregando(true)
+    setErro('')
+    try {
+      const [{ data: templatesData, error: eTemplates }, { data: salasData }] = await Promise.all([
+        supabase
+          .from('trilhas')
+          .select('*, trilha_blocos(id, ordem, conteudo, tipo), atividades(id, titulo, bloco_id)')
+          .eq('eh_template', true)
+          .order('titulo'),
+        supabase.from('salas').select('id, nome').eq('professor_id', perfil.id),
+      ])
+      if (eTemplates) throw eTemplates
+      setTemplates((templatesData || []).map((t) => ({ ...t, blocos: (t.trilha_blocos || []).sort((a, b) => a.ordem - b.ordem) })))
+      setSalas(salasData || [])
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível carregar a biblioteca de trilhas. Confira a conexão com o Supabase.')
+    } finally {
+      setCarregando(false)
+    }
+  }
+
+  useEffect(() => { carregar() }, [perfil?.id])
+
+  function abrirPublicar(template) {
+    setTemplateAberto(template)
+    setSalaEscolhida(salas[0]?.id || '')
+    setSucesso('')
+  }
+
+  async function publicar(e) {
+    e.preventDefault()
+    if (!templateAberto || !salaEscolhida) return
+    setPublicando(true)
+    setErro('')
+    try {
+      const { error } = await supabase.rpc('publicar_trilha_template', {
+        p_template_id: templateAberto.id,
+        p_sala_id: salaEscolhida,
+      })
+      if (error) throw error
+      setSucesso(`Trilha publicada! Já aparece em "Trilhas" pra essa turma.`)
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível publicar essa trilha. Confira se a turma é sua.')
+    } finally {
+      setPublicando(false)
+    }
+  }
+
+  return (
+    <div className="mt-6">
+      <p className="text-sm text-texto/50 -mt-2 mb-6">Trilhas prontas da Slark, feitas a partir dos livros do Método. Publique uma cópia pra sua turma quando quiser começar.</p>
+
+      {erro && <p className="mb-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
+
+      {carregando ? (
+        <div className="text-texto/50">Carregando biblioteca…</div>
+      ) : templates.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
+          <Library className="mx-auto text-azul/60" size={40} />
+          <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">Nenhuma trilha-modelo disponível ainda.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {templates.map((t) => {
+            const aulas = t.blocos.filter((b) => !ehIntroducao(b))
+            const missoes = (t.atividades || []).filter((a) => a.bloco_id)
+            return (
+              <div key={t.id} className="rounded-2xl bg-card border p-6 flex flex-col transition hover:-translate-y-1 hover:border-azul/40">
+                <div className="flex items-center gap-2 text-azul text-xs font-semibold"><BookOpen size={13} /> Trilha da Slark</div>
+                <div className="font-bold text-white text-lg leading-snug mt-2">{t.titulo}</div>
+                <p className="text-texto/60 text-sm mt-2 line-clamp-3">{t.descricao}</p>
+                <div className="mt-4 flex items-center gap-4 text-xs text-texto/50">
+                  <span className="flex items-center gap-1.5"><FileText size={12} /> {aulas.length} aula(s)</span>
+                  <span className="flex items-center gap-1.5"><Rocket size={12} /> {missoes.length} missão(ões)</span>
+                </div>
+                <button
+                  onClick={() => abrirPublicar(t)}
+                  className="mt-5 pt-4 border-t flex items-center justify-center gap-2 text-sm font-semibold text-white bg-azul hover:bg-azul-puro rounded-lg py-2.5 transition"
+                >
+                  <Rocket size={15} /> Publicar para minha turma
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {templateAberto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setTemplateAberto(null)}>
+          <div className="w-full max-w-md rounded-2xl bg-bg-2 border p-7" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xl font-bold text-white">Publicar trilha</h2>
+              <button onClick={() => setTemplateAberto(null)} className="text-texto/50 hover:text-white transition"><X size={20} /></button>
+            </div>
+            <p className="text-sm text-texto/50 mb-6">{templateAberto.titulo}</p>
+
+            {sucesso ? (
+              <div className="rounded-xl bg-[#3FD08A]/10 border border-[#3FD08A]/30 p-4 text-sm text-[#3FD08A] flex items-center gap-2">
+                <CheckCircle2 size={16} /> {sucesso}
+              </div>
+            ) : salas.length === 0 ? (
+              <p className="text-sm text-texto/60">Você ainda não tem turmas. Crie uma turma antes de publicar.</p>
+            ) : (
+              <form onSubmit={publicar} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-texto/70 mb-1.5">Para qual turma?</label>
+                  <select
+                    required value={salaEscolhida} onChange={(e) => setSalaEscolhida(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
+                  >
+                    {salas.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                  </select>
+                </div>
+                <p className="text-xs text-texto/45 leading-relaxed flex items-start gap-1.5">
+                  <Target size={13} className="shrink-0 mt-0.5" />
+                  Vira uma cópia independente na sua turma. As missões começam escondidas — você revela cada uma, com prazo, na aba "Projetos".
+                </p>
+                <button
+                  type="submit" disabled={publicando}
+                  className="w-full mt-2 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/40 disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {publicando ? <Loader2 size={18} className="animate-spin" /> : <Rocket size={16} />}
+                  {publicando ? 'Publicando…' : 'Publicar'}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}
