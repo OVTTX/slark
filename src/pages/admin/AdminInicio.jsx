@@ -62,12 +62,12 @@ export default function AdminInicio() {
       ) : (
         <>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <Kpi icon={Building2} rotulo="Escolas" valor={m.escolas} cor="#2E5BFF" />
+            <Kpi icon={Building2} rotulo="Escolas" valor={m.escolas} cor="#0651C3" />
             <Kpi icon={Users} rotulo="Alunos no total" valor={m.alunos} cor="#3FD08A" />
             <Kpi icon={CreditCard} rotulo="Assinaturas ativas" valor={m.ativas} cor="#C44DFF" />
             <Kpi icon={DollarSign} rotulo="Receita recebida" valor={`R$ ${m.receita.toLocaleString('pt-BR')}`} cor="#F5C451" />
             <Kpi icon={TrendingUp} rotulo="Pagamentos pendentes" valor={m.pendentes} cor="#FF6B6B" />
-            <Kpi icon={Trophy} rotulo="Pontos Slark gerados" valor={m.pontos} cor="#2E5BFF" />
+            <Kpi icon={Trophy} rotulo="Pontos Slark gerados" valor={m.pontos} cor="#0651C3" />
           </div>
 
           <div className="mt-6 rounded-2xl bg-card/50 border p-6 text-sm text-texto/55">

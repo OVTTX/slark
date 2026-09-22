@@ -34,7 +34,7 @@ export default function MapaRadial({ dados, tamanho = 340 }) {
       <defs>
         <linearGradient id="tracoGradiente" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#6FA8FF" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="#0033FF" stopOpacity="0.92" />
+          <stop offset="100%" stopColor="#0B0697" stopOpacity="0.92" />
         </linearGradient>
       </defs>
 

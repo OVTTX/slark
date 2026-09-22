@@ -15,7 +15,7 @@ function formatarData(iso) {
 }
 
 const STATUS_ROTULO = { pendente: 'Pendente', entregue: 'Entregue', corrigida: 'Corrigida', atrasada: 'Atrasada' }
-const STATUS_COR = { pendente: '#8892B0', entregue: '#2E5BFF', corrigida: '#3FD08A', atrasada: '#FF6B6B' }
+const STATUS_COR = { pendente: '#8892B0', entregue: '#0651C3', corrigida: '#3FD08A', atrasada: '#FF6B6B' }
 
 // Card compacto de atividade com formulário de entrega inline. Usado tanto
 // pro projeto final da trilha quanto pras atividades dentro de uma aula.

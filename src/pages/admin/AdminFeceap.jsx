@@ -7,7 +7,7 @@ import {
 
 const MEMBROS = [
   { nome: 'Regis', papel: 'Orientador', cor: '#F5C451' },
-  { nome: 'Vitor Oliveira', papel: 'Idealização e liderança técnica', cor: '#2E5BFF' },
+  { nome: 'Vitor Oliveira', papel: 'Idealização e liderança técnica', cor: '#0651C3' },
   { nome: 'Victor Pinaso', papel: 'Gestão organizacional', cor: '#3FD08A' },
   { nome: 'Lincoln Xavier', papel: 'Pesquisa técnica e narrativa visual', cor: '#C44DFF' },
   { nome: 'Tomás Galvão', papel: 'Revisão científica e dados', cor: '#FF6B6B' },
@@ -15,7 +15,7 @@ const MEMBROS = [
 
 const COLUNAS = [
   { valor: 'a_fazer', rotulo: 'A Fazer', cor: '#8892B0' },
-  { valor: 'em_andamento', rotulo: 'Em Andamento', cor: '#2E5BFF' },
+  { valor: 'em_andamento', rotulo: 'Em Andamento', cor: '#0651C3' },
   { valor: 'em_revisao', rotulo: 'Em Revisão', cor: '#F5C451' },
   { valor: 'concluido', rotulo: 'Concluído', cor: '#3FD08A' },
 ]
@@ -27,7 +27,7 @@ const PRIORIDADES = [
 ]
 
 const TIPOS_EVENTO = [
-  { valor: 'reuniao', rotulo: 'Reunião', cor: '#2E5BFF' },
+  { valor: 'reuniao', rotulo: 'Reunião', cor: '#0651C3' },
   { valor: 'prazo', rotulo: 'Prazo', cor: '#FF6B6B' },
   { valor: 'apresentacao', rotulo: 'Apresentação', cor: '#C44DFF' },
   { valor: 'entrega', rotulo: 'Entrega', cor: '#3FD08A' },

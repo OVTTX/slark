@@ -6,6 +6,7 @@ import {
   Calendar, FileText, Building2, CreditCard, LogOut, ArrowLeft, ListChecks,
   Settings, Kanban, UserPlus, Bell,
 } from 'lucide-react'
+import LogoSlark from './LogoSlark'
 
 // Menus por perfil (espelham as telas do app real)
 const MENUS = {
@@ -79,8 +80,8 @@ export default function Sidebar() {
     <aside className="w-64 shrink-0 h-screen sticky top-0 bg-bg-2 border-r flex flex-col">
       {/* Logo */}
       <div className="px-6 py-6 border-b">
-        <a href={landing} className="font-mono font-semibold text-xl text-white tracking-tight">
-          SLARK<span className="text-azul">.</span>
+        <a href={landing} className="block w-28">
+          <LogoSlark className="w-full h-auto" />
         </a>
       </div>
 

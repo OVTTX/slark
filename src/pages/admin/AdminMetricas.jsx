@@ -282,7 +282,7 @@ export default function AdminMetricas() {
         <>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <Kpi icon={Users} rotulo="Alunos" valor={kpis.alunos} cor="#3FD08A" />
-            <Kpi icon={School} rotulo="Turmas" valor={kpis.turmas} cor="#2E5BFF" />
+            <Kpi icon={School} rotulo="Turmas" valor={kpis.turmas} cor="#0651C3" />
             <Kpi icon={GraduationCap} rotulo="Professores" valor={kpis.professores} cor="#F5C451" />
             <Kpi icon={Building2} rotulo="Escolas ativas" valor={kpis.escolasAtivas} cor="#C44DFF" />
           </div>
@@ -299,7 +299,7 @@ export default function AdminMetricas() {
                     <YAxis type="category" dataKey="nome" stroke="rgb(var(--c-texto) / .7)" fontSize={12} width={100} />
                     <Tooltip content={<TooltipEscuro />} cursor={{ fill: 'rgb(var(--c-onbg) / .04)' }} />
                     <Bar dataKey="quantidade" name="Alunos" radius={[0, 6, 6, 0]}>
-                      {distribuicaoCaracteristicas.map((c) => <Cell key={c.nome} fill={c.cor || '#2E5BFF'} />)}
+                      {distribuicaoCaracteristicas.map((c) => <Cell key={c.nome} fill={c.cor || '#0651C3'} />)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -316,7 +316,7 @@ export default function AdminMetricas() {
                   <Tooltip content={<TooltipEscuro />} cursor={{ fill: 'rgb(var(--c-onbg) / .04)' }} />
                   <Legend wrapperStyle={{ fontSize: 12, color: 'rgb(var(--c-texto))' }} />
                   <Bar yAxisId="selos" dataKey="selos" name="Selos concedidos" fill="#F5C451" radius={[4, 4, 0, 0]} barSize={18} />
-                  <Line yAxisId="pontos" type="monotone" dataKey="pontos" name="Pontos gerados" stroke="#2E5BFF" strokeWidth={2.5} dot={{ r: 3 }} />
+                  <Line yAxisId="pontos" type="monotone" dataKey="pontos" name="Pontos gerados" stroke="#0651C3" strokeWidth={2.5} dot={{ r: 3 }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </CardGrafico>
@@ -349,7 +349,7 @@ export default function AdminMetricas() {
                     <XAxis type="number" allowDecimals={false} stroke="rgb(var(--c-texto) / .5)" fontSize={12} />
                     <YAxis type="category" dataKey="nome" stroke="rgb(var(--c-texto) / .7)" fontSize={12} width={100} />
                     <Tooltip content={<TooltipEscuro />} cursor={{ fill: 'rgb(var(--c-onbg) / .04)' }} />
-                    <Bar dataKey="pontosMedios" name="Pontos médios" fill="#2E5BFF" radius={[0, 6, 6, 0]} />
+                    <Bar dataKey="pontosMedios" name="Pontos médios" fill="#0651C3" radius={[0, 6, 6, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}

@@ -8,7 +8,7 @@ import {
 const SENHA_PADRAO = 'Slark@2026'
 
 const FUNCOES = [
-  { valor: 'admin_slark', rotulo: 'Admin Slark', descricao: 'Acesso total ao painel, todas as escolas.', icon: ShieldCheck, cor: '#2E5BFF' },
+  { valor: 'admin_slark', rotulo: 'Admin Slark', descricao: 'Acesso total ao painel, todas as escolas.', icon: ShieldCheck, cor: '#0651C3' },
   { valor: 'diretor', rotulo: 'Diretor', descricao: 'Entra como diretor de uma escola específica.', icon: Building2, cor: '#F5C451' },
   { valor: 'professor', rotulo: 'Professor', descricao: 'Entra como professor de uma escola específica.', icon: GraduationCap, cor: '#3FD08A' },
 ]

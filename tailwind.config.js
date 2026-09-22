@@ -4,11 +4,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Cores de marca — fixas em qualquer tema
-        rosa: '#FBE3EA',
-        azul: '#2E5BFF',
-        'azul-puro': '#0033FF',
-        profundo: '#03005B',
+        // Cores de marca — manual SLARK RENEW — fixas em qualquer tema
+        rosa: '#0651C3', // alias legado, agora aponta pro azul vivo da marca
+        azul: '#0651C3',
+        'azul-puro': '#0B0697',
+        profundo: '#000026',
         // Cores de superfície/texto — trocam de valor conforme o tema (ver index.css)
         bg: 'rgb(var(--c-bg) / <alpha-value>)',
         'bg-2': 'rgb(var(--c-bg2) / <alpha-value>)',
@@ -17,11 +17,15 @@ export default {
         white: 'rgb(var(--c-onbg) / <alpha-value>)',
       },
       fontFamily: {
-        display: ['"Bricolage Grotesque"', 'sans-serif'],
-        serif: ['"Instrument Serif"', 'serif'],
-        mono: ['"Unbounded"', 'sans-serif'],
+        // Manual novo usa uma única família — Plus Jakarta Sans — pra título,
+        // subtítulo e texto corrido. Mantemos os 3 nomes de utilitário
+        // (display/serif/mono) já usados em todo o app, todos apontando
+        // pra mesma fonte, pra não precisar editar cada componente.
+        display: ['"Plus Jakarta Sans"', 'sans-serif'],
+        serif: ['"Plus Jakarta Sans"', 'sans-serif'],
+        mono: ['"Plus Jakarta Sans"', 'sans-serif'],
       },
-      borderColor: { DEFAULT: 'rgba(120,130,255,.16)' },
+      borderColor: { DEFAULT: 'rgba(90,120,220,.18)' },
     },
   },
   plugins: [],

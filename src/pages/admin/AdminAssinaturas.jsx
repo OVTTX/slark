@@ -122,7 +122,7 @@ export default function AdminAssinaturas() {
                   <td className="px-6 py-4 font-semibold text-white">{a.escolaNome}</td>
                   <td className="px-6 py-4">{badge(a.status)}</td>
                   <td className="px-6 py-4">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${a.plano === 'pro' ? 'bg-[#2E5BFF]/20 text-azul' : 'bg-white/10 text-texto/60'}`}>
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${a.plano === 'pro' ? 'bg-[#0651C3]/20 text-azul' : 'bg-white/10 text-texto/60'}`}>
                       {a.plano === 'pro' ? 'Slark Pro' : 'Slark Base'}
                     </span>
                   </td>

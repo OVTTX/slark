@@ -56,15 +56,15 @@ export default function CaminhoTrilha({ blocos, concluidos, atual, onSelecionar,
             style={{ cursor: clicavel ? 'pointer' : 'default' }}
           >
             {ehAtual && !compacto && (
-              <circle r={raio + 8} fill="none" stroke="#2E5BFF" strokeWidth={2} opacity={0.35}>
+              <circle r={raio + 8} fill="none" stroke="#0651C3" strokeWidth={2} opacity={0.35}>
                 <animate attributeName="r" values={`${raio + 4};${raio + 12};${raio + 4}`} dur="1.8s" repeatCount="indefinite" />
                 <animate attributeName="opacity" values="0.4;0;0.4" dur="1.8s" repeatCount="indefinite" />
               </circle>
             )}
             <circle
               r={raio}
-              fill={feito ? '#3FD08A' : ehAtual ? '#2E5BFF' : 'rgb(var(--c-card))'}
-              stroke={feito ? '#3FD08A' : ehAtual ? '#2E5BFF' : 'rgba(120,130,255,.35)'}
+              fill={feito ? '#3FD08A' : ehAtual ? '#0651C3' : 'rgb(var(--c-card))'}
+              stroke={feito ? '#3FD08A' : ehAtual ? '#0651C3' : 'rgba(120,130,255,.35)'}
               strokeWidth={2}
             />
             {feito ? (

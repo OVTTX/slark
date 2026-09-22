@@ -232,7 +232,7 @@ export default function ProfessorInicio() {
       ) : (
         <>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <StatCard icon={Users} cor="#2E5BFF" rotulo="Total de Alunos" valor={stats.totalAlunos} sub="Alunos ativos cadastrados" />
+            <StatCard icon={Users} cor="#0651C3" rotulo="Total de Alunos" valor={stats.totalAlunos} sub="Alunos ativos cadastrados" />
             <StatCard
               icon={GraduationCap} cor="#3FD08A" rotulo="Média Geral"
               valor={stats.mediaGeral != null ? `${stats.mediaGeral}%` : '—'}
@@ -318,7 +318,7 @@ export default function ProfessorInicio() {
                   <div className="space-y-4">
                     {atividades.map((a, i) => {
                       const Icone = a.tipo === 'trilha' ? Star : a.tipo === 'pontos' ? Trophy : a.tipo === 'alerta' ? AlertTriangle : Send
-                      const cor = a.tipo === 'alerta' ? '#F5C451' : a.tipo === 'trilha' ? '#C44DFF' : a.tipo === 'pontos' ? '#3FD08A' : '#2E5BFF'
+                      const cor = a.tipo === 'alerta' ? '#F5C451' : a.tipo === 'trilha' ? '#C44DFF' : a.tipo === 'pontos' ? '#3FD08A' : '#0651C3'
                       return (
                         <div key={i} className="flex items-start gap-3">
                           <span className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center mt-0.5" style={{ background: `${cor}22`, color: cor }}>

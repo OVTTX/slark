@@ -5,7 +5,7 @@ import { Calendar, Plus, X, Loader2, Trash2 } from 'lucide-react'
 
 const TIPOS = [
   { valor: 'atividade', rotulo: 'Atividade', cor: '#FF6B6B' },
-  { valor: 'reuniao', rotulo: 'Reunião', cor: '#2E5BFF' },
+  { valor: 'reuniao', rotulo: 'Reunião', cor: '#0651C3' },
   { valor: 'feriado', rotulo: 'Feriado', cor: '#3FD08A' },
   { valor: 'evento', rotulo: 'Evento', cor: '#C44DFF' },
 ]

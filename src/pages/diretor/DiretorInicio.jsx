@@ -68,7 +68,7 @@ export default function DiretorInicio() {
       ) : (
         <>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <Kpi icon={School} rotulo="Salas" valor={m.salas} cor="#2E5BFF" />
+            <Kpi icon={School} rotulo="Salas" valor={m.salas} cor="#0651C3" />
             <Kpi icon={GraduationCap} rotulo="Professores" valor={m.professores} cor="#C44DFF" />
             <Kpi icon={Users} rotulo="Alunos" valor={m.alunos} cor="#3FD08A" />
             <Kpi icon={Trophy} rotulo="Pontos Slark gerados" valor={m.pontos} cor="#F5C451" />

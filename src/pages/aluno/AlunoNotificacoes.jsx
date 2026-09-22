@@ -17,7 +17,7 @@ const ICONE_TIPO = {
 }
 
 const COR_TIPO = {
-  aula_nova: '#2E5BFF',
+  aula_nova: '#0651C3',
   preparacao: '#F5C451',
   pontos: '#3FD08A',
   selo: '#F5C451',

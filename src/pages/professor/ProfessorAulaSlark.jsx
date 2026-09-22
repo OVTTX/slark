@@ -47,7 +47,7 @@ const CATEGORIAS = [
   },
   {
     nome: 'Trabalho em equipe',
-    cor: '#2E5BFF',
+    cor: '#0651C3',
     dinamicas: [
       { titulo: 'Torre de espaguete', duracao: '25 min', material: 'Espaguete cru, fita crepe, barbante', descricao: 'Times competem para construir a torre mais alta que sustente um marshmallow no topo.' },
       { titulo: 'Quebra-cabeça cooperativo', duracao: '20 min', material: 'Peças de quebra-cabeça divididas entre grupos', descricao: 'Cada time recebe parte das peças e precisa negociar trocas com outros times para completar sua imagem.' },

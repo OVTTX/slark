@@ -8,7 +8,7 @@ import {
 
 const COLUNAS = [
   { valor: 'novo', rotulo: 'Novo', cor: '#8892B0' },
-  { valor: 'contatado', rotulo: 'Contatado', cor: '#2E5BFF' },
+  { valor: 'contatado', rotulo: 'Contatado', cor: '#0651C3' },
   { valor: 'negociando', rotulo: 'Negociando', cor: '#F5C451' },
   { valor: 'convertido', rotulo: 'Convertido', cor: '#3FD08A' },
   { valor: 'perdido', rotulo: 'Perdido', cor: '#FF6B6B' },

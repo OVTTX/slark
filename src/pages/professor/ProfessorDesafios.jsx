@@ -361,7 +361,7 @@ function Presenca() {
                             ) : (
                               <input
                                 type="checkbox" checked={selecionado} onChange={() => alternar(a.id)}
-                                style={{ accentColor: '#2E5BFF' }}
+                                style={{ accentColor: '#0651C3' }}
                                 className="w-4 h-4 shrink-0"
                               />
                             )}
