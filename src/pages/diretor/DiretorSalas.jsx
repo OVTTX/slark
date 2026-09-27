@@ -126,7 +126,7 @@ export default function DiretorSalas() {
                 </button>
               </div>
               <div className="mt-4 space-y-2 text-sm text-texto/70">
-                <div className="flex items-center gap-2"><GraduationCap size={14} className="text-texto/40" /> {s.professorNome || 'Sem professor'}</div>
+                <div className="flex items-center gap-2"><GraduationCap size={14} className="text-texto/40" /> {s.professorNome || 'Sem representante'}</div>
                 <div className="flex items-center gap-2"><Users size={14} className="text-texto/40" /> {s.qtdAlunos} alunos</div>
               </div>
             </div>
@@ -159,14 +159,17 @@ export default function DiretorSalas() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-texto/70 mb-1.5">Professor responsável</label>
+                <label className="block text-sm font-medium text-texto/70 mb-1.5">Professor representante (opcional)</label>
                 <select
                   value={form.professor_id} onChange={(e) => setForm({ ...form, professor_id: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
                 >
-                  <option value="">Sem professor</option>
+                  <option value="">Sem representante</option>
                   {professores.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
                 </select>
+                <p className="mt-1.5 text-xs text-texto/45">
+                  É só o professor de referência da turma. O responsável por cada matéria é definido em Matérias.
+                </p>
               </div>
               <button
                 type="submit" disabled={salvando}

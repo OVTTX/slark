@@ -3,17 +3,23 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import {
   GraduationCap, Plus, X, Loader2, Pencil, Trash2, Search, ChevronLeft, ChevronRight,
-  Power, AlertTriangle, Copy, Check, School,
+  Power, AlertTriangle, Copy, Check, School, Inbox, XCircle,
 } from 'lucide-react'
 
 const SENHA_PADRAO = 'Slark@2026'
 const POR_PAGINA = 10
 const FORM_VAZIO = { nome: '', email: '', escola_id: '' }
 
+function dominioDe(email) {
+  if (!email || !email.includes('@')) return null
+  return email.split('@')[1]?.toLowerCase() || null
+}
+
 export default function AdminProfessores() {
   const { perfil } = useAuth()
   const [professores, setProfessores] = useState([])
   const [escolas, setEscolas] = useState([])
+  const [solicitacoes, setSolicitacoes] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [busca, setBusca] = useState('')
@@ -27,18 +33,24 @@ export default function AdminProfessores() {
   const [paraExcluir, setParaExcluir] = useState(null)
   const [excluindo, setExcluindo] = useState(false)
 
+  const [aprovando, setAprovando] = useState(null) // solicitação sendo aprovada
+  const [emailAprovacao, setEmailAprovacao] = useState('')
+  const [processandoSolicitacao, setProcessandoSolicitacao] = useState(false)
+
   async function carregar() {
     setCarregando(true)
     setErro('')
     try {
-      const [{ data: profData, error: e1 }, { data: escolasData, error: e2 }, { data: salasData, error: e3 }] = await Promise.all([
+      const [{ data: profData, error: e1 }, { data: escolasData, error: e2 }, { data: salasData, error: e3 }, { data: solicitacoesData, error: e4 }] = await Promise.all([
         supabase.from('usuarios').select('*').eq('perfil', 'professor').order('nome'),
-        supabase.from('escolas').select('id, nome').order('nome'),
+        supabase.from('escolas').select('id, nome, responsavel_email').order('nome'),
         supabase.from('salas').select('id, professor_id'),
+        supabase.from('solicitacoes_professor').select('*').eq('status', 'pendente').order('criado_em'),
       ])
       if (e1) throw e1
       if (e2) throw e2
       if (e3) throw e3
+      if (e4) throw e4
 
       const escolaPorId = Object.fromEntries((escolasData || []).map((e) => [e.id, e]))
       const turmasPorProfessor = {}
@@ -52,6 +64,7 @@ export default function AdminProfessores() {
         qtdTurmas: turmasPorProfessor[p.id] || 0,
       })))
       setEscolas(escolasData || [])
+      setSolicitacoes((solicitacoesData || []).map((s) => ({ ...s, escolaNome: escolaPorId[s.escola_id]?.nome || '—', dominio: dominioDe(escolaPorId[s.escola_id]?.responsavel_email) })))
     } catch (e) {
       console.error(e)
       setErro('Não foi possível carregar os professores. Confira a conexão com o Supabase.')
@@ -61,6 +74,59 @@ export default function AdminProfessores() {
   }
 
   useEffect(() => { carregar() }, [])
+
+  function abrirAprovacao(s) {
+    setAprovando(s)
+    const primeiroNome = s.nome.trim().split(/\s+/)[0]?.toLowerCase() || ''
+    setEmailAprovacao(s.dominio ? `${primeiroNome}@${s.dominio}` : '')
+  }
+
+  async function confirmarAprovacao(e) {
+    e.preventDefault()
+    if (!aprovando) return
+    setProcessandoSolicitacao(true)
+    setErro('')
+    try {
+      const email = emailAprovacao.trim().toLowerCase()
+      const { data, error } = await supabase.functions.invoke('admin-usuarios', {
+        body: { acao: 'criar_professor', nome: aprovando.nome, email, escola_id: aprovando.escola_id },
+      })
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+
+      const { error: eUpdate } = await supabase.from('solicitacoes_professor').update({
+        status: 'aprovado', email, decidido_por: perfil.id, decidido_em: new Date().toISOString(),
+      }).eq('id', aprovando.id)
+      if (eUpdate) throw eUpdate
+
+      const escolaNome = escolas.find((esc) => esc.id === aprovando.escola_id)?.nome
+      setCriadoComSucesso({ nome: aprovando.nome, email, escolaNome })
+      setAprovando(null)
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro(e.message || 'Não foi possível aprovar essa solicitação.')
+    } finally {
+      setProcessandoSolicitacao(false)
+    }
+  }
+
+  async function rejeitarSolicitacao(s) {
+    setProcessandoSolicitacao(true)
+    setErro('')
+    try {
+      const { error } = await supabase.from('solicitacoes_professor').update({
+        status: 'rejeitado', decidido_por: perfil.id, decidido_em: new Date().toISOString(),
+      }).eq('id', s.id)
+      if (error) throw error
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível rejeitar essa solicitação.')
+    } finally {
+      setProcessandoSolicitacao(false)
+    }
+  }
 
   const professoresFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase()
@@ -184,6 +250,39 @@ export default function AdminProfessores() {
       </div>
 
       {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
+
+      {solicitacoes.length > 0 && (
+        <div className="mt-6 rounded-2xl bg-[#F5C451]/10 border border-[#F5C451]/25 p-6">
+          <div className="flex items-center gap-2 text-[#F5C451] font-semibold">
+            <Inbox size={16} /> {solicitacoes.length} solicitação{solicitacoes.length > 1 ? 'ões' : ''} de professor pendente{solicitacoes.length > 1 ? 's' : ''}
+          </div>
+          <div className="mt-4 space-y-2">
+            {solicitacoes.map((s) => (
+              <div key={s.id} className="flex items-center justify-between gap-3 rounded-xl bg-white/[0.04] px-4 py-3">
+                <div className="min-w-0">
+                  <div className="font-semibold text-white truncate">{s.nome}</div>
+                  <div className="flex items-center gap-1.5 text-xs text-texto/50 truncate"><School size={11} /> {s.escolaNome}</div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => rejeitarSolicitacao(s)} disabled={processandoSolicitacao}
+                    className="p-2 rounded-lg text-texto/60 hover:text-red-400 hover:bg-red-400/10 transition disabled:opacity-40"
+                    title="Rejeitar"
+                  >
+                    <XCircle size={17} />
+                  </button>
+                  <button
+                    onClick={() => abrirAprovacao(s)} disabled={processandoSolicitacao}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#3FD08A] hover:bg-[#35b877] text-black text-sm font-semibold transition disabled:opacity-40"
+                  >
+                    <Check size={14} /> Aprovar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {criadoComSucesso && (
         <div className="mt-6 rounded-2xl bg-[#3FD08A]/10 border border-[#3FD08A]/25 p-5">
@@ -333,6 +432,43 @@ export default function AdminProfessores() {
               >
                 {salvando && <Loader2 size={18} className="animate-spin" />}
                 {salvando ? 'Salvando…' : editando ? 'Salvar alterações' : 'Criar professor'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {aprovando && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setAprovando(null)}>
+          <div className="w-full max-w-md rounded-2xl bg-bg-2 border p-7" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">Aprovar {aprovando.nome}</h2>
+              <button onClick={() => setAprovando(null)} className="text-texto/50 hover:text-white transition"><X size={20} /></button>
+            </div>
+            <form onSubmit={confirmarAprovacao} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-texto/70 mb-1.5">E-mail (no domínio da escola)</label>
+                <input
+                  required type="email" autoFocus value={emailAprovacao} onChange={(e) => setEmailAprovacao(e.target.value)}
+                  placeholder={aprovando.dominio ? `nome@${aprovando.dominio}` : 'nome@escola.com.br'}
+                  className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
+                />
+                {aprovando.dominio && (
+                  <p className="mt-1.5 text-xs text-texto/45">Domínio sugerido a partir do e-mail do responsável pela escola: <span className="text-texto/70">{aprovando.dominio}</span></p>
+                )}
+              </div>
+              <div className="rounded-xl bg-white/[0.03] border border-azul/10 p-4 text-sm text-texto/60 flex items-center justify-between gap-3">
+                <span>Senha provisória: <span className="text-white font-mono">{SENHA_PADRAO}</span></span>
+                <button type="button" onClick={copiarSenha} className="shrink-0 p-1.5 rounded-lg text-texto/50 hover:text-white hover:bg-white/10 transition" title="Copiar senha">
+                  {copiado ? <Check size={14} className="text-[#3FD08A]" /> : <Copy size={14} />}
+                </button>
+              </div>
+              <button
+                type="submit" disabled={processandoSolicitacao}
+                className="w-full mt-2 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/40 disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {processandoSolicitacao && <Loader2 size={18} className="animate-spin" />}
+                {processandoSolicitacao ? 'Criando…' : 'Criar acesso e aprovar'}
               </button>
             </form>
           </div>

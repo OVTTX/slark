@@ -15,9 +15,28 @@ export default function ProfessorSalas() {
       setCarregando(true)
       setErro('')
       try {
-        const { data: salasData, error: eSalas } = await supabase.from('salas').select('*').eq('professor_id', perfil.id).order('nome')
-        if (eSalas) throw eSalas
-        const salaIds = (salasData || []).map((s) => s.id)
+        // Uma sala aparece aqui se o professor for o representante dela OU se
+        // lecionar alguma matéria nela (atribuição feita pelo diretor em
+        // Matérias) — as duas coisas agora são independentes.
+        const [{ data: comoRepresentante, error: eRepresentante }, { data: materiasDoProf, error: eMaterias }] = await Promise.all([
+          supabase.from('salas').select('*').eq('professor_id', perfil.id),
+          supabase.from('sala_materias').select('sala_id').eq('professor_id', perfil.id),
+        ])
+        if (eRepresentante) throw eRepresentante
+        if (eMaterias) throw eMaterias
+
+        const idsComoMateria = [...new Set((materiasDoProf || []).map((m) => m.sala_id))].filter(
+          (id) => !(comoRepresentante || []).some((s) => s.id === id)
+        )
+        let salasComoMateria = []
+        if (idsComoMateria.length > 0) {
+          const { data, error } = await supabase.from('salas').select('*').in('id', idsComoMateria)
+          if (error) throw error
+          salasComoMateria = data || []
+        }
+
+        const salasData = [...(comoRepresentante || []), ...salasComoMateria].sort((a, b) => a.nome.localeCompare(b.nome))
+        const salaIds = salasData.map((s) => s.id)
 
         let alunosPorSala = {}
         let atividadesPorSala = {}
@@ -52,7 +71,7 @@ export default function ProfessorSalas() {
   return (
     <div>
       <h1 className="text-4xl font-bold text-white tracking-tight">Minhas Salas</h1>
-      <p className="mt-2 text-texto/60">As turmas sob sua responsabilidade.</p>
+      <p className="mt-2 text-texto/60">Turmas onde você é o representante ou leciona alguma matéria.</p>
 
       {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 
@@ -62,7 +81,7 @@ export default function ProfessorSalas() {
         <div className="mt-10 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
           <School className="mx-auto text-azul/60" size={40} />
           <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">
-            Você ainda não é responsável por nenhuma sala. Peça ao diretor da sua escola para vincular você.
+            Você ainda não está vinculado a nenhuma sala. Peça ao diretor da sua escola para te tornar representante de uma turma ou te atribuir uma matéria.
           </p>
         </div>
       ) : (

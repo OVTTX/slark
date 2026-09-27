@@ -186,7 +186,7 @@ export default function AdminTurmas() {
                 <tr className="text-left text-texto/50 border-b">
                   <th className="px-6 py-4 font-medium">Turma</th>
                   <th className="px-6 py-4 font-medium">Escola</th>
-                  <th className="px-6 py-4 font-medium">Professor</th>
+                  <th className="px-6 py-4 font-medium">Representante</th>
                   <th className="px-6 py-4 font-medium">Alunos</th>
                   <th className="px-6 py-4 font-medium text-right">Ações</th>
                 </tr>
@@ -199,7 +199,7 @@ export default function AdminTurmas() {
                       {t.serie && <div className="text-xs text-texto/45 mt-0.5">{t.serie}</div>}
                     </td>
                     <td className="px-6 py-4 text-texto/70">{t.escolaNome}</td>
-                    <td className="px-6 py-4 text-texto/70">{t.professorNome || <span className="text-texto/40 text-xs">Sem professor</span>}</td>
+                    <td className="px-6 py-4 text-texto/70">{t.professorNome || <span className="text-texto/40 text-xs">Sem representante</span>}</td>
                     <td className="px-6 py-4 text-texto/70">
                       <div className="flex items-center gap-1.5"><Users size={13} className="text-texto/40" /> {t.qtdAlunos}</div>
                     </td>
@@ -269,18 +269,21 @@ export default function AdminTurmas() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-texto/70 mb-1.5">Professor (opcional)</label>
+                <label className="block text-sm font-medium text-texto/70 mb-1.5">Professor representante (opcional)</label>
                 <select
                   value={form.professor_id} onChange={(e) => setForm({ ...form, professor_id: e.target.value })}
                   disabled={!form.escola_id}
                   className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition disabled:opacity-50"
                 >
-                  <option value="">Sem professor</option>
+                  <option value="">Sem representante</option>
                   {professoresDaEscola.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
                 </select>
                 {form.escola_id && professoresDaEscola.length === 0 && (
                   <p className="mt-1.5 text-xs text-texto/45">Essa escola ainda não tem professores cadastrados.</p>
                 )}
+                <p className="mt-1.5 text-xs text-texto/45">
+                  É só o professor de referência da turma. O responsável por cada matéria é definido pelo diretor em Matérias.
+                </p>
               </div>
 
               <button
