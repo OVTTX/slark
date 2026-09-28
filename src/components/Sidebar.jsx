@@ -13,7 +13,7 @@ const MENUS = {
   admin_slark: [
     { to: '/admin', label: 'Visão Geral', icon: LayoutGrid, end: true },
     { to: '/admin/escolas', label: 'Escolas', icon: Building2 },
-    { to: '/admin/alunos', label: 'Alunos', icon: Users },
+    { to: '/admin/alunos', label: 'Alunos e Turmas', icon: Users },
     { to: '/admin/pontuacao', label: 'Pontuação Global', icon: Trophy },
     { to: '/admin/assinaturas', label: 'Assinaturas', icon: CreditCard },
     { to: '/admin/pagamentos', label: 'Pagamentos', icon: DollarSign },
@@ -34,9 +34,7 @@ const MENUS = {
   professor: [
     { to: '/professor', label: 'Dashboard', icon: LayoutGrid, end: true },
     { to: '/professor/salas', label: 'Salas', icon: School },
-    { to: '/professor/alunos', label: 'Alunos', icon: Users },
     { to: '/professor/observacoes', label: 'Observações', icon: Eye },
-    { to: '/professor/equipes', label: 'Equipes', icon: UsersRound },
     { to: '/professor/insignias', label: 'Insígnias', icon: Award },
     { to: '/professor/desafios', label: 'Desafios', icon: Target },
     { to: '/professor/placar', label: 'Placar Equipes', icon: Trophy },

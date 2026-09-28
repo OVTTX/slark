@@ -8,8 +8,7 @@ import Perfil from './pages/Perfil'
 import AdminInicio from './pages/admin/AdminInicio'
 import AdminMetricas from './pages/admin/AdminMetricas'
 import AdminEscolas from './pages/admin/AdminEscolas'
-import AdminAlunos from './pages/admin/AdminAlunos'
-import AdminTurmas from './pages/admin/AdminTurmas'
+import AdminAlunosTurmas from './pages/admin/AdminAlunosTurmas'
 import AdminProfessores from './pages/admin/AdminProfessores'
 import AdminPontuacao from './pages/admin/AdminPontuacao'
 import AdminFinanceiro from './pages/admin/AdminFinanceiro'
@@ -27,9 +26,8 @@ import DiretorNotas from './pages/diretor/DiretorNotas'
 import DiretorRanking from './pages/diretor/DiretorRanking'
 import ProfessorInicio from './pages/professor/ProfessorInicio'
 import ProfessorSalas from './pages/professor/ProfessorSalas'
-import ProfessorAlunos from './pages/professor/ProfessorAlunos'
+import ProfessorSalaDetalhe from './pages/professor/ProfessorSalaDetalhe'
 import ProfessorObservacoes from './pages/professor/ProfessorObservacoes'
-import ProfessorEquipes from './pages/professor/ProfessorEquipes'
 import ProfessorDesafios from './pages/professor/ProfessorDesafios'
 import ProfessorRelatorios from './pages/professor/ProfessorRelatorios'
 import ProfessorTrilhas from './pages/professor/ProfessorTrilhas'
@@ -63,8 +61,8 @@ export default function App() {
           <Route path="/admin" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminInicio /></AppLayout></RotaProtegida>} />
           <Route path="/admin/metricas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminMetricas /></AppLayout></RotaProtegida>} />
           <Route path="/admin/escolas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminEscolas /></AppLayout></RotaProtegida>} />
-          <Route path="/admin/alunos" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminAlunos /></AppLayout></RotaProtegida>} />
-          <Route path="/admin/turmas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminTurmas /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/alunos" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminAlunosTurmas abaInicial="alunos" /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/turmas" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminAlunosTurmas abaInicial="turmas" /></AppLayout></RotaProtegida>} />
           <Route path="/admin/professores" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminProfessores /></AppLayout></RotaProtegida>} />
           <Route path="/admin/pontuacao" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminPontuacao /></AppLayout></RotaProtegida>} />
           <Route path="/admin/financeiro" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminFinanceiro /></AppLayout></RotaProtegida>} />
@@ -86,9 +84,10 @@ export default function App() {
           {/* ---------- PROFESSOR ---------- */}
           <Route path="/professor" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorInicio /></AppLayout></RotaProtegida>} />
           <Route path="/professor/salas" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorSalas /></AppLayout></RotaProtegida>} />
-          <Route path="/professor/alunos" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorAlunos /></AppLayout></RotaProtegida>} />
+          <Route path="/professor/salas/:id" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorSalaDetalhe /></AppLayout></RotaProtegida>} />
+          <Route path="/professor/alunos" element={<Navigate to="/professor/salas" replace />} />
           <Route path="/professor/observacoes" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorObservacoes /></AppLayout></RotaProtegida>} />
-          <Route path="/professor/equipes" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorEquipes /></AppLayout></RotaProtegida>} />
+          <Route path="/professor/equipes" element={<Navigate to="/professor/salas" replace />} />
           <Route path="/professor/desafios" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorDesafios /></AppLayout></RotaProtegida>} />
           <Route path="/professor/relatorios" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorRelatorios /></AppLayout></RotaProtegida>} />
           <Route path="/professor/trilhas" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorTrilhas /></AppLayout></RotaProtegida>} />

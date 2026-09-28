@@ -18,7 +18,7 @@ const MENUS = {
     { to: '/admin/escolas', label: 'Escolas', icon: Building2 },
     { to: '/admin/turmas', label: 'Turmas', icon: School },
     { to: '/admin/professores', label: 'Professores', icon: GraduationCap },
-    { to: '/admin/alunos', label: 'Alunos', icon: Users },
+    { to: '/admin/alunos', label: 'Alunos e Turmas', icon: Users },
     { to: '/admin/pontuacao', label: 'Pontuação Global', icon: Trophy },
     { to: '/admin/financeiro', label: 'Financeiro', icon: Wallet },
     { to: '/admin/leads', label: 'Leads', icon: UserPlus },
@@ -39,9 +39,7 @@ const MENUS = {
   professor: [
     { to: '/professor', label: 'Dashboard', icon: LayoutGrid, end: true },
     { to: '/professor/salas', label: 'Salas', icon: School },
-    { to: '/professor/alunos', label: 'Alunos', icon: Users },
     { to: '/professor/observacoes', label: 'Observações', icon: Eye },
-    { to: '/professor/equipes', label: 'Equipes', icon: UsersRound },
     { to: '/professor/desafios', label: 'Desafios', icon: Target },
     { to: '/professor/relatorios', label: 'Relatórios', icon: BarChart3 },
     { to: '/professor/trilhas', label: 'Trilhas', icon: BookOpen },

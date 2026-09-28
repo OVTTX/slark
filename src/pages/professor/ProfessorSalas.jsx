@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { School, Users, BookOpen, ClipboardList } from 'lucide-react'
@@ -71,7 +72,7 @@ export default function ProfessorSalas() {
   return (
     <div>
       <h1 className="text-4xl font-bold text-white tracking-tight">Minhas Salas</h1>
-      <p className="mt-2 text-texto/60">Turmas onde você é o representante ou leciona alguma matéria.</p>
+      <p className="mt-2 text-texto/60">Turmas onde você é o representante ou leciona alguma matéria. Clique numa sala pra ver os alunos e organizar as equipes.</p>
 
       {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 
@@ -87,7 +88,7 @@ export default function ProfessorSalas() {
       ) : (
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {salas.map((s) => (
-            <div key={s.id} className="rounded-2xl bg-card border p-6 transition hover:-translate-y-1 hover:border-azul/40">
+            <Link key={s.id} to={`/professor/salas/${s.id}`} className="block rounded-2xl bg-card border p-6 transition hover:-translate-y-1 hover:border-azul/40">
               <div className="font-bold text-white text-lg">{s.nome}</div>
               {s.serie && <div className="text-texto/50 text-sm">{s.serie}</div>}
               <div className="mt-5 grid grid-cols-3 gap-2 text-center">
@@ -107,7 +108,7 @@ export default function ProfessorSalas() {
                   <div className="text-[11px] text-texto/45">trilhas</div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
