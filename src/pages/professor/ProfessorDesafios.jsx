@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { salasDoProfessor } from '../../lib/salasProfessor'
 import {
   Target, Loader2, Trophy, CalendarCheck, Users, Check,
   Award, Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search,
@@ -58,7 +59,7 @@ function Desafios() {
     setCarregando(true)
     setErro('')
     try {
-      const { data: salasData, error: eSalas } = await supabase.from('salas').select('id').eq('professor_id', perfil.id)
+      const { data: salasData, error: eSalas } = await salasDoProfessor(perfil.id, 'id')
       if (eSalas) throw eSalas
       const salaIds = (salasData || []).map((s) => s.id)
       if (salaIds.length === 0) { setAlunos([]); return }
@@ -206,7 +207,7 @@ function Presenca() {
   useEffect(() => {
     if (!perfil?.id) return
     async function carregarSalas() {
-      const { data: salasData, error } = await supabase.from('salas').select('id, nome').eq('professor_id', perfil.id).order('nome')
+      const { data: salasData, error } = await salasDoProfessor(perfil.id, 'id, nome')
       if (!error) {
         setSalas(salasData || [])
         if (salasData?.length && !salaId) setSalaId(salasData[0].id)
@@ -408,7 +409,7 @@ function Selos() {
     try {
       const [{ data: selosData, error: eSelos }, { data: salasData, error: eSalas }] = await Promise.all([
         supabase.from('selos').select('*').order('pontos_necessarios'),
-        supabase.from('salas').select('id').eq('professor_id', perfil.id),
+        salasDoProfessor(perfil.id, 'id'),
       ])
       if (eSelos) throw eSelos
       if (eSalas) throw eSalas

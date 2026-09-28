@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { salasDoProfessor } from '../../lib/salasProfessor'
 import { Sparkles, Plus, X, Loader2, Trash2, Wand2 } from 'lucide-react'
 
 const MODELO_SUGERIDO = `Objetivo da aula:
@@ -37,7 +38,7 @@ export default function ProfessorPlanosIA() {
     setErro('')
     try {
       const [{ data: salasData, error: eSalas }, { data: planosData, error: ePlanos }] = await Promise.all([
-        supabase.from('salas').select('id, nome').eq('professor_id', perfil.id),
+        salasDoProfessor(perfil.id, 'id, nome'),
         supabase.from('planos_aula').select('*').eq('professor_id', perfil.id).order('criado_em', { ascending: false }),
       ])
       if (eSalas) throw eSalas

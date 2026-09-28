@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { salasDoProfessor } from '../../lib/salasProfessor'
 import {
   Eye, Loader2, Search, Sparkles, Wand2, Award, Crown, Brain, Lightbulb,
   MessageCircle, HeartHandshake, RefreshCcw, Check,
@@ -35,7 +36,7 @@ export default function ProfessorObservacoes() {
       setCarregando(true)
       setErro('')
       try {
-        const { data: salasData, error: eSalas } = await supabase.from('salas').select('id, nome').eq('professor_id', perfil.id)
+        const { data: salasData, error: eSalas } = await salasDoProfessor(perfil.id, 'id, nome')
         if (eSalas) throw eSalas
         const salaIds = (salasData || []).map((s) => s.id)
         const salaPorId = Object.fromEntries((salasData || []).map((s) => [s.id, s]))

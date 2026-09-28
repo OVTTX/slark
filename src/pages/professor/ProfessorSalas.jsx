@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { School, Users, BookOpen, ClipboardList } from 'lucide-react'
+import { salasDoProfessor } from '../../lib/salasProfessor'
 
 export default function ProfessorSalas() {
   const { perfil } = useAuth()
@@ -16,28 +17,9 @@ export default function ProfessorSalas() {
       setCarregando(true)
       setErro('')
       try {
-        // Uma sala aparece aqui se o professor for o representante dela OU se
-        // lecionar alguma matéria nela (atribuição feita pelo diretor em
-        // Matérias) — as duas coisas agora são independentes.
-        const [{ data: comoRepresentante, error: eRepresentante }, { data: materiasDoProf, error: eMaterias }] = await Promise.all([
-          supabase.from('salas').select('*').eq('professor_id', perfil.id),
-          supabase.from('sala_materias').select('sala_id').eq('professor_id', perfil.id),
-        ])
-        if (eRepresentante) throw eRepresentante
-        if (eMaterias) throw eMaterias
-
-        const idsComoMateria = [...new Set((materiasDoProf || []).map((m) => m.sala_id))].filter(
-          (id) => !(comoRepresentante || []).some((s) => s.id === id)
-        )
-        let salasComoMateria = []
-        if (idsComoMateria.length > 0) {
-          const { data, error } = await supabase.from('salas').select('*').in('id', idsComoMateria)
-          if (error) throw error
-          salasComoMateria = data || []
-        }
-
-        const salasData = [...(comoRepresentante || []), ...salasComoMateria].sort((a, b) => a.nome.localeCompare(b.nome))
-        const salaIds = salasData.map((s) => s.id)
+        const { data: salasData, error: eSalas } = await salasDoProfessor(perfil.id)
+        if (eSalas) throw eSalas
+        const salaIds = (salasData || []).map((s) => s.id)
 
         let alunosPorSala = {}
         let atividadesPorSala = {}

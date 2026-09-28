@@ -6,6 +6,7 @@ import {
   FolderKanban, Save, Hand, Megaphone, Lock, Unlock, Pencil, Sparkles, Library, Rocket, Target,
 } from 'lucide-react'
 import { ehIntroducao, rotuloAula, proximoNumeroAula, TEMPLATE_INTRODUCAO } from '../../lib/blocosAula'
+import { salasDoProfessor } from '../../lib/salasProfessor'
 
 const STATUS_TRILHA = [
   { valor: 'rascunho', rotulo: 'Rascunho', cor: '#8892B0' },
@@ -66,7 +67,7 @@ function TrilhasLista() {
     setErro('')
     try {
       const [{ data: salasData, error: eSalas }, { data: materiasData }] = await Promise.all([
-        supabase.from('salas').select('id, nome').eq('professor_id', perfil.id),
+        salasDoProfessor(perfil.id, 'id, nome'),
         supabase.from('materias').select('id, nome').eq('escola_id', perfil.escola_id),
       ])
       if (eSalas) throw eSalas
@@ -623,7 +624,7 @@ function Projetos() {
     setErro('')
     try {
       const [{ data: salasData, error: eSalas }, { data: trilhasData }] = await Promise.all([
-        supabase.from('salas').select('id, nome').eq('professor_id', perfil.id),
+        salasDoProfessor(perfil.id, 'id, nome'),
         supabase.from('trilhas').select('id, titulo').eq('professor_id', perfil.id),
       ])
       if (eSalas) throw eSalas
@@ -974,7 +975,7 @@ function BibliotecaTrilhas() {
           .select('*, trilha_blocos(id, ordem, conteudo, tipo), atividades(id, titulo, bloco_id)')
           .eq('eh_template', true)
           .order('titulo'),
-        supabase.from('salas').select('id, nome').eq('professor_id', perfil.id),
+        salasDoProfessor(perfil.id, 'id, nome'),
       ])
       if (eTemplates) throw eTemplates
       setTemplates((templatesData || []).map((t) => ({ ...t, blocos: (t.trilha_blocos || []).sort((a, b) => a.ordem - b.ordem) })))

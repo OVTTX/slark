@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { salasDoProfessor } from '../../lib/salasProfessor'
 import { Award, Loader2, Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search } from 'lucide-react'
 
 // selos antigos guardam um emoji em "icone" (ex: 🏆); os selos ligados a
@@ -33,7 +34,7 @@ export default function ProfessorInsignias() {
     try {
       const [{ data: selosData, error: eSelos }, { data: salasData, error: eSalas }] = await Promise.all([
         supabase.from('selos').select('*').order('pontos_necessarios'),
-        supabase.from('salas').select('id').eq('professor_id', perfil.id),
+        salasDoProfessor(perfil.id, 'id'),
       ])
       if (eSelos) throw eSelos
       if (eSalas) throw eSalas

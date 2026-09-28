@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { salasDoProfessor } from '../../lib/salasProfessor'
 import { ListChecks, Plus, X, Loader2, Trash2 } from 'lucide-react'
 
 export default function ProfessorGabaritos() {
@@ -21,7 +22,7 @@ export default function ProfessorGabaritos() {
     setCarregando(true)
     setErro('')
     try {
-      const { data: salasData, error: eSalas } = await supabase.from('salas').select('id, nome').eq('professor_id', perfil.id)
+      const { data: salasData, error: eSalas } = await salasDoProfessor(perfil.id, 'id, nome')
       if (eSalas) throw eSalas
       setSalas(salasData || [])
       const salaIds = (salasData || []).map((s) => s.id)

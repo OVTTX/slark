@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { salasDoProfessor } from '../../lib/salasProfessor'
 import { BarChart3, Thermometer, Users, UsersRound, School } from 'lucide-react'
 import { TermometroBarra, TermometroGrande } from '../../components/Termometro'
 import { calcularScoreAluno, agregarScores } from '../../lib/engajamento'
@@ -41,7 +42,7 @@ function Panorama() {
       setCarregando(true)
       setErro('')
       try {
-        const { data: salasData, error: eSalas } = await supabase.from('salas').select('id, nome').eq('professor_id', perfil.id)
+        const { data: salasData, error: eSalas } = await salasDoProfessor(perfil.id, 'id, nome')
         if (eSalas) throw eSalas
         setSalas(salasData || [])
         const salaIds = (salasData || []).map((s) => s.id)
@@ -173,7 +174,7 @@ function Engajamento() {
       setCarregando(true)
       setErro('')
       try {
-        const { data: salasData, error: eSalas } = await supabase.from('salas').select('id, nome').eq('professor_id', perfil.id)
+        const { data: salasData, error: eSalas } = await salasDoProfessor(perfil.id, 'id, nome')
         if (eSalas) throw eSalas
         setSalas(salasData || [])
         const salaIds = (salasData || []).map((s) => s.id)

@@ -1,12 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import ConvidarAlunoModal from '../../components/ConvidarAlunoModal'
 import useLimiteAlunos from '../../hooks/useLimiteAlunos'
-import { ArrowLeft, UsersRound, Plus, X, Loader2, Trash2, Mail, Clock, Trophy } from 'lucide-react'
+import {
+  ArrowLeft, UsersRound, Plus, X, Loader2, Trash2, Mail, Clock, Trophy,
+  ChevronLeft, ChevronRight, BookOpen, Pencil,
+} from 'lucide-react'
 
 const CORES_PODIO = ['#F5C451', '#C0C0C0', '#CD7F32']
+const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+
+function formatarISO(date) {
+  const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
 
 // Antes "Salas", "Alunos" e "Equipes" eram 3 itens separados no menu do
 // professor. Agora tudo vive dentro da sala: caminho é Salas -> (escolhe a
@@ -28,22 +38,30 @@ export default function ProfessorSalaDetalhe() {
   const [nomeTime, setNomeTime] = useState('')
   const [salvando, setSalvando] = useState(false)
 
+  const [diario, setDiario] = useState([])
+  const [mesAtual, setMesAtual] = useState(() => { const d = new Date(); d.setDate(1); return d })
+  const [diaSelecionado, setDiaSelecionado] = useState(null)
+  const [textoDiario, setTextoDiario] = useState('')
+  const [salvandoDiario, setSalvandoDiario] = useState(false)
+
   async function carregar() {
     if (!id) return
     setCarregando(true)
     setErro('')
     try {
-      const [{ data: salaData, error: eSala }, { data: alunosData, error: eAl }, { data: convitesData, error: eConv }, { data: timesData, error: eTimes }] =
+      const [{ data: salaData, error: eSala }, { data: alunosData, error: eAl }, { data: convitesData, error: eConv }, { data: timesData, error: eTimes }, { data: diarioData, error: eDiario }] =
         await Promise.all([
           supabase.from('salas').select('*').eq('id', id).single(),
           supabase.from('alunos').select('id, nome, pontos, nivel').eq('sala_id', id).order('nome'),
           supabase.from('convites_aluno').select('*').eq('sala_id', id).eq('usado', false),
           supabase.from('times').select('*, time_membros(aluno_id)').eq('sala_id', id).order('nome'),
+          supabase.from('diario_aula').select('*').eq('sala_id', id).eq('professor_id', perfil.id),
         ])
       if (eSala) throw eSala
       if (eAl) throw eAl
       if (eConv) throw eConv
       if (eTimes) throw eTimes
+      if (eDiario) throw eDiario
 
       const alunoPorId = Object.fromEntries((alunosData || []).map((a) => [a.id, a]))
       setSala(salaData)
@@ -53,6 +71,7 @@ export default function ProfessorSalaDetalhe() {
         ...t,
         membros: (t.time_membros || []).map((m) => alunoPorId[m.aluno_id]).filter(Boolean),
       })))
+      setDiario(diarioData || [])
     } catch (e) {
       console.error(e)
       setErro('Não foi possível carregar a sala. Confira a conexão com o Supabase.')
@@ -62,6 +81,50 @@ export default function ProfessorSalaDetalhe() {
   }
 
   useEffect(() => { carregar() }, [id])
+
+  const diasDoMes = useMemo(() => {
+    const ano = mesAtual.getFullYear(); const mes = mesAtual.getMonth()
+    const primeiroDiaSemana = new Date(ano, mes, 1).getDay()
+    const totalDias = new Date(ano, mes + 1, 0).getDate()
+    const celulas = []
+    for (let i = 0; i < primeiroDiaSemana; i++) celulas.push(null)
+    for (let d = 1; d <= totalDias; d++) celulas.push(new Date(ano, mes, d))
+    while (celulas.length % 7 !== 0) celulas.push(null)
+    return celulas
+  }, [mesAtual])
+
+  const diarioPorData = useMemo(() => Object.fromEntries(diario.map((d) => [d.data, d])), [diario])
+  const hojeISO = formatarISO(new Date())
+
+  function abrirDia(iso) {
+    setDiaSelecionado(iso)
+    setTextoDiario(diarioPorData[iso]?.conteudo || '')
+  }
+
+  async function salvarDiario(e) {
+    e.preventDefault()
+    if (!diaSelecionado) return
+    setSalvandoDiario(true)
+    setErro('')
+    try {
+      const { error } = await supabase.from('diario_aula').upsert({
+        sala_id: id,
+        professor_id: perfil.id,
+        escola_id: sala.escola_id,
+        data: diaSelecionado,
+        conteudo: textoDiario.trim(),
+        atualizado_em: new Date().toISOString(),
+      }, { onConflict: 'sala_id,professor_id,data' })
+      if (error) throw error
+      setDiaSelecionado(null)
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível salvar o diário desse dia.')
+    } finally {
+      setSalvandoDiario(false)
+    }
+  }
 
   async function cancelarConvite(convId) {
     if (!confirm('Cancelar esse convite? Se o e-mail estiver errado, você pode criar um novo convite com o e-mail certo depois.')) return
@@ -193,6 +256,9 @@ export default function ProfessorSalaDetalhe() {
         <button onClick={() => setAba('placar')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'placar' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
           Placar
         </button>
+        <button onClick={() => setAba('diario')} className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'diario' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>
+          <BookOpen size={14} /> Diário de Classe
+        </button>
       </div>
 
       {aba === 'equipes' ? (
@@ -268,7 +334,7 @@ export default function ProfessorSalaDetalhe() {
             </div>
           )}
         </div>
-      ) : (
+      ) : aba === 'placar' ? (
         <div className="mt-6">
           {times.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
@@ -301,6 +367,87 @@ export default function ProfessorSalaDetalhe() {
               ))}
             </div>
           )}
+        </div>
+      ) : (
+        <div className="mt-6">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setMesAtual((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))} className="p-2 rounded-lg bg-card border text-texto/60 hover:text-white transition">
+                <ChevronLeft size={16} />
+              </button>
+              <div className="text-lg font-bold text-white w-44 text-center">{MESES[mesAtual.getMonth()]} {mesAtual.getFullYear()}</div>
+              <button onClick={() => setMesAtual((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))} className="p-2 rounded-lg bg-card border text-texto/60 hover:text-white transition">
+                <ChevronRight size={16} />
+              </button>
+            </div>
+            <p className="text-xs text-texto/45 max-w-xs text-right">Registre o que foi trabalhado em cada aula — é o diário de classe, obrigatório por lei.</p>
+          </div>
+
+          <div className="mt-4 rounded-2xl bg-card border overflow-hidden">
+            <div className="grid grid-cols-7 border-b">
+              {DIAS_SEMANA.map((d) => (
+                <div key={d} className="px-2 py-2.5 text-center text-xs font-semibold text-texto/50">{d}</div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7">
+              {diasDoMes.map((date, i) => {
+                const iso = date ? formatarISO(date) : null
+                const entrada = iso ? diarioPorData[iso] : null
+                const ehHoje = iso === hojeISO
+                return (
+                  <button
+                    key={i}
+                    disabled={!date}
+                    onClick={() => abrirDia(iso)}
+                    className={`min-h-[84px] border-b border-r p-2 text-left align-top transition ${!date ? 'bg-white/[0.01]' : 'hover:bg-white/[0.03]'} ${i % 7 === 6 ? 'border-r-0' : ''}`}
+                  >
+                    {date && (
+                      <>
+                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs ${ehHoje ? 'bg-azul text-white font-bold' : 'text-texto/60'}`}>
+                          {date.getDate()}
+                        </span>
+                        {entrada && (
+                          <div className="mt-1.5 flex items-center gap-1 text-[11px] text-[#3FD08A]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#3FD08A]" /> preenchido
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {diaSelecionado && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setDiaSelecionado(null)}>
+          <div className="w-full max-w-lg rounded-2xl bg-bg-2 border p-7" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Pencil size={17} className="text-azul" /> {new Date(diaSelecionado + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+              </h2>
+              <button onClick={() => setDiaSelecionado(null)} className="text-texto/50 hover:text-white transition"><X size={20} /></button>
+            </div>
+            <form onSubmit={salvarDiario} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-texto/70 mb-1.5">O que foi trabalhado nessa aula?</label>
+                <textarea
+                  required rows={6} value={textoDiario} onChange={(e) => setTextoDiario(e.target.value)}
+                  placeholder="Ex: Introdução ao conteúdo de industrialização no Brasil, leitura do capítulo 3 e discussão em grupo."
+                  className="w-full px-4 py-3 rounded-xl bg-card border border-azul/15 text-white placeholder:text-texto/30 focus:outline-none focus:border-azul transition resize-none"
+                />
+              </div>
+              <button
+                type="submit" disabled={salvandoDiario}
+                className="w-full py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/40 disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {salvandoDiario && <Loader2 size={18} className="animate-spin" />}
+                {salvandoDiario ? 'Salvando…' : 'Salvar diário do dia'}
+              </button>
+            </form>
+          </div>
         </div>
       )}
 

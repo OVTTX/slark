@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { salasDoProfessor } from '../../lib/salasProfessor'
 import {
   Users, GraduationCap, Award, BookOpen, ArrowRight, ChevronRight,
   Trophy, Star, AlertTriangle, Send,
@@ -62,7 +63,7 @@ export default function ProfessorInicio() {
     async function carregar() {
       setCarregando(true)
       try {
-        const { data: salasData } = await supabase.from('salas').select('id, nome').eq('professor_id', perfil.id)
+        const { data: salasData } = await salasDoProfessor(perfil.id, 'id, nome')
         const salas = salasData || []
         const salaIds = salas.map((s) => s.id)
 

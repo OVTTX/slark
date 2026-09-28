@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { salasDoProfessor } from '../../lib/salasProfessor'
 import { Trophy, Medal, UsersRound } from 'lucide-react'
 
 const CORES_PODIO = ['#F5C451', '#C0C0C0', '#CD7F32']
@@ -19,7 +20,7 @@ export default function ProfessorRanking() {
       setCarregando(true)
       setErro('')
       try {
-        const { data: salasData, error: eSalas } = await supabase.from('salas').select('id, nome').eq('professor_id', perfil.id)
+        const { data: salasData, error: eSalas } = await salasDoProfessor(perfil.id, 'id, nome')
         if (eSalas) throw eSalas
         const salaIds = (salasData || []).map((s) => s.id)
         const salaPorId = Object.fromEntries((salasData || []).map((s) => [s.id, s]))
