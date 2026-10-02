@@ -91,7 +91,7 @@ export default function ProfessorObservacoes() {
 
   async function analisar(observacao) {
     if (caracteristicas.length === 0) {
-      setAvisoIA('Cadastre características antes de usar a análise por IA.')
+      setAvisoIA('Cadastre características antes de usar a análise da Luna.')
       return
     }
     setAnalisandoId(observacao.id)
@@ -103,7 +103,10 @@ export default function ProfessorObservacoes() {
           caracteristicas: caracteristicas.map((c) => ({ id: c.id, nome: c.nome, descricao: c.descricao })),
         },
       })
-      if (error) throw error
+      if (error) {
+        const corpo = await error.context?.json?.().catch(() => null)
+        throw new Error(corpo?.error || error.message)
+      }
       if (data?.error) throw new Error(data.error)
 
       const analise = data.analise
@@ -123,7 +126,7 @@ export default function ProfessorObservacoes() {
       await carregarObservacoes(observacao.aluno_id)
     } catch (e) {
       console.error(e)
-      setAvisoIA(e.message || 'Não foi possível analisar essa observação agora.')
+      setAvisoIA(e.message || 'Não foi possível analisar essa observação com a Luna agora.')
     } finally {
       setAnalisandoId(null)
     }
@@ -192,7 +195,7 @@ export default function ProfessorObservacoes() {
         <h1 className="text-4xl font-bold text-white tracking-tight">Observações</h1>
       </div>
       <p className="mt-2 text-texto/60">
-        Registre anotações sobre cada aluno. A IA da Slark lê o texto, monta o mapa de competências e sugere a característica e o selo do aluno.
+        Registre anotações sobre cada aluno. A Luna, a IA da Slark, lê o texto, monta o mapa de competências e sugere a característica e o selo do aluno.
       </p>
 
       {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
@@ -303,12 +306,12 @@ export default function ProfessorObservacoes() {
 
                           {analisandoId === o.id ? (
                             <div className="mt-3 flex items-center gap-2 text-xs text-azul">
-                              <Loader2 size={13} className="animate-spin" /> IA analisando o texto…
+                              <Loader2 size={13} className="animate-spin" /> Luna analisando o texto…
                             </div>
                           ) : o.mapa_competencias ? (
                             <div className="mt-4 pt-4 border-t border-white/5">
                               <div className="flex items-center gap-1.5 text-xs font-semibold text-texto/60 mb-2.5">
-                                <Sparkles size={12} className="text-azul" /> Mapa de competências (IA)
+                                <Sparkles size={12} className="text-azul" /> Mapa de competências (Luna)
                               </div>
                               <div className="space-y-1.5">
                                 {(o.mapa_competencias || []).map((c) => (
@@ -328,7 +331,7 @@ export default function ProfessorObservacoes() {
                                     <div className="flex items-center gap-2 text-sm">
                                       {seloSugerido && <IconeSelo nome={seloSugerido.icone} size={14} style={{ color: sugestao.cor }} />}
                                       <span className="text-white/90">
-                                        IA sugere: <span className="font-semibold" style={{ color: sugestao.cor }}>{sugestao.nome}</span>
+                                        Luna sugere: <span className="font-semibold" style={{ color: sugestao.cor }}>{sugestao.nome}</span>
                                         {typeof o.confianca_ia === 'number' && (
                                           <span className="text-texto/45"> ({Math.round(o.confianca_ia * 100)}% confiança)</span>
                                         )}
@@ -356,7 +359,7 @@ export default function ProfessorObservacoes() {
                               onClick={() => analisar(o)}
                               className="mt-3 inline-flex items-center gap-1.5 text-xs text-azul hover:text-white transition"
                             >
-                              <RefreshCcw size={12} /> Analisar com IA
+                              <RefreshCcw size={12} /> Analisar com a Luna
                             </button>
                           )}
                         </div>

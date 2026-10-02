@@ -89,7 +89,7 @@ export default function ProfessorAulaSlark() {
         <GraduationCap className="text-azul" size={28} />
         <h1 className="text-4xl font-bold text-white tracking-tight">Aula Slark</h1>
       </div>
-      <p className="mt-2 text-texto/60">Planeje suas aulas com a IA da Slark ou encontre dinâmicas prontas para deixá-las mais leves.</p>
+      <p className="mt-2 text-texto/60">Planeje suas aulas com a Luna, a IA da Slark, ou encontre dinâmicas prontas para deixá-las mais leves.</p>
 
       <div className="mt-6 inline-flex rounded-xl bg-card border p-1">
         <button onClick={() => setAba('planos')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aba === 'planos' ? 'bg-azul text-white' : 'text-texto/60 hover:text-white'}`}>Planos de aula</button>
@@ -193,7 +193,7 @@ function PlanosDeAula() {
 
   async function gerarComIA() {
     if (!temaIA.trim()) {
-      setAvisoIA('Escreva o tema da aula para a IA gerar o plano.')
+      setAvisoIA('Escreva o tema da aula para a Luna gerar o plano.')
       return
     }
     setGerandoIA(true)
@@ -217,7 +217,7 @@ function PlanosDeAula() {
       setConteudo(formatarAulaIA(aula))
     } catch (e) {
       console.error(e)
-      setAvisoIA(e.message || 'Não foi possível gerar a aula com IA agora. Tente novamente.')
+      setAvisoIA(e.message || 'Não foi possível gerar a aula com a Luna agora. Tente novamente.')
     } finally {
       setGerandoIA(false)
     }
@@ -313,9 +313,9 @@ function PlanosDeAula() {
             {!editandoId && (
               <div className="mb-5 rounded-xl bg-azul/10 border border-azul/20 p-4">
                 <div className="flex items-center gap-1.5 text-sm font-semibold text-white">
-                  <Sparkles size={14} className="text-azul" /> Gerar com IA no molde Slark
+                  <Sparkles size={14} className="text-azul" /> Gerar com a Luna
                 </div>
-                <p className="text-xs text-texto/60 mt-1">Diga o tema e a IA monta a aula seguindo o Método Slark — gamificada, personalizada e sem decoreba.</p>
+                <p className="text-xs text-texto/60 mt-1">Diga o tema e a Luna monta a aula seguindo o Método Slark — gamificada, personalizada e sem decoreba.</p>
                 <div className="mt-3 flex gap-2">
                   <input
                     value={temaIA} onChange={(e) => setTemaIA(e.target.value)}
