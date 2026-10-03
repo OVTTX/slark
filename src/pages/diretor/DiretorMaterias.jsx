@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { BookMarked, Plus, X, Loader2, Pencil, Trash2, School, AlertTriangle } from 'lucide-react'
+import { sugerirAulasSemana } from '../../lib/bnccAulasSemana'
 
 export default function DiretorMaterias() {
   const { perfil } = useAuth()
@@ -35,7 +36,7 @@ export default function DiretorMaterias() {
       const [{ data: materiasData, error: e1 }, { data: professoresData, error: e2 }, { data: salasData, error: e3 }, { data: atribData, error: e4 }] = await Promise.all([
         supabase.from('materias').select('*').eq('escola_id', perfil.escola_id).order('nome'),
         supabase.from('usuarios').select('id, nome').eq('escola_id', perfil.escola_id).eq('perfil', 'professor').order('nome'),
-        supabase.from('salas').select('id, nome').eq('escola_id', perfil.escola_id).order('nome'),
+        supabase.from('salas').select('id, nome, etapa').eq('escola_id', perfil.escola_id).order('nome'),
         supabase.from('sala_materias').select('*').eq('escola_id', perfil.escola_id),
       ])
       if (e1) throw e1
@@ -106,8 +107,22 @@ export default function DiretorMaterias() {
   }
 
   function abrirAtribuir(materia) {
+    const salaInicial = salas[0]
     setModalAtribuir(materia)
-    setFormAtribuir({ sala_id: salas[0]?.id || '', professor_id: '', aulas_semana: 2 })
+    setFormAtribuir({
+      sala_id: salaInicial?.id || '',
+      professor_id: '',
+      aulas_semana: sugerirAulasSemana(materia.nome, salaInicial?.etapa) ?? 2,
+    })
+  }
+
+  function mudarSalaAtribuir(salaId) {
+    const sala = salas.find((s) => s.id === salaId)
+    setFormAtribuir((f) => ({
+      ...f,
+      sala_id: salaId,
+      aulas_semana: sugerirAulasSemana(modalAtribuir?.nome, sala?.etapa) ?? f.aulas_semana,
+    }))
   }
 
   async function salvarAtribuicao(e) {
@@ -312,7 +327,7 @@ export default function DiretorMaterias() {
               <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Sala</label>
                 <select
-                  value={formAtribuir.sala_id} onChange={(e) => setFormAtribuir({ ...formAtribuir, sala_id: e.target.value })}
+                  value={formAtribuir.sala_id} onChange={(e) => mudarSalaAtribuir(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
                 >
                   {salas.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
@@ -336,7 +351,9 @@ export default function DiretorMaterias() {
                   onChange={(e) => setFormAtribuir({ ...formAtribuir, aulas_semana: Number(e.target.value) })}
                   className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
                 />
-                <p className="mt-1.5 text-xs text-texto/45">Usado para montar o cronograma semanal automaticamente em "Cronograma".</p>
+                <p className="mt-1.5 text-xs text-texto/45">
+                  Sugestão baseada na distribuição comum usada por redes de ensino pra atender a BNCC — ajuste se a sua grade curricular for diferente. Usado para montar o cronograma semanal automaticamente em "Cronograma".
+                </p>
               </div>
               <button
                 type="submit" disabled={salvandoAtribuicao}
