@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { School, Plus, X, Loader2, Pencil, Users, GraduationCap } from 'lucide-react'
 import ConvidarAlunoModal from '../../components/ConvidarAlunoModal'
 
-const FORM_VAZIO = { nome: '', serie: '', professor_id: '' }
+const FORM_VAZIO = { nome: '', serie: '', professor_id: '', etapa: 'ensino_medio' }
 
 export default function DiretorSalas() {
   const { perfil } = useAuth()
@@ -55,7 +55,7 @@ export default function DiretorSalas() {
 
   function abrirEdicao(s) {
     setEditandoId(s.id)
-    setForm({ nome: s.nome || '', serie: s.serie || '', professor_id: s.professor_id || '' })
+    setForm({ nome: s.nome || '', serie: s.serie || '', professor_id: s.professor_id || '', etapa: s.etapa || 'ensino_medio' })
     setModalAberto(true)
   }
 
@@ -67,6 +67,7 @@ export default function DiretorSalas() {
         nome: form.nome,
         serie: form.serie,
         professor_id: form.professor_id || null,
+        etapa: form.etapa,
       }
       if (editandoId) {
         const { error } = await supabase.from('salas').update(payload).eq('id', editandoId)
@@ -120,6 +121,9 @@ export default function DiretorSalas() {
                 <div>
                   <div className="font-bold text-white text-lg">{s.nome}</div>
                   {s.serie && <div className="text-texto/50 text-sm">{s.serie}</div>}
+                  <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-azul/15 text-azul">
+                    {s.etapa === 'fundamental_2' ? 'Fundamental 2' : 'Ensino Médio'}
+                  </span>
                 </div>
                 <button onClick={() => abrirEdicao(s)} className="p-2 rounded-lg text-texto/60 hover:text-white hover:bg-white/5 transition">
                   <Pencil size={15} />
@@ -157,6 +161,17 @@ export default function DiretorSalas() {
                   placeholder="Ex: 2º Ano"
                   className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-texto/70 mb-1.5">Etapa de ensino</label>
+                <select
+                  value={form.etapa} onChange={(e) => setForm({ ...form, etapa: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
+                >
+                  <option value="ensino_medio">Ensino Médio (6 aulas/dia)</option>
+                  <option value="fundamental_2">Fundamental 2 (5 aulas/dia)</option>
+                </select>
+                <p className="mt-1.5 text-xs text-texto/45">Define quantos períodos por dia essa turma tem no cronograma gerado automaticamente.</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Professor representante (opcional)</label>

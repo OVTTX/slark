@@ -24,6 +24,7 @@ import DiretorFinanceiro from './pages/diretor/DiretorFinanceiro'
 import DiretorCalendario from './pages/diretor/DiretorCalendario'
 import DiretorNotas from './pages/diretor/DiretorNotas'
 import DiretorRanking from './pages/diretor/DiretorRanking'
+import DiretorCronograma from './pages/diretor/DiretorCronograma'
 import ProfessorInicio from './pages/professor/ProfessorInicio'
 import ProfessorSalas from './pages/professor/ProfessorSalas'
 import ProfessorSalaDetalhe from './pages/professor/ProfessorSalaDetalhe'
@@ -35,6 +36,8 @@ import ProfessorAprendizado from './pages/professor/ProfessorAprendizado'
 import ProfessorRunaway from './pages/professor/ProfessorRunaway'
 import ProfessorAulaSlark from './pages/professor/ProfessorAulaSlark'
 import ProfessorRanking from './pages/professor/ProfessorRanking'
+import ProfessorDisponibilidade from './pages/professor/ProfessorDisponibilidade'
+import ProfessorGrade from './pages/professor/ProfessorGrade'
 import AlunoInicio from './pages/aluno/AlunoInicio'
 import AlunoBoletim from './pages/aluno/AlunoBoletim'
 import AlunoRunaway from './pages/aluno/AlunoRunaway'
@@ -44,6 +47,7 @@ import AlunoTrilhaDetalhe from './pages/aluno/AlunoTrilhaDetalhe'
 import AlunoNotificacoes from './pages/aluno/AlunoNotificacoes'
 import AlunoTime from './pages/aluno/AlunoTime'
 import AlunoRanking from './pages/aluno/AlunoRanking'
+import AlunoGrade from './pages/aluno/AlunoGrade'
 import NaoEncontrada from './pages/NaoEncontrada'
 
 export default function App() {
@@ -79,6 +83,7 @@ export default function App() {
           <Route path="/diretor/calendario" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorCalendario /></AppLayout></RotaProtegida>} />
           <Route path="/diretor/aprendizado" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorNotas /></AppLayout></RotaProtegida>} />
           <Route path="/diretor/ranking" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorRanking /></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/cronograma" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorCronograma /></AppLayout></RotaProtegida>} />
 
           {/* ---------- PROFESSOR ---------- */}
           <Route path="/professor" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorInicio /></AppLayout></RotaProtegida>} />
@@ -94,6 +99,8 @@ export default function App() {
           <Route path="/professor/runaway" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorRunaway /></AppLayout></RotaProtegida>} />
           <Route path="/professor/aula-slark" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorAulaSlark /></AppLayout></RotaProtegida>} />
           <Route path="/professor/ranking" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorRanking /></AppLayout></RotaProtegida>} />
+          <Route path="/professor/disponibilidade" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorDisponibilidade /></AppLayout></RotaProtegida>} />
+          <Route path="/professor/grade" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorGrade /></AppLayout></RotaProtegida>} />
 
           {/* ---------- ALUNO ---------- */}
           <Route path="/aluno" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoInicio /></AppLayout></RotaProtegida>} />
@@ -105,6 +112,7 @@ export default function App() {
           <Route path="/aluno/notificacoes" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoNotificacoes /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/time" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoTime /></AppLayout></RotaProtegida>} />
           <Route path="/aluno/ranking" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoRanking /></AppLayout></RotaProtegida>} />
+          <Route path="/aluno/grade" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AlunoGrade /></AppLayout></RotaProtegida>} />
 
           <Route path="*" element={<NaoEncontrada />} />
         </Routes>

@@ -7,7 +7,7 @@ import {
   BarChart3, BookOpen, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut,
   Kanban, UserPlus, Wallet, ShieldCheck, Sun, Moon,
-  ClipboardList, Bell,
+  ClipboardList, Bell, CalendarClock, CalendarDays, CalendarRange,
 } from 'lucide-react'
 
 // Menus por perfil (espelham as telas do app real)
@@ -35,6 +35,7 @@ const MENUS = {
     { to: '/diretor/calendario', label: 'Calendário', icon: Calendar },
     { to: '/diretor/aprendizado', label: 'Aprendizado', icon: FileText },
     { to: '/diretor/ranking', label: 'Ranking', icon: Trophy },
+    { to: '/diretor/cronograma', label: 'Cronograma', icon: CalendarRange },
   ],
   professor: [
     { to: '/professor', label: 'Dashboard', icon: LayoutGrid, end: true },
@@ -45,6 +46,8 @@ const MENUS = {
     { to: '/professor/trilhas', label: 'Trilhas', icon: BookOpen },
     { to: '/professor/aprendizado', label: 'Aprendizado', icon: ClipboardList },
     { to: '/professor/aula-slark', label: 'Aula Slark', icon: GraduationCap },
+    { to: '/professor/grade', label: 'Minha Grade', icon: CalendarDays },
+    { to: '/professor/disponibilidade', label: 'Disponibilidade', icon: CalendarClock },
     { to: '/professor/ranking', label: 'Ranking', icon: Trophy },
   ],
   aluno: [
@@ -53,6 +56,7 @@ const MENUS = {
     { to: '/aluno/boletim', label: 'Boletim', icon: ClipboardList },
     { to: '/aluno/competencias', label: 'Mapa de Competências', icon: Target },
     { to: '/aluno/trilhas', label: 'Trilhas', icon: BookOpen },
+    { to: '/aluno/grade', label: 'Grade de Aulas', icon: CalendarDays },
     { to: '/aluno/time', label: 'Meu Time', icon: UsersRound },
     { to: '/aluno/ranking', label: 'Ranking', icon: Trophy },
   ],

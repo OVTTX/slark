@@ -18,8 +18,11 @@ export default function DiretorMaterias() {
   const [salvandoMateria, setSalvandoMateria] = useState(false)
 
   const [modalAtribuir, setModalAtribuir] = useState(null) // matéria sendo atribuída a uma sala
-  const [formAtribuir, setFormAtribuir] = useState({ sala_id: '', professor_id: '' })
+  const [formAtribuir, setFormAtribuir] = useState({ sala_id: '', professor_id: '', aulas_semana: 2 })
   const [salvandoAtribuicao, setSalvandoAtribuicao] = useState(false)
+  const [editandoAulas, setEditandoAulas] = useState(null) // id da atribuição com o campo de aulas/semana aberto
+  const [aulasSemanaEdit, setAulasSemanaEdit] = useState(2)
+  const [salvandoAulas, setSalvandoAulas] = useState(false)
 
   const [paraExcluir, setParaExcluir] = useState(null)
   const [excluindo, setExcluindo] = useState(false)
@@ -104,7 +107,7 @@ export default function DiretorMaterias() {
 
   function abrirAtribuir(materia) {
     setModalAtribuir(materia)
-    setFormAtribuir({ sala_id: salas[0]?.id || '', professor_id: '' })
+    setFormAtribuir({ sala_id: salas[0]?.id || '', professor_id: '', aulas_semana: 2 })
   }
 
   async function salvarAtribuicao(e) {
@@ -117,6 +120,7 @@ export default function DiretorMaterias() {
         sala_id: formAtribuir.sala_id,
         materia_id: modalAtribuir.id,
         professor_id: formAtribuir.professor_id || null,
+        aulas_semana: formAtribuir.aulas_semana,
       })
       if (error) {
         if (error.code === '23505') throw new Error('Essa matéria já está atribuída a essa sala.')
@@ -129,6 +133,27 @@ export default function DiretorMaterias() {
       setErro(e.message || 'Não foi possível atribuir a matéria a essa sala.')
     } finally {
       setSalvandoAtribuicao(false)
+    }
+  }
+
+  function abrirEdicaoAulas(atrib) {
+    setEditandoAulas(atrib.id)
+    setAulasSemanaEdit(atrib.aulas_semana || 2)
+  }
+
+  async function salvarAulasSemana(atribId) {
+    setSalvandoAulas(true)
+    setErro('')
+    try {
+      const { error } = await supabase.from('sala_materias').update({ aulas_semana: aulasSemanaEdit }).eq('id', atribId)
+      if (error) throw error
+      setEditandoAulas(null)
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível atualizar as aulas por semana.')
+    } finally {
+      setSalvandoAulas(false)
     }
   }
 
@@ -197,11 +222,34 @@ export default function DiretorMaterias() {
                   ) : (
                     salasDaMateria.map((a) => (
                       <div key={a.id} className="flex items-center justify-between gap-3 text-sm bg-white/[0.03] rounded-xl px-3.5 py-2.5">
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0 flex-wrap">
                           <School size={13} className="text-texto/40 shrink-0" />
                           <span className="text-white font-medium">{a.salaNome}</span>
                           <span className="text-texto/40">—</span>
                           <span className="text-texto/70 truncate">{a.professorNome || 'Sem professor definido'}</span>
+                          {editandoAulas === a.id ? (
+                            <span className="flex items-center gap-1 ml-1">
+                              <input
+                                type="number" min={1} max={10} value={aulasSemanaEdit}
+                                onChange={(e) => setAulasSemanaEdit(Number(e.target.value))}
+                                className="w-14 px-1.5 py-1 rounded-md bg-card border border-azul/20 text-white text-xs"
+                              />
+                              <button
+                                type="button" onClick={() => salvarAulasSemana(a.id)} disabled={salvandoAulas}
+                                className="text-azul hover:text-white transition text-xs font-semibold"
+                              >
+                                ok
+                              </button>
+                            </span>
+                          ) : (
+                            <button
+                              type="button" onClick={() => abrirEdicaoAulas(a)}
+                              title="Clique para editar"
+                              className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-azul/15 text-azul hover:bg-azul/25 transition"
+                            >
+                              {a.aulas_semana || 2}x/semana
+                            </button>
+                          )}
                         </div>
                         <button onClick={() => removerAtribuicao(a.id)} className="shrink-0 text-texto/40 hover:text-red-400 transition">
                           <X size={14} />
@@ -279,6 +327,16 @@ export default function DiretorMaterias() {
                   <option value="">Sem professor definido ainda</option>
                   {professores.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-texto/70 mb-1.5">Aulas por semana</label>
+                <input
+                  type="number" min={1} max={10} required
+                  value={formAtribuir.aulas_semana}
+                  onChange={(e) => setFormAtribuir({ ...formAtribuir, aulas_semana: Number(e.target.value) })}
+                  className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
+                />
+                <p className="mt-1.5 text-xs text-texto/45">Usado para montar o cronograma semanal automaticamente em "Cronograma".</p>
               </div>
               <button
                 type="submit" disabled={salvandoAtribuicao}
