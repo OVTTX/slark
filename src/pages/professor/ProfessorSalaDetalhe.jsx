@@ -6,6 +6,7 @@ import ConvidarAlunoModal from '../../components/ConvidarAlunoModal'
 import useLimiteAlunos from '../../hooks/useLimiteAlunos'
 import {
   ArrowLeft, UsersRound, Plus, X, Loader2, Trash2, Mail, Clock, Trophy,
+  Shuffle, ShieldAlert,
 } from 'lucide-react'
 
 const CORES_PODIO = ['#F5C451', '#C0C0C0', '#CD7F32']
@@ -24,28 +25,37 @@ export default function ProfessorSalaDetalhe() {
   const [alunos, setAlunos] = useState([])
   const [convites, setConvites] = useState([])
   const [times, setTimes] = useState([])
+  const [restricoes, setRestricoes] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [modalNovo, setModalNovo] = useState(false)
   const [nomeTime, setNomeTime] = useState('')
   const [salvando, setSalvando] = useState(false)
+  const [modalRestricoes, setModalRestricoes] = useState(false)
+  const [restricaoA, setRestricaoA] = useState('')
+  const [restricaoB, setRestricaoB] = useState('')
+  const [salvandoRestricao, setSalvandoRestricao] = useState(false)
+  const [distribuindo, setDistribuindo] = useState(false)
+  const [avisoDistribuicao, setAvisoDistribuicao] = useState('')
 
   async function carregar() {
     if (!id) return
     setCarregando(true)
     setErro('')
     try {
-      const [{ data: salaData, error: eSala }, { data: alunosData, error: eAl }, { data: convitesData, error: eConv }, { data: timesData, error: eTimes }] =
+      const [{ data: salaData, error: eSala }, { data: alunosData, error: eAl }, { data: convitesData, error: eConv }, { data: timesData, error: eTimes }, { data: restricoesData, error: eRestricoes }] =
         await Promise.all([
           supabase.from('salas').select('*').eq('id', id).single(),
           supabase.from('alunos').select('id, nome, pontos, nivel').eq('sala_id', id).order('nome'),
           supabase.from('convites_aluno').select('*').eq('sala_id', id).eq('usado', false),
           supabase.from('times').select('*, time_membros(aluno_id)').eq('sala_id', id).order('nome'),
+          supabase.from('restricoes_equipe').select('*').eq('sala_id', id),
         ])
       if (eSala) throw eSala
       if (eAl) throw eAl
       if (eConv) throw eConv
       if (eTimes) throw eTimes
+      if (eRestricoes) throw eRestricoes
 
       const alunoPorId = Object.fromEntries((alunosData || []).map((a) => [a.id, a]))
       setSala(salaData)
@@ -55,6 +65,7 @@ export default function ProfessorSalaDetalhe() {
         ...t,
         membros: (t.time_membros || []).map((m) => alunoPorId[m.aluno_id]).filter(Boolean),
       })))
+      setRestricoes(restricoesData || [])
     } catch (e) {
       console.error(e)
       setErro('Não foi possível carregar a sala. Confira a conexão com o Supabase.')
@@ -125,6 +136,103 @@ export default function ProfessorSalaDetalhe() {
     } catch (e) {
       console.error(e)
       setErro('Não foi possível remover o membro.')
+    }
+  }
+
+  async function adicionarRestricao(e) {
+    e.preventDefault()
+    if (!restricaoA || !restricaoB || restricaoA === restricaoB) return
+    setSalvandoRestricao(true)
+    setErro('')
+    try {
+      const { error } = await supabase.from('restricoes_equipe').insert({
+        sala_id: id,
+        aluno_id_1: restricaoA,
+        aluno_id_2: restricaoB,
+      })
+      if (error) throw error
+      setRestricaoA('')
+      setRestricaoB('')
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível adicionar a restrição (talvez esse par já esteja cadastrado).')
+    } finally {
+      setSalvandoRestricao(false)
+    }
+  }
+
+  async function removerRestricao(restricaoId) {
+    try {
+      const { error } = await supabase.from('restricoes_equipe').delete().eq('id', restricaoId)
+      if (error) throw error
+      await carregar()
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível remover a restrição.')
+    }
+  }
+
+  async function distribuirAutomaticamente() {
+    const semTime = alunosSemTime(null)
+    if (times.length === 0) {
+      setAvisoDistribuicao('Crie ao menos uma equipe antes de distribuir os alunos.')
+      return
+    }
+    if (semTime.length === 0) {
+      setAvisoDistribuicao('Todos os alunos já estão em uma equipe.')
+      return
+    }
+    setDistribuindo(true)
+    setAvisoDistribuicao('')
+    setErro('')
+    try {
+      // mapa aluno -> conjunto de alunos com quem ele não pode ficar
+      const proibidosPorAluno = new Map()
+      for (const r of restricoes) {
+        if (!proibidosPorAluno.has(r.aluno_id_1)) proibidosPorAluno.set(r.aluno_id_1, new Set())
+        if (!proibidosPorAluno.has(r.aluno_id_2)) proibidosPorAluno.set(r.aluno_id_2, new Set())
+        proibidosPorAluno.get(r.aluno_id_1).add(r.aluno_id_2)
+        proibidosPorAluno.get(r.aluno_id_2).add(r.aluno_id_1)
+      }
+
+      // cópia local dos membros atuais de cada time, pra ir atualizando durante a distribuição
+      const membrosPorTime = Object.fromEntries(times.map((t) => [t.id, t.membros.map((m) => m.id)]))
+
+      const embaralhados = [...semTime].sort(() => Math.random() - 0.5)
+      const insercoes = []
+      let comConflito = 0
+
+      for (const aluno of embaralhados) {
+        const proibidos = proibidosPorAluno.get(aluno.id) || new Set()
+
+        const timesValidos = times.filter((t) => !membrosPorTime[t.id].some((mId) => proibidos.has(mId)))
+        const candidatos = timesValidos.length > 0 ? timesValidos : times
+        if (timesValidos.length === 0) comConflito++
+
+        // escolhe o time com menos membros no momento, pra equilibrar
+        const escolhido = candidatos.reduce((menor, t) =>
+          membrosPorTime[t.id].length < membrosPorTime[menor.id].length ? t : menor
+        , candidatos[0])
+
+        membrosPorTime[escolhido.id].push(aluno.id)
+        insercoes.push({ time_id: escolhido.id, aluno_id: aluno.id })
+      }
+
+      const { error } = await supabase.from('time_membros').insert(insercoes)
+      if (error) throw error
+
+      await carregar()
+      setAvisoDistribuicao(
+        comConflito > 0
+          ? `${semTime.length} aluno${semTime.length > 1 ? 's' : ''} distribuído${semTime.length > 1 ? 's' : ''}. ${comConflito} não puderam respeitar todas as restrições (não havia equipe livre de conflito).`
+          : `${semTime.length} aluno${semTime.length > 1 ? 's' : ''} distribuído${semTime.length > 1 ? 's' : ''} respeitando todas as restrições.`
+      )
+    } catch (e) {
+      console.error(e)
+      setErro('Não foi possível distribuir os alunos automaticamente.')
+    } finally {
+      setDistribuindo(false)
     }
   }
 
@@ -199,7 +307,21 @@ export default function ProfessorSalaDetalhe() {
 
       {aba === 'equipes' ? (
         <div className="mt-6">
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2 flex-wrap">
+            <button
+              onClick={() => setModalRestricoes(true)}
+              className="flex items-center gap-2 px-4 py-3 rounded-full bg-card border text-texto/70 hover:text-white hover:border-azul/40 font-semibold text-sm transition"
+            >
+              <ShieldAlert size={16} /> Restrições {restricoes.length > 0 && `(${restricoes.length})`}
+            </button>
+            <button
+              onClick={distribuirAutomaticamente}
+              disabled={distribuindo || times.length === 0}
+              className="flex items-center gap-2 px-4 py-3 rounded-full bg-card border text-texto/70 hover:text-white hover:border-azul/40 font-semibold text-sm transition disabled:opacity-50"
+            >
+              {distribuindo ? <Loader2 size={16} className="animate-spin" /> : <Shuffle size={16} />}
+              Distribuir automaticamente
+            </button>
             <button
               onClick={() => setModalNovo(true)}
               className="flex items-center gap-2 px-5 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/30"
@@ -207,6 +329,10 @@ export default function ProfessorSalaDetalhe() {
               <Plus size={18} /> Nova equipe
             </button>
           </div>
+
+          {avisoDistribuicao && (
+            <p className="mt-4 text-sm text-[#F5C451] bg-[#F5C451]/10 px-4 py-3 rounded-xl">{avisoDistribuicao}</p>
+          )}
 
           {alunos.length === 0 ? (
             <div className="mt-6 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
@@ -303,6 +429,67 @@ export default function ProfessorSalaDetalhe() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {modalRestricoes && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setModalRestricoes(false)}>
+          <div className="w-full max-w-md rounded-2xl bg-bg-2 border p-7 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <ShieldAlert size={18} className="text-azul" /> Restrições de grupo
+              </h2>
+              <button onClick={() => setModalRestricoes(false)} className="text-texto/50 hover:text-white transition"><X size={20} /></button>
+            </div>
+            <p className="text-xs text-texto/50 mb-5 leading-relaxed">
+              Marque pares de alunos que não podem ficar na mesma equipe. A distribuição automática respeita essas regras.
+            </p>
+
+            <form onSubmit={adicionarRestricao} className="space-y-2.5">
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  required value={restricaoA} onChange={(e) => setRestricaoA(e.target.value)}
+                  className="px-3 py-2.5 rounded-xl bg-card border border-azul/15 text-white text-sm focus:outline-none focus:border-azul transition"
+                >
+                  <option value="" disabled>Aluno A</option>
+                  {alunos.map((a) => <option key={a.id} value={a.id}>{a.nome}</option>)}
+                </select>
+                <select
+                  required value={restricaoB} onChange={(e) => setRestricaoB(e.target.value)}
+                  className="px-3 py-2.5 rounded-xl bg-card border border-azul/15 text-white text-sm focus:outline-none focus:border-azul transition"
+                >
+                  <option value="" disabled>Aluno B</option>
+                  {alunos.filter((a) => a.id !== restricaoA).map((a) => <option key={a.id} value={a.id}>{a.nome}</option>)}
+                </select>
+              </div>
+              <button
+                type="submit" disabled={salvandoRestricao || !restricaoA || !restricaoB}
+                className="w-full py-2.5 rounded-xl bg-azul hover:bg-azul-puro text-white font-semibold text-sm transition shadow-lg shadow-azul/30 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {salvandoRestricao && <Loader2 size={15} className="animate-spin" />}
+                {salvandoRestricao ? 'Adicionando…' : '+ Adicionar restrição'}
+              </button>
+            </form>
+
+            <div className="mt-6 pt-5 border-t space-y-1.5">
+              {restricoes.length === 0 ? (
+                <p className="text-xs text-texto/40">Nenhuma restrição cadastrada ainda.</p>
+              ) : (
+                restricoes.map((r) => {
+                  const nomeA = alunos.find((a) => a.id === r.aluno_id_1)?.nome || '—'
+                  const nomeB = alunos.find((a) => a.id === r.aluno_id_2)?.nome || '—'
+                  return (
+                    <div key={r.id} className="flex items-center justify-between text-sm bg-white/[0.03] rounded-lg px-3 py-2">
+                      <span className="text-white/80">{nomeA} <span className="text-texto/40">não pode com</span> {nomeB}</span>
+                      <button onClick={() => removerRestricao(r.id)} className="text-texto/40 hover:text-red-400 transition shrink-0">
+                        <X size={13} />
+                      </button>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          </div>
         </div>
       )}
 
