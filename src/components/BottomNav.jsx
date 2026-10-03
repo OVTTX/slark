@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext'
 import {
   LayoutGrid, School, Users, Eye, UsersRound, Target, Trophy,
   BarChart3, BookOpen, GraduationCap, DollarSign,
-  Calendar, FileText, Building2, CreditCard, LogOut, ListChecks,
+  Calendar, FileText, Building2, CreditCard, LogOut,
   Kanban, UserPlus, Wallet, ShieldCheck, Sun, Moon,
   ClipboardList, Bell,
 } from 'lucide-react'
@@ -43,7 +43,6 @@ const MENUS = {
     { to: '/professor/desafios', label: 'Desafios', icon: Target },
     { to: '/professor/relatorios', label: 'Relatórios', icon: BarChart3 },
     { to: '/professor/trilhas', label: 'Trilhas', icon: BookOpen },
-    { to: '/professor/gabaritos', label: 'Gabaritos', icon: ListChecks },
     { to: '/professor/aprendizado', label: 'Aprendizado', icon: ClipboardList },
     { to: '/professor/aula-slark', label: 'Aula Slark', icon: GraduationCap },
     { to: '/professor/ranking', label: 'Ranking', icon: Trophy },

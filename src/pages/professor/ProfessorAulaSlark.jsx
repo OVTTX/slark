@@ -52,6 +52,10 @@ const CATEGORIAS = [
     dinamicas: [
       { titulo: 'Verdade ou mentira', duracao: '10 min', material: 'Nenhum', descricao: 'Cada aluno conta 3 fatos sobre si, sendo um falso. A turma vota em qual é a mentira.' },
       { titulo: 'Bingo humano', duracao: '15 min', material: 'Cartelas impressas', descricao: 'Alunos circulam pela sala buscando colegas que se encaixem em características de uma cartela.' },
+      { titulo: 'Duas verdades e um sonho', duracao: '10 min', material: 'Nenhum', descricao: 'Cada aluno compartilha duas coisas verdadeiras sobre si e um sonho/objetivo futuro; a turma tenta adivinhar qual é o sonho.' },
+      { titulo: 'Linha do tempo humana', duracao: '12 min', material: 'Nenhum', descricao: 'Sem conversar, os alunos se organizam em fila por um critério (mês de aniversário, altura, ordem alfabética do nome do meio).' },
+      { titulo: 'Objeto misterioso', duracao: '10 min', material: 'Um objeto qualquer trazido pelo professor', descricao: 'Alunos fazem perguntas de sim/não para descobrir a ligação do objeto com o tema da aula.' },
+      { titulo: 'Rede de nomes com bola de lã', duracao: '15 min', material: 'Novelo de barbante ou lã', descricao: 'Em círculo, cada aluno diz seu nome e algo que gosta antes de jogar o novelo para outro colega, formando uma teia.' },
     ],
   },
   {
@@ -60,6 +64,10 @@ const CATEGORIAS = [
     dinamicas: [
       { titulo: 'Torre de espaguete', duracao: '25 min', material: 'Espaguete cru, fita crepe, barbante', descricao: 'Times competem para construir a torre mais alta que sustente um marshmallow no topo.' },
       { titulo: 'Quebra-cabeça cooperativo', duracao: '20 min', material: 'Peças de quebra-cabeça divididas entre grupos', descricao: 'Cada time recebe parte das peças e precisa negociar trocas com outros times para completar sua imagem.' },
+      { titulo: 'Ilha deserta', duracao: '20 min', material: 'Lista impressa de itens', descricao: 'Cada time recebe uma lista de 15 itens e precisa chegar a um consenso sobre os 5 mais importantes para sobreviver numa ilha, relacionando a escolha ao tema da aula.' },
+      { titulo: 'Construção às cegas', duracao: '20 min', material: 'Blocos de montar ou sucata, vendas/olhos vendados', descricao: 'Um aluno vendado constrói uma estrutura seguindo apenas as instruções verbais dos colegas do time, sem poder ver.' },
+      { titulo: 'Corrida de revezamento do conhecimento', duracao: '20 min', material: 'Fichas com perguntas, giz ou fita para marcar o percurso', descricao: 'Em equipes, cada aluno corre até o quadro, responde uma pergunta e passa a vez ao próximo colega; vence quem terminar primeiro com mais acertos.' },
+      { titulo: 'Mapa mental coletivo', duracao: '25 min', material: 'Papel pardo ou cartolina, canetinhas', descricao: 'O time constrói juntos um mapa mental gigante do tema, cada integrante responsável por um ramo diferente.' },
     ],
   },
   {
@@ -68,6 +76,10 @@ const CATEGORIAS = [
     dinamicas: [
       { titulo: 'Roleta de perguntas', duracao: '15 min', material: 'Roleta física ou digital com temas', descricao: 'Gire a roleta para sortear o tema; o aluno sorteado responde uma pergunta sobre o conteúdo da aula.' },
       { titulo: 'Batalha de equipes (quiz)', duracao: '20 min', material: 'Kahoot! (integrado à Slark)', descricao: 'Use um quiz do Kahoot! vinculado à trilha da aula para revisar o conteúdo em formato de competição.' },
+      { titulo: 'Jogo da memória temático', duracao: '15 min', material: 'Cartas com termos e definições', descricao: 'Alunos em duplas viram cartas tentando formar pares de conceito + definição relacionados ao conteúdo da aula.' },
+      { titulo: 'Explique para o colega', duracao: '15 min', material: 'Nenhum', descricao: 'Em duplas, um aluno explica um conceito da aula para o outro em 1 minuto; depois trocam os papéis com outro conceito.' },
+      { titulo: 'Forca em equipe', duracao: '10 min', material: 'Quadro ou cartolina', descricao: 'Times alternam tentando adivinhar palavras-chave do conteúdo da aula no formato clássico da forca.' },
+      { titulo: 'Caça ao tesouro de conceitos', duracao: '20 min', material: 'Pistas espalhadas pela sala ou escola', descricao: 'Equipes seguem pistas que só avançam respondendo corretamente perguntas sobre o conteúdo, até encontrar o "tesouro" final.' },
     ],
   },
   {
@@ -76,6 +88,10 @@ const CATEGORIAS = [
     dinamicas: [
       { titulo: 'Semáforo da compreensão', duracao: '5 min', material: 'Cartões verde/amarelo/vermelho', descricao: 'Ao final da explicação, peça que levantem o cartão que representa o quanto entenderam o conteúdo.' },
       { titulo: 'Bilhete de saída', duracao: '5 min', material: 'Papel ou formulário digital', descricao: 'Cada aluno escreve uma coisa que aprendeu e uma dúvida que ainda tem, antes de sair da aula.' },
+      { titulo: 'Termômetro da turma', duracao: '5 min', material: 'Desenho de termômetro no quadro, post-its', descricao: 'Cada aluno cola um post-it na altura do termômetro que representa o quanto se sente confiante sobre o conteúdo.' },
+      { titulo: 'Uma palavra só', duracao: '5 min', material: 'Nenhum', descricao: 'Cada aluno resume a aula em uma única palavra e compartilha rapidamente com a turma, criando uma "nuvem de palavras" falada.' },
+      { titulo: 'Autoavaliação em 3 perguntas', duracao: '8 min', material: 'Formulário curto (papel ou digital)', descricao: 'Alunos respondem: o que aprendi, o que ainda não entendi, o que farei para resolver essa dúvida.' },
+      { titulo: 'Roda de pares avaliando pares', duracao: '10 min', material: 'Nenhum', descricao: 'Em duplas, um aluno explica o que entendeu da aula e o colega dá um feedback rápido sobre clareza e completude.' },
     ],
   },
 ]

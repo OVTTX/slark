@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import {
   LayoutGrid, School, Users, Eye, UsersRound, Award, Target, Trophy,
   BarChart3, BookOpen, ClipboardList, GraduationCap, DollarSign,
-  Calendar, FileText, Building2, CreditCard, LogOut, ArrowLeft, ListChecks,
+  Calendar, FileText, Building2, CreditCard, LogOut, ArrowLeft,
   Settings, Kanban, UserPlus, Bell,
 } from 'lucide-react'
 import LogoSlark from './LogoSlark'
@@ -40,7 +40,6 @@ const MENUS = {
     { to: '/professor/placar', label: 'Placar Equipes', icon: Trophy },
     { to: '/professor/relatorios', label: 'Relatórios', icon: BarChart3 },
     { to: '/professor/trilhas', label: 'Trilhas', icon: BookOpen },
-    { to: '/professor/gabaritos', label: 'Gabaritos', icon: ListChecks },
     { to: '/professor/aprendizado', label: 'Aprendizado', icon: ClipboardList },
     { to: '/professor/aula-slark', label: 'Aula Slark', icon: GraduationCap },
     { to: '/professor/ranking', label: 'Ranking', icon: Trophy },
