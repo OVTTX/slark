@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 
 const CORES_PODIO = ['#F5C451', '#C0C0C0', '#CD7F32']
+const TAMANHO_MAX_TIME = 4
 
 // Antes "Salas", "Alunos" e "Equipes" eram 3 itens separados no menu do
 // professor. Agora tudo vive dentro da sala: caminho é Salas -> (escolhe a
@@ -46,7 +47,7 @@ export default function ProfessorSalaDetalhe() {
       const [{ data: salaData, error: eSala }, { data: alunosData, error: eAl }, { data: convitesData, error: eConv }, { data: timesData, error: eTimes }, { data: restricoesData, error: eRestricoes }] =
         await Promise.all([
           supabase.from('salas').select('*').eq('id', id).single(),
-          supabase.from('alunos').select('id, nome, pontos, nivel').eq('sala_id', id).order('nome'),
+          supabase.from('alunos').select('id, nome, pontos, nivel, caracteristica_id').eq('sala_id', id).order('nome'),
           supabase.from('convites_aluno').select('*').eq('sala_id', id).eq('usado', false),
           supabase.from('times').select('*, time_membros(aluno_id)').eq('sala_id', id).order('nome'),
           supabase.from('restricoes_equipe').select('*').eq('sala_id', id),
@@ -118,6 +119,11 @@ export default function ProfessorSalaDetalhe() {
 
   async function adicionarMembro(timeId, alunoId) {
     if (!alunoId) return
+    const time = times.find((t) => t.id === timeId)
+    if (time && time.membros.length >= TAMANHO_MAX_TIME) {
+      setErro(`Essa equipe já tem ${TAMANHO_MAX_TIME} membros, o máximo permitido.`)
+      return
+    }
     try {
       const { error } = await supabase.from('time_membros').insert({ time_id: timeId, aluno_id: alunoId })
       if (error) throw error
@@ -196,38 +202,52 @@ export default function ProfessorSalaDetalhe() {
         proibidosPorAluno.get(r.aluno_id_2).add(r.aluno_id_1)
       }
 
-      // cópia local dos membros atuais de cada time, pra ir atualizando durante a distribuição
+      // cópia local dos membros atuais de cada time (ids e características), pra ir atualizando durante a distribuição
+      const alunoPorId = Object.fromEntries(alunos.map((a) => [a.id, a]))
       const membrosPorTime = Object.fromEntries(times.map((t) => [t.id, t.membros.map((m) => m.id)]))
 
       const embaralhados = [...semTime].sort(() => Math.random() - 0.5)
       const insercoes = []
       let comConflito = 0
+      let semVaga = 0
 
       for (const aluno of embaralhados) {
         const proibidos = proibidosPorAluno.get(aluno.id) || new Set()
 
-        const timesValidos = times.filter((t) => !membrosPorTime[t.id].some((mId) => proibidos.has(mId)))
-        const candidatos = timesValidos.length > 0 ? timesValidos : times
-        if (timesValidos.length === 0) comConflito++
+        const comVaga = times.filter((t) => membrosPorTime[t.id].length < TAMANHO_MAX_TIME)
+        if (comVaga.length === 0) { semVaga++; continue }
 
-        // escolhe o time com menos membros no momento, pra equilibrar
-        const escolhido = candidatos.reduce((menor, t) =>
+        const semRestricao = comVaga.filter((t) => !membrosPorTime[t.id].some((mId) => proibidos.has(mId)))
+        const candidatos = semRestricao.length > 0 ? semRestricao : comVaga
+        if (semRestricao.length === 0) comConflito++
+
+        // entre os candidatos, prioriza equipes que ainda não têm ninguém com a
+        // mesma característica do aluno — características complementares, de
+        // preferência uma de cada — e só depois equilibra pelo tamanho do time
+        const semCaracRepetida = aluno.caracteristica_id
+          ? candidatos.filter((t) => !membrosPorTime[t.id].some((mId) => alunoPorId[mId]?.caracteristica_id === aluno.caracteristica_id))
+          : candidatos
+        const pool = semCaracRepetida.length > 0 ? semCaracRepetida : candidatos
+
+        const escolhido = pool.reduce((menor, t) =>
           membrosPorTime[t.id].length < membrosPorTime[menor.id].length ? t : menor
-        , candidatos[0])
+        , pool[0])
 
         membrosPorTime[escolhido.id].push(aluno.id)
         insercoes.push({ time_id: escolhido.id, aluno_id: aluno.id })
       }
 
-      const { error } = await supabase.from('time_membros').insert(insercoes)
-      if (error) throw error
+      if (insercoes.length > 0) {
+        const { error } = await supabase.from('time_membros').insert(insercoes)
+        if (error) throw error
+      }
 
       await carregar()
-      setAvisoDistribuicao(
-        comConflito > 0
-          ? `${semTime.length} aluno${semTime.length > 1 ? 's' : ''} distribuído${semTime.length > 1 ? 's' : ''}. ${comConflito} não puderam respeitar todas as restrições (não havia equipe livre de conflito).`
-          : `${semTime.length} aluno${semTime.length > 1 ? 's' : ''} distribuído${semTime.length > 1 ? 's' : ''} respeitando todas as restrições.`
-      )
+
+      const partes = [`${insercoes.length} aluno${insercoes.length !== 1 ? 's' : ''} distribuído${insercoes.length !== 1 ? 's' : ''}.`]
+      if (comConflito > 0) partes.push(`${comConflito} não puderam respeitar todas as restrições.`)
+      if (semVaga > 0) partes.push(`${semVaga} ficaram sem equipe por falta de vaga (limite de ${TAMANHO_MAX_TIME} por equipe) — crie mais equipes.`)
+      setAvisoDistribuicao(partes.join(' '))
     } catch (e) {
       console.error(e)
       setErro('Não foi possível distribuir os alunos automaticamente.')
@@ -349,7 +369,7 @@ export default function ProfessorSalaDetalhe() {
                       <Trash2 size={15} />
                     </button>
                   </div>
-                  <div className="text-sm text-texto/50 mt-1">{t.pontos} pontos</div>
+                  <div className="text-sm text-texto/50 mt-1">{t.pontos} pontos · {t.membros.length}/{TAMANHO_MAX_TIME} membros</div>
 
                   <div className="mt-4 space-y-1.5">
                     {t.membros.length === 0 && <p className="text-xs text-texto/40">Sem membros ainda.</p>}
@@ -363,7 +383,9 @@ export default function ProfessorSalaDetalhe() {
                     ))}
                   </div>
 
-                  {alunosSemTime(t.id).length > 0 && (
+                  {t.membros.length >= TAMANHO_MAX_TIME ? (
+                    <div className="mt-3 pt-3 border-t text-xs text-texto/40 text-center">Equipe completa ({TAMANHO_MAX_TIME}/{TAMANHO_MAX_TIME})</div>
+                  ) : alunosSemTime(t.id).length > 0 && (
                     <div className="mt-3 pt-3 border-t">
                       <select
                         defaultValue=""
