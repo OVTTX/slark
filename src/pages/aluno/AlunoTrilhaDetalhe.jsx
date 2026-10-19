@@ -1,3 +1,4 @@
+import SlarkLiveRoom from '../../components/SlarkLiveRoom'
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -423,6 +424,8 @@ export default function AlunoTrilhaDetalhe() {
               </a>
             )}
 
+            <SlarkLiveRoom pin={selecionado.bloco.conteudo?.liveRoom?.pin} />
+
             {atividadeDaAula && (
               <div className="mt-6 max-w-md">
                 {atividadeDaAula.revelado ? (
@@ -491,3 +494,4 @@ export default function AlunoTrilhaDetalhe() {
     </div>
   )
 }
+
