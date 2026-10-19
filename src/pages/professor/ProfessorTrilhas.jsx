@@ -319,6 +319,7 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
   const [tipo, setTipo] = useState('texto')
   const [conteudo, setConteudo] = useState('')
   const [editandoBlocoId, setEditandoBlocoId] = useState(null)
+  const [livePin, setLivePin] = useState('')
   const [salvando, setSalvando] = useState(false)
   const [preparacao, setPreparacao] = useState(trilha.preparacao_texto || '')
   const [salvandoPreparacao, setSalvandoPreparacao] = useState(false)
@@ -342,10 +343,11 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
   async function adicionar(e) {
     e.preventDefault()
     if (!conteudo.trim()) return
+    if (livePin && !/^\d{6}$/.test(livePin)) { setErro('O PIN do Slark Live deve ter seis números.'); return }
     setSalvando(true)
     try {
       const blocoEditado = editandoBlocoId ? blocos.find((b) => b.id === editandoBlocoId) : null
-      const conteudoBase = tipo === 'texto' ? { texto: conteudo } : { url: conteudo }
+      const conteudoBase = { ...(tipo === 'texto' ? { texto: conteudo } : { url: conteudo }), ...(livePin ? { liveRoom: { pin: livePin } } : {}) }
       // preserva a marca de "introdução" (Aula 0) ao editar, senão ela vira uma aula normal
       const novoConteudo = blocoEditado && ehIntroducao(blocoEditado) ? { ...conteudoBase, intro: true } : conteudoBase
 
@@ -359,6 +361,7 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
         if (error) throw error
       }
       setConteudo('')
+      setLivePin('')
       setEditandoBlocoId(null)
       await carregar()
     } catch (e) {
@@ -373,12 +376,14 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
     setEditandoBlocoId(b.id)
     setTipo(b.tipo)
     setConteudo(b.conteudo?.texto || b.conteudo?.url || '')
+    setLivePin(b.conteudo?.liveRoom?.pin || '')
   }
 
   function cancelarEdicao() {
     setEditandoBlocoId(null)
     setTipo('texto')
     setConteudo('')
+    setLivePin('')
   }
 
   const temIntro = blocos.some(ehIntroducao)
@@ -541,6 +546,12 @@ function GerenciarBlocosModal({ trilha, onFechar, onAtualizarTrilha }) {
               className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
             />
           )}
+          <div className="rounded-xl border border-azul/20 p-4 space-y-2">
+            <label htmlFor="slark-live-pin" className="block text-sm font-semibold text-white">Slark Live Room · fim do capítulo</label>
+            <p className="text-xs text-texto/60">Crie a sala no Slark Live e cole o PIN aqui. O quarteto definido na Slark joga junto.</p>
+            <input id="slark-live-pin" value={livePin} onChange={(e) => setLivePin(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" maxLength={6} placeholder="PIN de seis números (opcional)" className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white" />
+            <p className="text-xs text-texto/45">Apague o PIN para desvincular a sala deste capítulo.</p>
+          </div>
           <button
             type="submit" disabled={salvando}
             className="w-full py-2.5 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition disabled:opacity-60 flex items-center justify-center gap-2"
@@ -1100,3 +1111,4 @@ function BibliotecaTrilhas() {
     </div>
   )
 }
+
