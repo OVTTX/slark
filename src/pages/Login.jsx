@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase, carregarPerfil } from '../lib/supabase'
 import { HOME_POR_PERFIL } from '../lib/rotasPorPerfil'
@@ -251,7 +251,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen w-full relative font-display overflow-hidden">
+    <div className="min-h-screen w-full relative font-display overflow-hidden" style={{ '--c-onbg': '255 255 255' }}>
       <FundoLogin />
       <IntroMobile />
 
@@ -332,6 +332,7 @@ export default function Login() {
           {erro && <p className="mt-3 text-sm text-white bg-red-500/25 backdrop-blur-md border border-red-200/30 px-4 py-3 rounded-2xl">{erro}</p>}
           {aviso && <p className="mt-3 text-sm text-white bg-[#3FD08A]/25 backdrop-blur-md border border-white/20 px-4 py-3 rounded-2xl">{aviso}</p>}
 
+          <Link to="/" className="mt-5 inline-block text-sm text-white/80 hover:text-white">← Voltar ao início</Link>
           <p className="mt-4 text-sm text-white/80">
             Quer ser Slark?{' '}
             <a href="https://wa.me/5511945699915" target="_blank" rel="noopener" className="text-white hover:underline font-medium">

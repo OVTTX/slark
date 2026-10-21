@@ -4,6 +4,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import RotaProtegida from './components/RotaProtegida'
 import AppLayout from './components/AppLayout'
 import Login from './pages/Login'
+import Landing from './pages/Landing'
 import Perfil from './pages/Perfil'
 import AdminInicio from './pages/admin/AdminInicio'
 import AdminMetricas from './pages/admin/AdminMetricas'
@@ -56,7 +57,7 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/perfil" element={<RotaProtegida><Perfil /></RotaProtegida>} />
 
