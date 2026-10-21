@@ -63,6 +63,7 @@ const MENUS = {
 }
 
 const botaoBase = 'shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition'
+const slarkLiveUrl = 'https://slarklive.vercel.app'
 
 export default function BottomNav() {
   const { perfil, sair } = useAuth()
@@ -93,6 +94,15 @@ export default function BottomNav() {
             className={`${botaoBase} font-mono font-bold text-white/80 hover:text-white hover:bg-white/10`}
           >
             S
+          </a>
+
+          <a
+            href={slarkLiveUrl}
+            title="Abrir Slark Live"
+            aria-label="Abrir Slark Live"
+            className={`${botaoBase} bg-white/90 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-azul`}
+          >
+            <img src="/slark-live.svg" alt="" className="w-6 h-6" />
           </a>
 
           <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
@@ -160,6 +170,16 @@ export default function BottomNav() {
             </a>
 
             <div className="flex flex-col gap-1">
+              <a
+                href={slarkLiveUrl}
+                onClick={() => setAberto(false)}
+                className="py-3 text-3xl font-display font-semibold tracking-tight text-white/90 flex items-center gap-3"
+              >
+                <span className="w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shrink-0">
+                  <img src="/slark-live.svg" alt="" className="w-6 h-6" />
+                </span>
+                Slark Live
+              </a>
               {menu.map(({ to, label, end }) => (
                 <NavLink
                   key={to}
