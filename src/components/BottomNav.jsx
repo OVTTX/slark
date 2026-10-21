@@ -89,7 +89,7 @@ export default function BottomNav() {
         <div className="flex items-center gap-1 px-2.5 py-2 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-x-auto">
           {/* Logo pequeno */}
           <a
-            href={landing}
+            href="https://slark.site"
             title="Site da Slark"
             className={`${botaoBase} font-mono font-bold text-white/80 hover:text-white hover:bg-white/10`}
           >
