@@ -52,12 +52,12 @@ const PILLARS: Pillar[] = [
     files: [
       { name: "Apostilas Integradas com IA", meta: "Material Físico + Digital" },
       { name: "Mapas Mentais", meta: "Final de cada Capítulo" },
-      { name: "Quizzes com Kahoot!", meta: "Aprendizado Ativo" },
+      { name: "Quizzes com Slark Live", meta: "Aprendizado Ativo" },
     ],
     details: [
       "O Runaway conecta material didático físico e digital à proposta de personalização da Slark, oferecendo apoio ao estudo e à exploração dos conteúdos.",
       "Mapas mentais ao final dos capítulos organizam os principais conceitos para apoiar a revisão e conectar ideias.",
-      "Os quizzes com Kahoot! integram a proposta de atividades interativas do método. Seu uso depende da preparação da aula pelo educador.",
+      "Os quizzes com Slark Live conectam a turma a desafios em equipe, ao vivo. Os estudantes entram com o PIN compartilhado para participar da dinâmica.",
     ],
   },
   {

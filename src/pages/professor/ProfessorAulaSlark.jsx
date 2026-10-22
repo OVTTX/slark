@@ -75,7 +75,7 @@ const CATEGORIAS = [
     cor: '#3FD08A',
     dinamicas: [
       { titulo: 'Roleta de perguntas', duracao: '15 min', material: 'Roleta física ou digital com temas', descricao: 'Gire a roleta para sortear o tema; o aluno sorteado responde uma pergunta sobre o conteúdo da aula.' },
-      { titulo: 'Batalha de equipes (quiz)', duracao: '20 min', material: 'Kahoot! (integrado à Slark)', descricao: 'Use um quiz do Kahoot! vinculado à trilha da aula para revisar o conteúdo em formato de competição.' },
+      { titulo: 'Batalha de equipes (quiz)', duracao: '20 min', material: 'Slark Live', descricao: 'Use um quiz no Slark Live para revisar o conteúdo em equipe. Compartilhe o PIN da sala para os alunos participarem dos desafios ao vivo.' },
       { titulo: 'Jogo da memória temático', duracao: '15 min', material: 'Cartas com termos e definições', descricao: 'Alunos em duplas viram cartas tentando formar pares de conceito + definição relacionados ao conteúdo da aula.' },
       { titulo: 'Explique para o colega', duracao: '15 min', material: 'Nenhum', descricao: 'Em duplas, um aluno explica um conceito da aula para o outro em 1 minuto; depois trocam os papéis com outro conceito.' },
       { titulo: 'Forca em equipe', duracao: '10 min', material: 'Quadro ou cartolina', descricao: 'Times alternam tentando adivinhar palavras-chave do conteúdo da aula no formato clássico da forca.' },
