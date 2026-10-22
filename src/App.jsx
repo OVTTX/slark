@@ -15,7 +15,6 @@ import AdminAlunosTurmas from './pages/admin/AdminAlunosTurmas'
 import AdminProfessores from './pages/admin/AdminProfessores'
 import AdminPontuacao from './pages/admin/AdminPontuacao'
 import AdminFinanceiro from './pages/admin/AdminFinanceiro'
-import AdminFeceap from './pages/admin/AdminFeceap'
 import AdminLeads from './pages/admin/AdminLeads'
 import AdminUsuarios from './pages/admin/AdminUsuarios'
 import DiretorInicio from './pages/diretor/DiretorInicio'
@@ -74,7 +73,6 @@ export default function App() {
           <Route path="/admin/professores" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminProfessores /></AppLayout></RotaProtegida>} />
           <Route path="/admin/pontuacao" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminPontuacao /></AppLayout></RotaProtegida>} />
           <Route path="/admin/financeiro" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminFinanceiro /></AppLayout></RotaProtegida>} />
-          <Route path="/admin/feceap" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminFeceap /></AppLayout></RotaProtegida>} />
           <Route path="/admin/leads" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminLeads /></AppLayout></RotaProtegida>} />
           <Route path="/admin/usuarios" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AdminUsuarios /></AppLayout></RotaProtegida>} />
 

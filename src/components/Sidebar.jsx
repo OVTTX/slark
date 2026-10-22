@@ -18,7 +18,6 @@ const MENUS = {
     { to: '/admin/assinaturas', label: 'Assinaturas', icon: CreditCard },
     { to: '/admin/pagamentos', label: 'Pagamentos', icon: DollarSign },
     { to: '/admin/leads', label: 'Leads', icon: UserPlus },
-    { to: '/admin/feceap', label: 'FeCEAP', icon: Kanban },
   ],
   diretor: [
     { to: '/diretor', label: 'Início', icon: LayoutGrid, end: true },

@@ -23,7 +23,6 @@ const MENUS = {
     { to: '/admin/pontuacao', label: 'Pontuação Global', icon: Trophy },
     { to: '/admin/financeiro', label: 'Financeiro', icon: Wallet },
     { to: '/admin/leads', label: 'Leads', icon: UserPlus },
-    { to: '/admin/feceap', label: 'FeCEAP', icon: Kanban },
     { to: '/admin/usuarios', label: 'Usuários Admin', icon: ShieldCheck },
   ],
   diretor: [
