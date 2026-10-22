@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, type CSSProperties } from "react"
+import { SlarkHeader } from "./ui/slark-header"
 import { useSlarkMotion } from "./hooks/use-slark-motion"
 import GlassFolder, { type ArtPreset, type FolderFile } from "./ui/glass-folder-cards"
 
@@ -138,7 +139,6 @@ function FolderCard({ pillar, index, onSelect }: {
 }
 
 export default function SlarkLanding() {
-  const [menuOpen, setMenuOpen] = useState(false)
   const [selected, setSelected] = useState<{ pillar: Pillar; index: number } | null>(null)
   const [liveAnswer, setLiveAnswer] = useState<number | null>(null)
   const dialog = useRef<HTMLDialogElement>(null)
@@ -147,7 +147,7 @@ export default function SlarkLanding() {
 
   useEffect(() => {
     const originalTitle = document.title
-    document.title = "Slark Educação — Luz na Educação"
+    document.title = "Slark Educação"
     return () => { document.title = originalTitle }
   }, [])
 
@@ -161,7 +161,7 @@ export default function SlarkLanding() {
   const showFile = (pillar: Pillar, index: number) => setSelected({ pillar, index })
 
   return (
-    <div ref={scope} className="slark-marketing min-h-screen overflow-x-clip bg-[#05031F] text-[#E8E6FF]" onKeyDown={event => { if (event.key === "Escape") setMenuOpen(false) }}>
+    <div ref={scope} className="slark-marketing min-h-screen overflow-x-clip bg-[#05031F] text-[#E8E6FF]">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
         html:has(.slark-marketing){scroll-behavior:smooth;scroll-padding-top:100px}
@@ -173,11 +173,6 @@ export default function SlarkLanding() {
         .slark-marketing .slark-glass-folder{font-family:'Plus Jakarta Sans',sans-serif}
         .slark-marketing .gf-meta{font-family:inherit;font-size:11px}
         .slark-marketing .slark-motion-word{will-change:transform;vertical-align:baseline}
-        .slark-marketing .slark-navbar{background:rgba(22,26,31,.94);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);box-shadow:0 12px 36px #00000020;pointer-events:auto}
-        .slark-marketing .slark-navbar a:not(.slark-nav-cta){transition:color .2s}
-        .slark-marketing .slark-navbar a:hover{color:#FFFFFF}
-        .slark-marketing .slark-nav-cta{background:#0651C3;color:#FFFFFF}
-        .slark-marketing .slark-nav-cta:hover{background:#2E5BFF}
         @media(max-width:767px){.slark-marketing .slark-brand{width:99px}.slark-marketing .slark-navbar .slark-brand{width:80px}}
         .slark-marketing .gf-title{max-width:230px;font-size:17px}
         .slark-marketing .gf-label{max-width:240px}
@@ -189,6 +184,8 @@ export default function SlarkLanding() {
         .slark-marketing .slark-glass-folder canvas{pointer-events:none}
         .slark-marketing .cta-primary{background:#2E5BFF;color:#FFFFFF;box-shadow:0 8px 30px #0033ff30}
         .slark-marketing .cta-primary:hover{background:#416AFF}
+        .slark-marketing .slark-hero-title{font-size:clamp(1.85rem,7.15vw,6.1rem)}
+        @media(max-width:639px){.slark-marketing .slark-hero-title{font-size:clamp(1.85rem,9.3vw,3.7rem)}}
         .slark-marketing .hero-orbit{position:absolute;border:1px solid #8d9bff38;border-radius:50%;transform:rotate(-32deg)}
         .slark-marketing dialog::backdrop{background:#03021fbd;backdrop-filter:blur(8px)}
         .slark-marketing dialog{color:#E8E6FF;background:#0E0B40}
@@ -197,29 +194,15 @@ export default function SlarkLanding() {
       `}</style>
       <a href="#conteudo" className="sr-only z-50 rounded-lg bg-[#E8E6FF] p-4 text-[#05031F] focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Pular para o conteúdo</a>
 
-      <header className="pointer-events-none fixed inset-x-0 top-2 z-40 px-2 sm:top-3 sm:px-3">
-        <div className="slark-navbar relative mx-auto flex min-h-[60px] max-w-[1440px] items-center gap-5 rounded-full border border-[#FFFFFF]/10 py-[7px] pl-5 pr-[7px] sm:gap-7 sm:pl-6">
-          <a href="#" aria-label="Slark Educação, início" className="flex shrink-0 items-center gap-2 sm:gap-3"><Brand /><span className="border-l border-[#FFFFFF]/20 pl-2 text-[9px] font-medium tracking-wide text-[#FFFFFF]/90 sm:pl-3 sm:text-xs">Educação</span></a>
-          <nav aria-label="Menu principal" className="ml-auto hidden items-center gap-7 text-[12px] font-semibold text-[#FFFFFF]/90 lg:flex">
-            <a href="#ecossistema">O ecossistema</a><a href="#causa">Nossa causa</a><a href="#slark-live">Slark Live</a><a href="#equipe">Quem faz</a><a href="#contato">Contato</a>
-          </nav>
-          <div className="ml-auto flex items-center gap-2 lg:ml-0">
-            <a href="/login" className="slark-nav-cta inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-3 text-[11px] font-semibold transition-colors sm:gap-4 sm:px-6 sm:text-xs">Entrar<span className="hidden sm:inline">no app</span><span aria-hidden="true" className="hidden sm:inline">↗</span></a>
-            <button type="button" aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={menuOpen} aria-controls="slark-mobile-menu" onClick={() => setMenuOpen(value => !value)} className="grid h-11 w-11 place-items-center rounded-full text-xl text-[#FFFFFF] transition hover:bg-[#FFFFFF]/10 lg:hidden">{menuOpen ? "×" : "☰"}</button>
-          </div>
-          {menuOpen && <nav id="slark-mobile-menu" aria-label="Menu mobile" onClick={() => setMenuOpen(false)} className="absolute inset-x-0 top-[calc(100%_+_8px)] flex flex-col gap-1 rounded-[26px] border border-[#FFFFFF]/15 bg-[#171C22] p-4 text-sm font-medium text-[#FFFFFF] shadow-2xl lg:hidden">
-            <a className="rounded-xl px-4 py-3 hover:bg-[#FFFFFF]/10" href="#ecossistema">O ecossistema</a><a className="rounded-xl px-4 py-3 hover:bg-[#FFFFFF]/10" href="#causa">Nossa causa</a><a className="rounded-xl px-4 py-3 hover:bg-[#FFFFFF]/10" href="#slark-live">Slark Live</a><a className="rounded-xl px-4 py-3 hover:bg-[#FFFFFF]/10" href="#equipe">Quem faz</a><a className="rounded-xl px-4 py-3 hover:bg-[#FFFFFF]/10" href="#contato">Contato</a>
-          </nav>}
-        </div>
-      </header>
+      <SlarkHeader />
 
       <main id="conteudo">
         <section className="slark-hero relative isolate border-b border-[#E8E6FF]/10">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_80%_50%,#03005B_0%,transparent_60%)]" />
-          <div className="mx-auto grid max-w-7xl gap-4 px-6 pb-16 pt-36 lg:grid-cols-[1.1fr_0.9fr] lg:px-10 lg:pb-24 lg:pt-40">
+          <div className="relative mx-auto max-w-[1440px] px-6 pb-10 pt-36 sm:px-10 lg:px-16 lg:pb-20 lg:pt-40">
             <div className="relative z-10">
-              <div className="micro flex items-center gap-3 text-[#FBE3EA]"><span className="h-1.5 w-1.5 rounded-full bg-[#2E5BFF] shadow-[0_0_15px_#2E5BFF]" /> LUZ NA EDUCAÇÃO</div>
-              <h1 data-motion-title className="mt-7 max-w-[14ch] text-[clamp(3rem,6.8vw,6.1rem)] font-medium leading-[0.99] tracking-[-0.065em]">A escola mudou.<br />{" "}O jeito de aprender <span className="editorial text-[#FBE3EA]">também.</span></h1>
+              <div className="micro flex items-center gap-3 text-[#FBE3EA]"><span className="h-1.5 w-1.5 rounded-full bg-[#2E5BFF] shadow-[0_0_15px_#2E5BFF]" /> SLARK EDUCAÇÃO</div>
+              <h1 aria-label="A escola mudou. E o jeito de aprender também." className="slark-hero-title mt-7 font-medium leading-[1.06] tracking-[-0.065em]"><span className="block whitespace-nowrap">A escola mudou</span><span className="block whitespace-nowrap">E o jeito de aprender</span><span className="editorial block text-[#FBE3EA]">também</span></h1>
               <p data-motion-reveal className="mt-8 max-w-[43ch] text-base leading-relaxed text-[#E8E6FF]/60 sm:text-lg">IA para conhecer cada estudante. Times para somar diferenças. Uma educação que enxerga pessoas por inteiro.</p>
               <div data-motion-reveal className="mt-9 flex flex-wrap items-center gap-6">
                 <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="cta-primary inline-flex items-center gap-7 rounded-full px-7 py-4 text-sm font-medium transition">Conhecer a Slark <Arrow diagonal /></a>
@@ -227,14 +210,14 @@ export default function SlarkLanding() {
               </div>
               <div className="mt-12 flex items-center gap-3 border-t border-[#E8E6FF]/10 pt-6 text-xs text-[#E8E6FF]/40"><span aria-hidden="true" className="text-2xl text-[#FBE3EA]">✳</span> Cada mente é um universo.</div>
             </div>
-            <div className="slark-hero-visual relative flex min-h-[380px] items-center justify-center lg:min-h-[530px]" aria-label="Uma prévia interativa do ecossistema Slark">
+            <div className="slark-hero-visual relative flex min-h-[340px] items-center justify-center lg:absolute lg:bottom-16 lg:right-14 lg:w-[380px]" aria-label="Uma prévia interativa do ecossistema Slark">
               <div aria-hidden="true" className="hero-orbit h-[260px] w-[110%] max-w-[570px]" /><div aria-hidden="true" className="hero-orbit h-[350px] w-[80%] max-w-[450px]" />
               <span aria-hidden="true" className="absolute left-[10%] top-[20%] h-2 w-2 rounded-full bg-[#FBE3EA] shadow-[0_0_24px_#FBE3EA80]" />
               <div className="relative max-w-full -rotate-6"><GlassFolder label="Seu próximo universo" meta="COMECE PELA CURIOSIDADE" art="aurora" tone="dark" action="none" width={275} appear={false} files={PILLARS[0].files} onFileSelect={(_, i) => showFile(PILLARS[0], i)} /></div>
               <span className="micro absolute bottom-4 right-2 text-[#E8E6FF]/40">TOQUE PARA EXPLORAR ↗</span>
             </div>
           </div>
-          <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-x-8 gap-y-4 px-6 pb-7 text-[9px] tracking-[.14em] text-[#E8E6FF]/40 lg:px-10"><span>PERSONALIZAÇÃO COM IA</span><span>APRENDIZAGEM EM TIME</span><span>PROFESSORES NO CENTRO DAS CONEXÕES</span><span>34ª FECEAP · 2026</span></div>
+          <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-x-8 gap-y-4 px-6 pb-7 text-[9px] tracking-[.14em] text-[#E8E6FF]/40 lg:px-10"><span>PERSONALIZAÇÃO COM IA</span><span>APRENDIZAGEM EM TIME</span><span>PROFESSORES NO CENTRO DAS CONEXÕES</span></div>
         </section>
 
         <section id="ecossistema" className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
@@ -261,12 +244,10 @@ export default function SlarkLanding() {
           <div className="relative rounded-[28px] border border-[#E8E6FF]/20 bg-[#0E0B40]/80 p-6 shadow-[0_35px_90px_#00000040] sm:p-9"><div className="flex items-center justify-between text-[9px] tracking-widest text-[#E8E6FF]/45"><span>SLARK LIVE</span><span>EXEMPLO INTERATIVO</span></div><p className="mt-8 text-center text-[10px] tracking-[.2em] text-[#E8E6FF]/40">PIN ILUSTRATIVO</p><p className="mt-2 text-center text-5xl font-medium tracking-[.12em] sm:text-6xl">248 <span className="text-[#A3B6FF]">601</span></p><div className="mt-8 border-t border-[#E8E6FF]/15 pt-7"><h3 className="text-2xl font-medium tracking-tight">O que faz um time ir mais longe?</h3><div className="mt-5 grid gap-3">{["Pensar sempre igual", "Somar diferentes habilidades"].map((answer, index) => <button type="button" key={answer} aria-pressed={liveAnswer === index} onClick={() => setLiveAnswer(index)} className={`flex items-center gap-4 rounded-xl border px-4 py-4 text-left text-xs transition ${liveAnswer === index ? "border-[#8BA5FF] bg-[#2E5BFF]/20" : "border-[#E8E6FF]/15 hover:bg-[#E8E6FF]/5"}`}><span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-[#E8E6FF]/10 text-[10px]">{index === 0 ? "A" : "B"}</span>{answer}</button>)}</div><p role="status" className="mt-5 min-h-10 text-xs leading-relaxed text-[#E8E6FF]/55">{liveAnswer === null ? "Escolha uma resposta e experimente a ideia." : liveAnswer === 1 ? "É isso! Características diferentes ampliam as possibilidades do time." : "Que tal somar os pontos fortes de cada pessoa? As diferenças também ensinam."}</p></div></div></div>
         </section>
 
-        <section id="equipe" className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28"><div className="flex flex-col justify-between gap-6 md:flex-row md:items-end"><div><p className="micro text-[#E8E6FF]/45">03 / IDEIAS QUE GANHAM FORMA</p><h2 data-motion-title className="mt-5 text-4xl font-medium tracking-[-.05em] sm:text-5xl">Feita por quem acredita<br />{" "}<span className="editorial text-[#FBE3EA]">em outros caminhos.</span></h2></div><div className="max-w-xs text-sm leading-relaxed text-[#E8E6FF]/55"><p>Projeto da Equipe Slark para a 34ª FeCEAP, em 2026, sob orientação do Prof. Regis.</p><p className="mt-3 text-xs text-[#E8E6FF]/35">Tecnologia, pesquisa e design a serviço de uma educação mais humana.</p></div></div><div data-motion-group className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">{[{ name: "Vitor Oliveira", initials: "VO", role: "Idealização & Liderança Técnica" }, { name: "Victor Pinaso", initials: "VP", role: "Gestão Organizacional" }, { name: "Lincoln Xavier", initials: "LX", role: "Pesquisa & Narrativa" }, { name: "Tomás Galvão", initials: "TG", role: "Revisão Científica" }].map(person => <article key={person.name} className="rounded-2xl border border-[#E8E6FF]/10 bg-[#0E0B40]/30 p-5 sm:p-7"><span className="editorial text-4xl text-[#FBE3EA]/65">{person.initials}</span><h3 className="mt-6 text-sm font-medium sm:text-base">{person.name}</h3><p className="mt-2 text-[11px] leading-relaxed text-[#E8E6FF]/45">{person.role}</p></article>)}</div></section>
-
-        <section id="contato" className="mx-auto max-w-7xl px-6 pb-20 lg:px-10"><div className="slark-cta-frame relative overflow-hidden rounded-[32px] border border-[#E8E6FF]/15 bg-[linear-gradient(120deg,#0E0B40,#03005B)] px-7 py-14 text-center sm:px-12 sm:py-20"><span aria-hidden="true" className="pointer-events-none absolute -right-10 -top-10 text-[240px] leading-none text-[#E8E6FF]/5">✳</span><p className="micro relative text-[#FBE3EA]/70">VAMOS CONVERSAR?</p><h2 data-motion-title className="relative mt-6 text-4xl font-medium leading-tight tracking-[-.05em] sm:text-6xl">A próxima conexão<br />{" "}<span className="editorial text-[#FBE3EA]">pode ser na sua escola.</span></h2><p className="relative mx-auto mt-6 max-w-lg text-sm leading-relaxed text-[#E8E6FF]/55">Conheça o Método Slark e converse com a equipe sobre uma demonstração para a sua instituição.</p><a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="cta-primary relative mt-8 inline-flex items-center gap-8 rounded-full px-8 py-4 text-sm font-medium">Falar com a Slark <Arrow diagonal /></a></div></section>
+        <section id="contato" className="mx-auto max-w-7xl px-6 py-20 lg:px-10"><div className="slark-cta-frame relative overflow-hidden rounded-[32px] border border-[#E8E6FF]/15 bg-[linear-gradient(120deg,#0E0B40,#03005B)] px-7 py-14 text-center sm:px-12 sm:py-20"><span aria-hidden="true" className="pointer-events-none absolute -right-10 -top-10 text-[240px] leading-none text-[#E8E6FF]/5">✳</span><p className="micro relative text-[#FBE3EA]/70">VAMOS CONVERSAR?</p><h2 data-motion-title className="relative mt-6 text-4xl font-medium leading-tight tracking-[-.05em] sm:text-6xl">A próxima conexão<br />{" "}<span className="editorial text-[#FBE3EA]">pode ser na sua escola.</span></h2><p className="relative mx-auto mt-6 max-w-lg text-sm leading-relaxed text-[#E8E6FF]/55">Conheça o Método Slark e converse com a equipe sobre uma demonstração para a sua instituição.</p><a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="cta-primary relative mt-8 inline-flex items-center gap-8 rounded-full px-8 py-4 text-sm font-medium">Falar com a Slark <Arrow diagonal /></a></div></section>
       </main>
 
-      <footer className="border-t border-[#E8E6FF]/10"><div className="mx-auto max-w-7xl px-6 py-10 lg:px-10"><div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-center"><div><a href="#" aria-label="Slark Educação, início"><Brand /></a><p className="mt-3 text-xs text-[#E8E6FF]/40">Cada mente é um universo.</p></div><div className="flex flex-wrap gap-6 text-xs text-[#E8E6FF]/65"><a href="https://slark.tech" target="_blank" rel="noopener noreferrer">slark.tech ↗</a><a href="https://instagram.com/slarkedu" target="_blank" rel="noopener noreferrer">@slarkedu ↗</a><a href={WHATSAPP} target="_blank" rel="noopener noreferrer">WhatsApp ↗</a><a href="/login">Entrar no app ↗</a></div></div><div className="mt-9 flex flex-wrap justify-between gap-4 border-t border-[#E8E6FF]/10 pt-6 text-[10px] text-[#E8E6FF]/35"><span>© 2026 Slark Educação · Um produto Slark - Moorning Group</span><span>34ª FeCEAP · São Paulo</span></div></div></footer>
+      <footer className="border-t border-[#E8E6FF]/10"><div className="mx-auto max-w-7xl px-6 py-10 lg:px-10"><div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-center"><div><a href="#" aria-label="Slark Educação, início"><Brand /></a><p className="mt-3 text-xs text-[#E8E6FF]/40">Cada mente é um universo.</p></div><div className="flex flex-wrap gap-6 text-xs text-[#E8E6FF]/65"><a href="https://slark.tech" target="_blank" rel="noopener noreferrer">slark.tech ↗</a><a href="https://instagram.com/slarkedu" target="_blank" rel="noopener noreferrer">@slarkedu ↗</a><a href={WHATSAPP} target="_blank" rel="noopener noreferrer">WhatsApp ↗</a><a href="/login">Entrar no app ↗</a></div></div><div className="mt-9 flex flex-wrap justify-between gap-4 border-t border-[#E8E6FF]/10 pt-6 text-[10px] text-[#E8E6FF]/35"><span>© 2026 Slark Educação · Um produto Slark - Moorning Group</span><a href="/documentacao">Documentação ↗</a></div></div></footer>
 
       <dialog ref={dialog} aria-labelledby="slark-detail-title" onClose={() => setSelected(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close() }} className="m-auto w-[calc(100%_-_2rem)] max-w-lg rounded-3xl border border-[#E8E6FF]/20 p-0 shadow-2xl">
         {selected && <div className="p-7 sm:p-9"><div className="flex items-start justify-between gap-4"><p className="micro text-[#AABFFF]">{selected.pillar.label}</p><button type="button" autoFocus onClick={() => dialog.current?.close()} aria-label="Fechar detalhes" className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#E8E6FF]/15 text-xl">×</button></div><h2 id="slark-detail-title" className="mt-5 text-3xl font-medium tracking-tight">{selected.pillar.files[selected.index].name}</h2><p className="mt-3 text-xs text-[#FBE3EA]/65">{selected.pillar.files[selected.index].meta}</p><p className="mt-6 text-sm leading-loose text-[#E8E6FF]/70">{selected.pillar.details[selected.index]}</p><p className="mt-6 border-t border-[#E8E6FF]/10 pt-5 text-[10px] leading-relaxed text-[#E8E6FF]/40">Conheça a proposta do ecossistema. Para consultar a disponibilidade de cada recurso na sua escola, fale com a equipe.</p><a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="cta-primary mt-6 inline-flex items-center gap-5 rounded-full px-5 py-3 text-xs">Conversar sobre este recurso <Arrow diagonal /></a></div>}

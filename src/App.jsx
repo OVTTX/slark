@@ -5,6 +5,7 @@ import RotaProtegida from './components/RotaProtegida'
 import AppLayout from './components/AppLayout'
 import Login from './pages/Login'
 import Landing from './pages/Landing.tsx'
+import SlarkDocumentation from '../components/slark-documentation'
 import Perfil from './pages/Perfil'
 import AdminInicio from './pages/admin/AdminInicio'
 import AdminMetricas from './pages/admin/AdminMetricas'
@@ -58,6 +59,7 @@ export default function App() {
         <BrowserRouter>
           <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/documentacao" element={<SlarkDocumentation />} />
           <Route path="/login" element={<Login />} />
           <Route path="/perfil" element={<RotaProtegida><Perfil /></RotaProtegida>} />
 
