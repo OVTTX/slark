@@ -3,7 +3,7 @@
 .app-content[data-page-layout=bento] > :is(div,section):not(.slark-student-dashboard):not(.slark-panel-skeleton) {
  display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start;
 }
-.app-content[data-page-layout=bento] > :is(div,section):not(.slark-student-dashboard) > :not(.fixed) {min-width:0;grid-column:1/-1;}
+.app-content[data-page-layout=bento] > :where(div,section):where(:not(.slark-student-dashboard)) > :where(:not(.fixed)) {min-width:0;grid-column:1/-1;}
 .app-content[data-page-layout=bento] > :is(div,section) > h1 + p {margin-top:-12px;}
 .app-content[data-page-layout=bento] > :is(div,section) > :is(.grid,[class*="rounded-"][class*="bg-card"],.bento-team-ranking,.bento-radar,.bento-ranking-list) {margin-top:0;}
 .app-content[data-page-layout=bento] > :is(div,section) > .flex:has(> :is(input,select)) {
@@ -31,12 +31,12 @@
 @media(min-width:1100px) {
  .app-content[data-page-layout=bento] > :is(div,section):not(.slark-student-dashboard):not(.slark-panel-skeleton) {grid-template-columns:repeat(12,minmax(0,1fr));}
  /* Recompose existing card grids, leaving tables, dialogs and form grids intact. */
- .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])) {grid-template-columns:repeat(12,minmax(0,1fr));align-items:stretch;}
- .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])) > * {grid-column:span 4;min-width:0;}
- .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])) > :first-child {grid-column:span 8;}
- .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])):has(> :nth-child(2):last-child) > :last-child {grid-column:span 4;}
- .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])):has(> :nth-child(3):last-child) > :last-child {grid-column:1/-1;}
- .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])):has(> :nth-child(4):last-child) > :last-child {grid-column:span 8;}
+ .app-content[data-page-layout=bento] > :where(div,section) > :where(.grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"]))) {grid-template-columns:repeat(12,minmax(0,1fr));align-items:stretch;}
+ .app-content[data-page-layout=bento] > :where(div,section) > :where(.grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"]))) > :where(*) {grid-column:span 4;min-width:0;}
+ .app-content[data-page-layout=bento] > :where(div,section) > :where(.grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"]))) > :where(:first-child) {grid-column:span 8;}
+ .app-content[data-page-layout=bento] > :where(div,section) > :where(.grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])):has(> :nth-child(2):last-child)) > :where(:last-child) {grid-column:span 4;}
+ .app-content[data-page-layout=bento] > :where(div,section) > :where(.grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])):has(> :nth-child(3):last-child)) > :where(:last-child) {grid-column:1/-1;}
+ .app-content[data-page-layout=bento] > :where(div,section) > :where(.grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])):has(> :nth-child(4):last-child)) > :where(:last-child) {grid-column:span 8;}
  .app-content[data-page-layout=bento] > :is(div,section) > .bento-kpis > :first-child {grid-column:span 4;grid-row:span 2;display:flex;flex-direction:column;justify-content:space-between;min-height:290px;}
  .app-content[data-page-layout=bento] > :is(div,section) > .bento-kpis:not(.bento-kpis-six) > :nth-child(4) {grid-column:span 8;}
  .app-content[data-page-layout=bento] > :is(div,section) > .bento-kpis-six > :last-child {grid-column:span 8;}
