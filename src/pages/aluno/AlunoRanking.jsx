@@ -68,7 +68,7 @@ export default function AlunoRanking() {
           </p>
         </div>
       ) : (
-        <div className="mt-8 space-y-3">
+        <div className="bento-ranking-list mt-8 space-y-3">
           {lista.map((item, i) => (
             <div
               key={item.id}

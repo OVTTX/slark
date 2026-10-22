@@ -1,0 +1,64 @@
+/* Application composition only: every rule is gated so paths and notifications
+   retain their original layout, including nested path detail routes. */
+.app-content[data-page-layout=bento] > :is(div,section):not(.slark-student-dashboard):not(.slark-panel-skeleton) {
+ display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start;
+}
+.app-content[data-page-layout=bento] > :is(div,section):not(.slark-student-dashboard) > :not(.fixed) {min-width:0;grid-column:1/-1;}
+.app-content[data-page-layout=bento] > :is(div,section) > h1 + p {margin-top:-12px;}
+.app-content[data-page-layout=bento] > :is(div,section) > :is(.grid,[class*="rounded-"][class*="bg-card"],.bento-team-ranking,.bento-radar,.bento-ranking-list) {margin-top:0;}
+.app-content[data-page-layout=bento] > :is(div,section) > .flex:has(> :is(input,select)) {
+ padding:20px;border:1px solid var(--app-line);border-radius:24px;background:var(--app-panel);
+}
+.app-content[data-page-layout=bento] :is(.bento-ranking-list,.bento-week) {display:grid;grid-template-columns:minmax(0,1fr);gap:16px;}
+.app-content[data-page-layout=bento] .bento-ranking-list > * {margin-top:0;min-width:0;}
+.app-content[data-page-layout=bento] .bento-ranking-list > :first-child {min-height:160px;}
+.app-content[data-page-layout=bento] .bento-competence-stats {display:contents;}
+.app-content[data-page-layout=bento] .bento-radar {padding:24px;background:var(--app-panel);border:1px solid var(--app-line);border-radius:24px;}
+.app-content[data-page-layout=bento] .bento-radar > div:last-child {padding:0;border:0;background:transparent;box-shadow:none;}
+.app-content[data-page-layout=bento] .bento-team-ranking {padding:24px;background:var(--app-panel);border:1px solid var(--app-line);border-radius:24px;}
+.app-content[data-page-layout=bento] .bento-week {margin-top:0;}
+.app-content[data-page-layout=bento] .bento-day {min-width:0;padding:20px;border-radius:24px;background:var(--app-panel);border:1px solid var(--app-line);}
+.app-content[data-page-layout=bento] .bento-day h2 {margin-bottom:20px;font-size:18px;font-weight:700;}
+.app-content[data-page-layout=bento] .bento-day ol {display:grid;gap:12px;}
+.app-content[data-page-layout=bento] .bento-day li {display:flex;gap:12px;align-items:start;padding-top:12px;border-top:1px solid var(--app-line);font-size:12px;}
+.app-content[data-page-layout=bento] .bento-day li > span {flex-shrink:0;color:var(--app-muted);}
+.app-content[data-page-layout=bento] .bento-day li > div {min-width:0;overflow-wrap:anywhere;}
+.app-content[data-page-layout=bento] .bento-day li p {margin-top:4px;color:var(--app-secondary);}
+@media(min-width:640px) {
+ .app-content[data-page-layout=bento] :is(.bento-ranking-list,.bento-week) {grid-template-columns:repeat(2,minmax(0,1fr));}
+ .app-content[data-page-layout=bento] .bento-ranking-list > :first-child {grid-column:1/-1;}
+}
+@media(min-width:1100px) {
+ .app-content[data-page-layout=bento] > :is(div,section):not(.slark-student-dashboard):not(.slark-panel-skeleton) {grid-template-columns:repeat(12,minmax(0,1fr));}
+ /* Recompose existing card grids, leaving tables, dialogs and form grids intact. */
+ .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])) {grid-template-columns:repeat(12,minmax(0,1fr));align-items:stretch;}
+ .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])) > * {grid-column:span 4;min-width:0;}
+ .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])) > :first-child {grid-column:span 8;}
+ .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])):has(> :nth-child(2):last-child) > :last-child {grid-column:span 4;}
+ .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])):has(> :nth-child(3):last-child) > :last-child {grid-column:1/-1;}
+ .app-content[data-page-layout=bento] > :is(div,section) > .grid:has(> :is(.slark-stat,[class*="rounded-"][class*="bg-card"])):has(> :nth-child(4):last-child) > :last-child {grid-column:span 8;}
+ .app-content[data-page-layout=bento] > :is(div,section) > .bento-kpis > :first-child {grid-column:span 4;grid-row:span 2;display:flex;flex-direction:column;justify-content:space-between;min-height:290px;}
+ .app-content[data-page-layout=bento] > :is(div,section) > .bento-kpis:not(.bento-kpis-six) > :nth-child(4) {grid-column:span 8;}
+ .app-content[data-page-layout=bento] > :is(div,section) > .bento-kpis-six > :last-child {grid-column:span 8;}
+ .app-content[data-page-layout=bento] > .bento-competencias > .bento-trait {grid-column:span 4;}
+ .app-content[data-page-layout=bento] > .bento-competencias > .bento-competence-stats {grid-column:auto;}
+ .app-content[data-page-layout=bento] > .bento-competencias > .bento-competence-stats > * {grid-column:span 4;min-height:190px;}
+ .app-content[data-page-layout=bento] > .bento-competencias > .bento-radar {grid-column:1/-1;}
+ .app-content[data-page-layout=bento] > .bento-team > .bento-team-members {grid-column:span 8;}
+ .app-content[data-page-layout=bento] > .bento-team > .bento-team-ranking {grid-column:span 4;}
+ .app-content[data-page-layout=bento] > .bento-boletim > .bento-learning-summary {grid-column:span 4;min-height:260px;flex-direction:column;align-items:start;}
+ .app-content[data-page-layout=bento] > .bento-boletim > .bento-subjects {grid-column:span 8;grid-template-columns:repeat(2,minmax(0,1fr));}
+ .app-content[data-page-layout=bento] > .bento-boletim > .bento-subjects > * {grid-column:span 1;}
+ .app-content[data-page-layout=bento] > .bento-boletim > .bento-subjects > :first-child {grid-column:1/-1;}
+ .app-content[data-page-layout=bento] .bento-profile {grid-template-columns:minmax(260px,4fr) minmax(0,8fr);align-items:stretch;}
+ .app-content[data-page-layout=bento] .bento-profile > :first-child {display:grid;gap:20px;align-content:start;}
+ .app-content[data-page-layout=bento] .bento-profile > :first-child > * {margin-top:0;}
+ .app-content[data-page-layout=bento] .loja-estilos {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:stretch;}
+ .app-content[data-page-layout=bento] .loja-estilos > * {grid-column:1/-1;margin-top:0;min-width:0;}
+ .app-content[data-page-layout=bento] .loja-estilos > :is(.loja-progresso,.loja-preview) {grid-column:span 1;}
+ .app-content[data-page-layout=bento] .bento-materials {grid-template-columns:repeat(3,minmax(0,1fr));}
+ .app-content[data-page-layout=bento] .bento-materials > :first-child {grid-column:span 2;}
+ .app-content[data-page-layout=bento] .bento-week {grid-template-columns:repeat(6,minmax(0,1fr));}
+ .app-content[data-page-layout=bento] .bento-day {grid-column:span 2;}
+ .app-content[data-page-layout=bento] .bento-day:nth-child(-n+2) {grid-column:span 3;}
+}

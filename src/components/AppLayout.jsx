@@ -8,15 +8,17 @@ import LogoSlark from './LogoSlark'
 import '../styles/slark-app.css'
 import '../styles/slark-entry.css'
 import '../styles/slark-custom.css'
+import '../styles/slark-bento.css'
 
 const PERFIS = { admin_slark: 'Equipe Slark', diretor: 'Diretor', professor: 'Professor', aluno: 'Estudante' }
 
-// All application routes share the same visual system; page grids and actions stay in place.
+// Bento is the default application layout; learning paths and notifications keep their original layout.
 export default function AppLayout({ children }) {
   const { perfil } = useAuth()
   const { preferencias } = usePersonalizacao()
   const content = useRef(null)
   const { pathname } = useLocation()
+  const layoutBento = !/(?:^|\/)(?:trilhas|notificacoes)(?:\/|$)/.test(pathname)
   useAppEntrance(content, pathname)
   return (
     <div data-skin={preferencias.skin} data-texto={preferencias.texto} data-moldura={preferencias.moldura} className="slark-app min-h-screen bg-bg text-texto font-display overflow-x-clip relative isolate">
@@ -33,7 +35,7 @@ export default function AppLayout({ children }) {
         </Link>
       </header>
       <main id="app-conteudo" className="w-full relative">
-        <div ref={content} className="app-content px-4 sm:px-8 pt-6 sm:pt-8 pb-28 sm:pb-32 max-w-[1500px] mx-auto">{children}</div>
+        <div ref={content} data-page-layout={layoutBento ? 'bento' : 'original'} className="app-content px-4 sm:px-8 pt-6 sm:pt-8 pb-28 sm:pb-32 max-w-[1500px] mx-auto">{children}</div>
       </main>
       <BottomNav />
     </div>

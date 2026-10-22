@@ -90,12 +90,12 @@ export default function AlunoCompetencias() {
   const pctSelos = selosTotal ? Math.round((selosConquistados / selosTotal) * 100) : 0
 
   return (
-    <div>
+    <div className="bento-competencias">
       <h1 className="text-4xl font-bold text-white tracking-tight">Mapa de Competências</h1>
       <p className="mt-2 text-texto/60">Seu perfil de desenvolvimento na Slark.</p>
 
       {aluno.caracteristicas && (
-        <div className="mt-8 rounded-2xl bg-card border p-6">
+        <div className="bento-trait mt-8 rounded-2xl bg-card border p-6">
           <div className="text-sm text-texto/60 mb-2">Sua característica</div>
           <span
             className="inline-flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded-full"
@@ -107,7 +107,7 @@ export default function AlunoCompetencias() {
         </div>
       )}
 
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div className="bento-competence-stats mt-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="rounded-2xl bg-card border p-6">
           <div className="flex items-center gap-2 text-white font-semibold"><BookOpen size={18} className="text-azul" /> Trilhas concluídas</div>
           <div className="mt-3 flex items-end gap-2">
@@ -130,7 +130,7 @@ export default function AlunoCompetencias() {
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="bento-radar mt-6">
         <div className="flex items-center gap-2 text-white font-semibold mb-3"><Target size={18} className="text-azul" /> Seus Traços</div>
         <div className="rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
           <MapaRadial dados={tracos} />

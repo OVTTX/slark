@@ -233,7 +233,7 @@ export default function ProfessorInicio() {
         <PainelLoading />
       ) : (
         <>
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="bento-kpis mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <StatCard icon={Users} cor="#0651C3" rotulo="Total de Alunos" valor={stats.totalAlunos} sub="Alunos ativos cadastrados" />
             <StatCard
               icon={GraduationCap} cor="#3FD08A" rotulo="Média Geral"

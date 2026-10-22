@@ -170,7 +170,7 @@ export default function Perfil() {
         <h1 className="text-4xl font-bold text-white tracking-tight">Meu Perfil</h1>
         <p className="mt-2 text-texto/60">{ehAluno ? 'Sua jornada de aprendizado.' : 'Gerencie seus dados de acesso.'}</p>
 
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5 items-start">
+        <div className="bento-profile mt-8 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5 items-start">
           {/* Coluna esquerda: foto + selo de característica + menu + tempo de plataforma + selos ganhos */}
           <div className="space-y-5">
             <div className="rounded-2xl bg-card border p-6 flex flex-col items-center text-center">

@@ -75,7 +75,7 @@ export default function AlunoBoletim() {
     : null
 
   return (
-    <div>
+    <div className="bento-boletim">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-4xl font-bold text-white tracking-tight">Boletim</h1>
@@ -98,7 +98,7 @@ export default function AlunoBoletim() {
       ) : (
         <>
           {mediaGeral !== null && (
-            <div className="mt-8 rounded-2xl bg-card border p-8 flex items-center gap-6">
+            <div className="bento-learning-summary mt-8 rounded-2xl bg-card border p-8 flex items-center gap-6">
               <div className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold shrink-0" style={{ background: `${corDoValor(mediaGeral)}22`, color: corDoValor(mediaGeral) }}>
                 {mediaGeral}%
               </div>
@@ -109,7 +109,7 @@ export default function AlunoBoletim() {
             </div>
           )}
 
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="bento-subjects mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {resumoPorMateria.map((m) => (
               <div key={m.materiaId} className="rounded-2xl bg-card border p-6">
                 <div className="font-bold text-white">{m.nome}</div>

@@ -120,7 +120,7 @@ export default function MateriaisRunaway({ gerencia = false }) {
           </p>
         </div>
       ) : (
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="bento-materials mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {materiais.map((m) => (
             <div key={m.id} className="rounded-2xl bg-card border p-6">
               <div className="flex items-start justify-between gap-2">

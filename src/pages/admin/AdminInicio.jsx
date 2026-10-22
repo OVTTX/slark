@@ -62,7 +62,7 @@ export default function AdminInicio() {
         <PainelLoading columns={3} count={6} withDetails={false} />
       ) : (
         <>
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="bento-kpis bento-kpis-six mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <Kpi icon={Building2} rotulo="Escolas" valor={m.escolas} cor="#0651C3" />
             <Kpi icon={Users} rotulo="Alunos no total" valor={m.alunos} cor="#3FD08A" />
             <Kpi icon={CreditCard} rotulo="Assinaturas ativas" valor={m.ativas} cor="#C44DFF" />

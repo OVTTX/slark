@@ -61,41 +61,25 @@ export default function AlunoGrade() {
           <p className="mt-4 text-texto/70 max-w-md mx-auto leading-relaxed">A grade da sua turma ainda não foi montada pela direção.</p>
         </div>
       ) : (
-        <div className="mt-8 rounded-2xl bg-card border overflow-hidden overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th className="px-3 py-3 text-left text-xs font-semibold text-texto/50 uppercase tracking-wide">Período</th>
-                {DIAS_SEMANA_GRADE.map((dia) => (
-                  <th key={dia} className="px-3 py-3 text-center text-xs font-semibold text-texto/50 uppercase tracking-wide">
-                    {NOME_DIA_SEMANA[dia]}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {PERIODOS.map((periodo) => (
-                <tr key={periodo} className="border-b last:border-b-0">
-                  <td className="px-3 py-3 text-sm text-texto/60 font-medium">{periodo}º</td>
-                  {DIAS_SEMANA_GRADE.map((dia) => {
-                    const aula = porSlot[`${dia}-${periodo}`]
-                    return (
-                      <td key={dia} className="px-2 py-2 text-center">
-                        {aula ? (
-                          <div className="rounded-lg bg-azul/10 border border-azul/25 px-2 py-2">
-                            <div className="text-xs font-semibold text-white truncate">{aula.materias?.nome}</div>
-                            <div className="text-[11px] text-texto/50 truncate">{aula.usuarios?.nome}</div>
-                          </div>
-                        ) : (
-                          <div className="h-full py-2 text-texto/20 text-xs">—</div>
-                        )}
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="bento-week mt-8" aria-label="Grade semanal de aulas">
+          {DIAS_SEMANA_GRADE.map((dia) => (
+            <section key={dia} className="bento-day" aria-label={NOME_DIA_SEMANA[dia]}>
+              <h2>{NOME_DIA_SEMANA[dia]}</h2>
+              <ol>
+                {PERIODOS.map((periodo) => {
+                  const aula = porSlot[`${dia}-${periodo}`]
+                  return (
+                    <li key={periodo}>
+                      <span>{periodo}º</span>
+                      <div>
+                        {aula ? <><strong>{aula.materias?.nome}</strong><p>{aula.usuarios?.nome}</p></> : <span className="text-texto/45">Sem aula</span>}
+                      </div>
+                    </li>
+                  )
+                })}
+              </ol>
+            </section>
+          ))}
         </div>
       )}
     </div>

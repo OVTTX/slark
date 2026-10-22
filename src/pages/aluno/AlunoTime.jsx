@@ -52,7 +52,7 @@ export default function AlunoTime() {
   if (carregando) return <div className="text-texto/50">Carregando seu time…</div>
 
   return (
-    <div>
+    <div className="bento-team">
       <h1 className="text-4xl font-bold text-white tracking-tight">Meu Time</h1>
       <p className="mt-2 text-texto/60">Vocês crescem juntos.</p>
 
@@ -65,7 +65,7 @@ export default function AlunoTime() {
         </div>
       ) : (
         <>
-          <div className="mt-8 rounded-2xl bg-card border p-6">
+          <div className="bento-team-members mt-8 rounded-2xl bg-card border p-6">
             <div className="flex items-center justify-between">
               <div className="font-bold text-white text-xl">{time.nome}</div>
               <div className="flex items-center gap-1.5 font-bold text-white text-lg"><Trophy size={18} className="text-[#F5C451]" /> {time.pontos}</div>
@@ -84,7 +84,7 @@ export default function AlunoTime() {
           </div>
 
           {ranking.length > 1 && (
-            <div className="mt-6">
+            <div className="bento-team-ranking mt-6">
               <div className="text-sm font-semibold text-texto/50 uppercase tracking-wide mb-3">Ranking de times da sua turma</div>
               <div className="space-y-2">
                 {ranking.map((t, i) => (

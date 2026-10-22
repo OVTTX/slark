@@ -124,11 +124,7 @@
 .slark-app[data-skin=noir] [class*="bg-white"] {background:#000;}
 .slark-app[data-skin=noir] :is(button.bg-white,a.bg-white) {color:#D1D1D1;border:1px solid #363636;}
 
-/* A hidden, account-scoped alternate layout for Meu Painel. */
-.slark-bento-secret {border-radius:4px;touch-action:manipulation;}
-.slark-bento-secret:focus-visible {outline:2px solid currentColor;outline-offset:5px;}
-.slark-bento-feedback:empty {display:none;}
-.slark-bento-feedback:not(:empty) {margin-top:16px;}
+/* Bento composition for Meu Painel. */
 .slark-bento .slark-dashboard-grid {display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:24px;}
 .slark-bento :is(.slark-dashboard-stats,.slark-dashboard-details) {display:contents;}
 .slark-bento .slark-dashboard-grid > div > * {min-width:0;}
