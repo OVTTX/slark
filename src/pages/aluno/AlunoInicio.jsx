@@ -1,5 +1,5 @@
 import { PainelLoading } from '../../components/SlarkLoading'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
@@ -29,6 +29,39 @@ export default function AlunoInicio() {
   const [pontuacoesRecentes, setPontuacoesRecentes] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
+  const [layout, setLayout] = useState({ conta: null, bento: false })
+  const [avisoLayout, setAvisoLayout] = useState('')
+  const segredo = useRef({ cliques: 0, ultimo: 0 })
+  const bento = layout.conta === perfil?.id && layout.bento
+
+  useEffect(() => {
+    let salvo = false
+    try { salvo = localStorage.getItem(`slark:painel-bento:${perfil?.id}`) === '1' } catch { /* Armazenamento pode estar bloqueado. */ }
+    setLayout({ conta: perfil?.id, bento: salvo })
+    segredo.current = { cliques: 0, ultimo: 0 }
+    setAvisoLayout('')
+  }, [perfil?.id])
+
+  useEffect(() => {
+    if (!avisoLayout) return
+    const timer = setTimeout(() => setAvisoLayout(''), 4500)
+    return () => clearTimeout(timer)
+  }, [avisoLayout])
+
+  function alternarBento() {
+    const ativo = !bento
+    setLayout({ conta: perfil.id, bento: ativo })
+    try { localStorage.setItem(`slark:painel-bento:${perfil.id}`, ativo ? '1' : '0') } catch { /* A troca continua funcionando sem persistência. */ }
+    setAvisoLayout(ativo ? 'Segredo descoberto. Seu painel ganhou um novo encaixe ✨' : 'De volta ao seu painel original.')
+    segredo.current = { cliques: 0, ultimo: 0 }
+  }
+
+  function descobrirBento() {
+    const agora = Date.now()
+    const cliques = agora - segredo.current.ultimo < 1800 ? segredo.current.cliques + 1 : 1
+    segredo.current = { cliques, ultimo: agora }
+    if (cliques >= 5) alternarBento()
+  }
 
   useEffect(() => {
     if (!perfil?.id) return
@@ -139,16 +172,26 @@ export default function AlunoInicio() {
     : null
 
   return (
-    <div>
-      <div className="flex items-start justify-between gap-4">
+    <div className={`slark-student-dashboard${bento ? ' slark-bento' : ''}`}>
+      <div className="slark-dashboard-heading flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs text-texto/45">Boas-vindas à Slark, a nova educação.</p>
+          <button type="button" onClick={descobrirBento} className="slark-bento-secret text-left text-xs text-texto/45">
+            Boas-vindas à Slark, a nova educação.
+          </button>
           <h1 className="mt-1 text-4xl font-bold text-white tracking-tight">Olá, {aluno.nome.split(' ')[0]}!</h1>
         </div>
         <SininhoNotificacoes />
       </div>
 
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div role="status" className="slark-bento-feedback text-sm text-texto/70">{avisoLayout}</div>
+      {bento && (
+        <div className="slark-bento-toolbar flex flex-wrap items-center gap-3 mt-5 text-xs text-texto/60">
+          <span>✦ Bento desbloqueado</span>
+          <button type="button" onClick={alternarBento} className="underline underline-offset-4 hover:text-texto">Voltar ao original</button>
+        </div>
+      )}
+      <div className="slark-dashboard-grid">
+      <div className="slark-dashboard-stats mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard icon={Rocket} label="Sua Pontuação" value={aluno.pontos} sub="Pontos acumulados" />
         <StatCard
           icon={GraduationCap}
@@ -170,8 +213,8 @@ export default function AlunoInicio() {
         />
       </div>
 
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
+      <div className="slark-dashboard-details mt-8 grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="slark-dashboard-trail lg:col-span-2">
           <h2 className="text-lg font-bold text-white mb-3">Sua Trilha Recomendada</h2>
           <div className="rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
             {trilhaRetomar ? (
@@ -211,7 +254,7 @@ export default function AlunoInicio() {
           </div>
         </div>
 
-        <div>
+        <div className="slark-dashboard-activity">
           <h2 className="text-lg font-bold text-white mb-3">Atividades Recentes</h2>
           <div className="rounded-3xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6">
             {pontuacoesRecentes.length === 0 ? (
@@ -243,6 +286,7 @@ export default function AlunoInicio() {
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
