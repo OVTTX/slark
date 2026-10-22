@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { supabase, carregarPerfil } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 import { HOME_POR_PERFIL } from '../lib/rotasPorPerfil'
 import { ArrowRight, Loader2, CheckCircle2 } from 'lucide-react'
 import LogoSlark from '../components/LogoSlark'
@@ -86,8 +86,15 @@ function IntroMobile() {
 }
 
 export default function Login() {
-  const { entrar } = useAuth()
+  const { entrar, sessao, perfil, carregando: preparandoAcesso, erroAuth, tentarNovamente, sair } = useAuth()
   const navigate = useNavigate()
+
+  // Redirect only after React has committed the shared session AND profile.
+  useEffect(() => {
+    if (!preparandoAcesso && sessao && perfil && HOME_POR_PERFIL[perfil.perfil]) {
+      navigate(HOME_POR_PERFIL[perfil.perfil], { replace: true })
+    }
+  }, [preparandoAcesso, sessao, perfil, navigate])
 
   // A tela de login tem identidade visual própria (degradê escuro fixo) e não
   // deve mudar com o tema claro/escuro do resto do app — força o fundo do
@@ -140,12 +147,10 @@ export default function Login() {
     setErro('')
     setCarregando(true)
     try {
-      const { data, error } = await entrar(email.trim().toLowerCase(), senha)
+      const { error } = await entrar(email.trim().toLowerCase(), senha)
       if (error) throw error
-      const perfil = await carregarPerfil(data.user.id)
-      navigate(HOME_POR_PERFIL[perfil.perfil] || '/professor')
     } catch (err) {
-      setErro('E-mail ou senha incorretos. Tente novamente.')
+      setErro(['PROFILE_LOAD_FAILED', 'SESSION_NOT_READY'].includes(err.code) ? err.message : 'E-mail ou senha incorretos. Tente novamente.')
     } finally {
       setCarregando(false)
     }
@@ -168,10 +173,8 @@ export default function Login() {
       const { error: erroCriar } = await supabase.rpc('criar_conta_aluno', { p_email: emailNormalizado, p_senha: senha })
       if (erroCriar) throw erroCriar
 
-      const { data, error } = await entrar(emailNormalizado, senha)
+      const { error } = await entrar(emailNormalizado, senha)
       if (error) throw error
-      const perfil = await carregarPerfil(data.user.id)
-      navigate(HOME_POR_PERFIL[perfil.perfil] || '/aluno')
     } catch (err) {
       console.error(err)
       setErro(err.message?.includes('já existe') ? err.message : 'Não foi possível criar sua senha. Tente novamente.')
@@ -231,7 +234,7 @@ export default function Login() {
           </div>
 
           <div className="w-full max-w-lg lg:ml-auto">
-          {etapa === 'email' && (
+          {!preparandoAcesso && !sessao && etapa === 'email' && (
             <>
               <p className="font-mono text-2xl sm:text-3xl font-medium text-white/90">Entre no seu espaço</p>
               <form onSubmit={continuarComEmail}>
@@ -243,7 +246,7 @@ export default function Login() {
             </>
           )}
 
-          {etapa === 'senha' && (
+          {!preparandoAcesso && !sessao && etapa === 'senha' && (
             <>
               <p className="font-mono text-2xl sm:text-3xl font-medium text-white/90 truncate">{email}</p>
               <form onSubmit={entrarComSenha}>
@@ -259,7 +262,7 @@ export default function Login() {
             </>
           )}
 
-          {etapa === 'criar_senha' && (
+          {!preparandoAcesso && !sessao && etapa === 'criar_senha' && (
             <>
               <p className="font-mono text-2xl sm:text-3xl font-medium text-white/90">
                 Olá{nomeConvite ? `, ${nomeConvite.split(' ')[0]}` : ''}! Crie sua senha
@@ -289,7 +292,9 @@ export default function Login() {
             </>
           )}
 
-          {erro && <p role="alert" className="mt-3 text-sm text-white bg-red-500/25 backdrop-blur-md border border-red-200/30 px-4 py-3 rounded-2xl">{erro}</p>}
+          {preparandoAcesso && <p role="status" className="flex items-center gap-3 text-sm text-white/90"><Loader2 size={18} className="animate-spin" />Preparando seu espaço…</p>}
+          {erroAuth && !preparandoAcesso && <div className="space-y-4"><p role="alert" className="text-sm leading-relaxed text-white/90">{erroAuth}</p><button type="button" onClick={() => { setErro(''); tentarNovamente() }} className="rounded-full border border-white/30 px-5 py-3 text-sm text-white">Tentar carregar novamente</button><button type="button" onClick={sair} className="ml-4 text-sm text-white/80 underline underline-offset-4">Voltar ao login</button></div>}
+          {erro && !erroAuth && <p role="alert" className="mt-3 text-sm text-white bg-red-500/25 backdrop-blur-md border border-red-200/30 px-4 py-3 rounded-2xl">{erro}</p>}
           {aviso && <p role="status" className="mt-3 text-sm text-white bg-[#3FD08A]/25 backdrop-blur-md border border-white/20 px-4 py-3 rounded-2xl">{aviso}</p>}
 
           <Link to="/" className="mt-5 inline-block text-sm text-white/80 hover:text-white">← Voltar ao início</Link>
