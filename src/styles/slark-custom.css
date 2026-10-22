@@ -37,3 +37,67 @@
 .loja-mini-orbita {position:absolute;width:180px;height:70px;border:1px solid currentColor;border-radius:50%;transform:rotate(-24deg);opacity:.3;}
 .slark-app .loja-item.loja-item-ativo {border-color:var(--app-brand-text);}
 @media(prefers-reduced-motion:reduce) {.loja-preview {transition:none;}}
+
+/* Additional themes: full palettes for dark and light mode. */
+.slark-app[data-skin=rosa] {
+ --skin-accent:#A72F73;--app-brand-text:#F4A5D0;--c-bg:33 15 35;--c-bg2:48 23 46;--c-card:48 23 46;
+ --app-panel:linear-gradient(135deg,#30172E,#210F23);--app-raised:#30172E;--app-input:#210F23;--app-line:#F4A5D033;
+ background:radial-gradient(ellipse at 90% 0%,#A72F7344,transparent 55%),#210F23;
+}
+.light .slark-app[data-skin=rosa] {
+ --app-brand-text:#A72F73;--c-bg:255 245 250;--c-bg2:255 250 253;--c-card:255 250 253;
+ --app-panel:linear-gradient(135deg,#fff,#FFFAFD);--app-raised:#FFFAFD;--app-input:#fff;--app-line:#A72F7333;
+ background:radial-gradient(ellipse at 90% 0%,#A72F7318,transparent 55%),#FFF5FA;
+}
+.slark-app[data-skin=solar] {
+ --skin-accent:#AF4C20;--app-brand-text:#FFBD8F;--c-bg:38 19 15;--c-bg2:56 32 26;--c-card:56 32 26;
+ --app-panel:linear-gradient(135deg,#38201A,#26130F);--app-raised:#38201A;--app-input:#26130F;--app-line:#FFBD8F33;
+ background:radial-gradient(ellipse at 90% 0%,#AF4C2044,transparent 55%),#26130F;
+}
+.light .slark-app[data-skin=solar] {
+ --app-brand-text:#AF4C20;--c-bg:255 247 240;--c-bg2:255 252 247;--c-card:255 252 247;
+ --app-panel:linear-gradient(135deg,#fff,#FFFCF7);--app-raised:#FFFCF7;--app-input:#fff;--app-line:#AF4C2033;
+ background:radial-gradient(ellipse at 90% 0%,#AF4C2018,transparent 55%),#FFF7F0;
+}
+.slark-app[data-skin=floresta] {
+ --skin-accent:#287044;--app-brand-text:#96D7A7;--c-bg:13 32 25;--c-bg2:23 46 35;--c-card:23 46 35;
+ --app-panel:linear-gradient(135deg,#172E23,#0D2019);--app-raised:#172E23;--app-input:#0D2019;--app-line:#96D7A733;
+ background:radial-gradient(ellipse at 90% 0%,#28704444,transparent 55%),#0D2019;
+}
+.light .slark-app[data-skin=floresta] {
+ --app-brand-text:#287044;--c-bg:243 250 243;--c-bg2:252 255 250;--c-card:252 255 250;
+ --app-panel:linear-gradient(135deg,#fff,#FCFFFA);--app-raised:#FCFFFA;--app-input:#fff;--app-line:#28704433;
+ background:radial-gradient(ellipse at 90% 0%,#28704418,transparent 55%),#F3FAF3;
+}
+.slark-app[data-skin=cosmos] {
+ --skin-accent:#6552BE;--app-brand-text:#BDB5FF;--c-bg:20 16 44;--c-bg2:33 26 63;--c-card:33 26 63;
+ --app-panel:linear-gradient(135deg,#211A3F,#14102C);--app-raised:#211A3F;--app-input:#14102C;--app-line:#BDB5FF33;
+ background:radial-gradient(ellipse at 90% 0%,#6552BE44,transparent 55%),#14102C;
+}
+.light .slark-app[data-skin=cosmos] {
+ --app-brand-text:#6552BE;--c-bg:245 243 255;--c-bg2:252 250 255;--c-card:252 250 255;
+ --app-panel:linear-gradient(135deg,#fff,#FCFAFF);--app-raised:#FCFAFF;--app-input:#fff;--app-line:#6552BE33;
+ background:radial-gradient(ellipse at 90% 0%,#6552BE18,transparent 55%),#F5F3FF;
+}
+.slark-app[data-skin=grafite] {
+ --skin-accent:#52616D;--app-brand-text:#C3D1DC;--c-bg:20 23 27;--c-bg2:34 39 45;--c-card:34 39 45;
+ --app-panel:linear-gradient(135deg,#22272D,#14171B);--app-raised:#22272D;--app-input:#14171B;--app-line:#C3D1DC33;
+ background:radial-gradient(ellipse at 90% 0%,#52616D44,transparent 55%),#14171B;
+}
+.light .slark-app[data-skin=grafite] {
+ --app-brand-text:#52616D;--c-bg:243 245 247;--c-bg2:252 253 254;--c-card:252 253 254;
+ --app-panel:linear-gradient(135deg,#fff,#FCFDFE);--app-raised:#FCFDFE;--app-input:#fff;--app-line:#52616D33;
+ background:radial-gradient(ellipse at 90% 0%,#52616D18,transparent 55%),#F3F5F7;
+}
+.slark-app[data-skin=rubi] {
+ --skin-accent:#AC3150;--app-brand-text:#FFA4B8;--c-bg:37 14 24;--c-bg2:57 23 35;--c-card:57 23 35;
+ --app-panel:linear-gradient(135deg,#391723,#250E18);--app-raised:#391723;--app-input:#250E18;--app-line:#FFA4B833;
+ background:radial-gradient(ellipse at 90% 0%,#AC315044,transparent 55%),#250E18;
+}
+.light .slark-app[data-skin=rubi] {
+ --app-brand-text:#AC3150;--c-bg:255 243 246;--c-bg2:255 250 252;--c-card:255 250 252;
+ --app-panel:linear-gradient(135deg,#fff,#FFFAFC);--app-raised:#FFFAFC;--app-input:#fff;--app-line:#AC315033;
+ background:radial-gradient(ellipse at 90% 0%,#AC315018,transparent 55%),#FFF3F6;
+}
+.slark-app[data-skin]:not([data-skin=slark]) .slark-mobile-toggle {background:var(--skin-accent);}
+.slark-app[data-skin]:not([data-skin=slark]) :is(input,textarea,select):focus {border-color:var(--skin-accent);}
