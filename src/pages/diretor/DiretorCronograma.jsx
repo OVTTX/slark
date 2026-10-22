@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { CalendarRange, Wand2, Loader2, AlertTriangle, School, GripVertical } from 'lucide-react'
+import { CalendarRange, Wand2, Loader2, AlertTriangle, School, GripVertical, Trash2 } from 'lucide-react'
 import { gerarGradeEscola, DIAS_SEMANA_GRADE, NOME_DIA_SEMANA, PERIODOS_POR_ETAPA } from '../../lib/gerarGrade'
 
 export default function DiretorCronograma() {
@@ -42,6 +42,7 @@ export default function DiretorCronograma() {
 
   async function moverAula(token, dia, periodo) {
     if (salvando || gerando || !token) return
+    const destino = grade.find((g) => g.sala_id === salaAtiva && g.dia_semana === dia && g.periodo === periodo)
     const nova = token.startsWith('atribuicao:')
     const aula = nova ? null : grade.find((g) => g.id === token && g.sala_id === salaAtiva)
     const atribuicao = nova ? atribuicoes.find((a) => a.id === token.slice(11) && a.sala_id === salaAtiva)
@@ -50,16 +51,33 @@ export default function DiretorCronograma() {
     if (aula?.dia_semana === dia && aula?.periodo === periodo) return
     setErro(''); setMensagem(''); setSalvando(true)
     try {
-      const { data, error } = await supabase.rpc('agendar_aula_slark', {
-        p_atribuicao: atribuicao.id, p_grade: aula?.id || null, p_dia: dia, p_periodo: periodo,
-      })
+      if (nova && destino) throw new Error('Para trocar duas aulas, arraste uma aula que já está na grade sobre a outra.')
+      const { data, error } = destino && aula
+        ? await supabase.rpc('trocar_aulas_slark', { p_origem: aula.id, p_destino: destino.id })
+        : await supabase.rpc('agendar_aula_slark', {
+          p_atribuicao: atribuicao.id, p_grade: aula?.id || null, p_dia: dia, p_periodo: periodo,
+        })
       if (error) throw error
       setSelecionada(null)
       await carregar()
       setMensagem(data.status === 'pendente'
-        ? 'Solicitação enviada à caixa de notificações do professor. A aula só muda após ele aceitar.'
-        : `Aula salva em ${NOME_DIA_SEMANA[dia]}, ${periodo}º período.`)
+        ? 'Solicitação enviada às notificações. A alteração só será aplicada após todos os aceites necessários.'
+        : destino ? 'Aulas trocadas de posição e salvas.' : `Aula salva em ${NOME_DIA_SEMANA[dia]}, ${periodo}º período.`)
     } catch (e) { setErro(e.message || 'Não foi possível agendar esta aula.') }
+    finally { setSalvando(false) }
+  }
+
+  async function esvaziarGrade() {
+    if (salvando || gerando || !salaAtiva) return
+    if (!window.confirm(`Esvaziar a grade de ${sala?.nome || 'esta turma'}? As aulas agendadas serão removidas e os pedidos pendentes serão cancelados. Matérias, professores e quantidades cadastradas serão mantidos.`)) return
+    setSalvando(true); setErro(''); setMensagem('')
+    try {
+      const { error } = await supabase.rpc('esvaziar_grade_slark', { p_sala: salaAtiva })
+      if (error) throw error
+      setSelecionada(null)
+      await carregar()
+      setMensagem('Grade desta turma esvaziada. Você já pode montar os horários novamente.')
+    } catch (e) { setErro(e.message || 'Não foi possível esvaziar a grade.') }
     finally { setSalvando(false) }
   }
 
@@ -124,7 +142,7 @@ export default function DiretorCronograma() {
   }, [perfil?.escola_id])
 
   async function gerarGrade() {
-    if (solicitacoes.some((s) => s.status === 'pendente')) { setErro('Resolva ou cancele as solicitações pendentes antes de gerar uma nova grade.'); return }
+    if (solicitacoes.some((s) => ['pendente', 'aprovada'].includes(s.status))) { setErro('Resolva ou cancele as solicitações pendentes antes de gerar uma nova grade.'); return }
     if (!confirm('Isso substitui a grade atual de todas as salas da escola pela nova grade gerada automaticamente. Continuar?')) return
     setGerando(true)
     setErro('')
@@ -164,7 +182,7 @@ export default function DiretorCronograma() {
     [gradeDaSala],
   )
 
-  const pendentes = solicitacoes.filter((s) => s.status === 'pendente')
+  const pendentes = solicitacoes.filter((s) => ['pendente', 'aprovada'].includes(s.status))
   const pedidosDaSala = solicitacoes.filter((s) => s.sala_id === salaAtiva)
 
   return (
@@ -180,7 +198,7 @@ export default function DiretorCronograma() {
           </p>
         </div>
         <button
-          onClick={gerarGrade} disabled={gerando || salvando || carregando || salas.length === 0 || solicitacoes.some((s) => s.status === 'pendente')}
+          onClick={gerarGrade} disabled={gerando || salvando || carregando || salas.length === 0 || solicitacoes.some((s) => ['pendente', 'aprovada'].includes(s.status))}
           className="flex items-center gap-2 px-5 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/30 disabled:opacity-50"
         >
           {gerando ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
@@ -223,9 +241,11 @@ export default function DiretorCronograma() {
           </div>
 
           <p className="mt-4 text-sm text-texto/60" aria-live="polite">
-            {salvando ? 'Salvando alteração…' : selecionada ? 'Escolha um horário vazio para mover a aula.' : 'Arraste uma aula da lista ou da grade para um horário vazio. No celular ou teclado, selecione a aula e depois o destino.'}
+            {salvando ? 'Salvando alteração…' : selecionada ? 'Escolha um horário vazio ou outra aula para trocar de posição.' : 'Arraste para um horário vazio ou sobre outra aula para trocar as duas de posição. No celular ou teclado, selecione a aula e depois o destino.'}
             {selecionada && !salvando && <button onClick={() => setSelecionada(null)} className="ml-2 underline">Cancelar</button>}
           </p>
+          <button type="button" onClick={esvaziarGrade} disabled={salvando || gerando || carregando || (!gradeDaSala.length && !pendentes.some((r) => r.sala_id === salaAtiva))}
+            className="mt-4 flex items-center gap-2 rounded-full border border-red-400/30 px-4 py-2.5 text-sm text-red-400 disabled:opacity-50"><Trash2 size={16}/>Esvaziar grade desta turma</button>
           <section className="mt-6 rounded-2xl bg-card border p-5" aria-label="Aulas desta turma">
             <h2 className="text-lg font-semibold text-white">Aulas desta turma</h2>
             <p className="mt-2 text-xs text-texto/60">A escola define aqui quantas aulas de cada matéria a turma terá por semana. Arraste uma aula disponível para a grade. Fora da disponibilidade, o professor recebe um pedido de aceite.</p>
@@ -265,8 +285,8 @@ export default function DiretorCronograma() {
           {pedidosDaSala.length > 0 && <section className="mt-4 rounded-2xl border bg-card p-5" aria-label="Solicitações de horário">
             <h2 className="font-semibold text-white">Respostas dos professores</h2>
             <div className="mt-3 space-y-3">{pedidosDaSala.slice(0, 20).map((r) => <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 text-xs text-texto/70">
-              <span>{r.materias?.nome} · {r.usuarios?.nome} · {NOME_DIA_SEMANA[r.dia_semana]}, {r.periodo}º · <strong>{r.status === 'pendente' ? 'Aguardando aceite' : r.status}</strong></span>
-              {r.status === 'pendente' && <button disabled={salvando} onClick={() => cancelarSolicitacao(r.id)} className="underline">Cancelar pedido</button>}
+              <span>{r.materias?.nome} · {r.usuarios?.nome} · {NOME_DIA_SEMANA[r.dia_semana]}, {r.periodo}º · <strong>{['pendente', 'aprovada'].includes(r.status) ? 'Aguardando aceite' : r.status}</strong></span>
+              {['pendente', 'aprovada'].includes(r.status) && <button disabled={salvando} onClick={() => cancelarSolicitacao(r.id)} className="underline">Cancelar pedido</button>}
             </div>)}</div>
           </section>}
             <div className="mt-6 rounded-2xl bg-card border overflow-hidden overflow-x-auto">
@@ -297,7 +317,7 @@ export default function DiretorCronograma() {
                             {aula ? (
                               <button type="button" draggable={!salvando && !gerando && !origemPendente} disabled={salvando || gerando || origemPendente}
                                 onDragStart={(e) => { e.dataTransfer.setData('text/plain', String(aula.id)); e.dataTransfer.effectAllowed = 'move'; setSelecionada(aula.id) }}
-                                onClick={() => { setSelecionada(selecionada === aula.id ? null : aula.id); setMensagem('') }}
+                                onClick={() => { if (selecionada && selecionada !== aula.id) { moverAula(selecionada, dia, periodo) } else { setSelecionada(selecionada === aula.id ? null : aula.id); setMensagem('') } }}
                                 aria-pressed={selecionada === aula.id}
                                 aria-label={`Mover ${aula.materias?.nome || 'aula'}, ${NOME_DIA_SEMANA[dia]}, ${periodo}º período`}
                                 className={`w-full rounded-lg bg-azul/10 border border-azul/25 px-2 py-2 cursor-grab active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-azul ${selecionada === aula.id ? 'ring-2 ring-azul' : ''}`}>

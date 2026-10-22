@@ -30,9 +30,9 @@ export default function ProfessorNotificacoes() {
   async function responder(id, resposta) {
     setOcupado(id); setErro(''); setAviso('')
     try {
-      const { error } = await supabase.rpc('responder_aula_slark', { p_id: id, p_resposta: resposta })
+      const { data, error } = await supabase.rpc('responder_aula_slark', { p_id: id, p_resposta: resposta })
       if (error) throw error
-      setAviso(resposta === 'aceitar' ? 'Horário aceito e atualizado na sua grade.' : 'Pedido recusado. Seu horário anterior foi mantido.')
+      setAviso(data.status === 'aprovada' ? 'Seu aceite foi registrado. A troca aguarda o aceite da outra aula.' : resposta === 'aceitar' ? 'Horário aceito e atualizado na sua grade.' : 'Pedido recusado. Seu horário anterior foi mantido.')
       await carregar()
       window.dispatchEvent(new Event('slark-notificacoes-atualizadas'))
     } catch (e) { setErro(e.message || 'Não foi possível responder ao pedido.') }
@@ -46,7 +46,8 @@ export default function ProfessorNotificacoes() {
     {aviso && <p role="status" className="mt-4 text-sm text-texto">{aviso}</p>}
     {carregando ? <p className="mt-6">Buscando notificações…</p> : !pedidos.length ? <p className="mt-8 text-texto/60">Nenhuma solicitação de horário por enquanto.</p> : <div className="mt-6 space-y-4">
       {pedidos.map((r) => <article key={r.id} className="rounded-2xl bg-card border p-5">
-        <div className="flex flex-wrap justify-between gap-3"><h2 className="font-semibold text-white">{r.materias?.nome} · {r.salas?.nome}</h2><span className="text-xs text-texto/70">{r.status === 'pendente' ? 'Aguardando sua resposta' : r.status}</span></div>
+        <div className="flex flex-wrap justify-between gap-3"><h2 className="font-semibold text-white">{r.materias?.nome} · {r.salas?.nome}</h2><span className="text-xs text-texto/70">{r.status === 'pendente' ? 'Aguardando sua resposta' : r.status === 'aprovada' ? 'Você aceitou · aguardando outro aceite' : r.status}</span></div>
+        {r.grupo_troca && <p className="mt-2 text-xs text-texto/60">Troca entre duas aulas: só será aplicada quando os dois pedidos forem aceitos.</p>}
         <p className="mt-3 text-sm">Proposta: {NOME_DIA_SEMANA[r.dia_semana]}, {r.periodo}º período.</p>
         {r.grade_id ? <p className="mt-2 text-xs text-texto/60">Horário anterior: {NOME_DIA_SEMANA[r.origem_dia]}, {r.origem_periodo}º período.</p> : <p className="mt-2 text-xs text-texto/60">Nova aula para esta turma.</p>}
         <p className="mt-2 text-xs text-texto/50">{new Date(r.criada_em).toLocaleString('pt-BR')}</p>
