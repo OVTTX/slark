@@ -14,13 +14,13 @@ export function SlarkHeader({ documentation = false }: { documentation?: boolean
   const [compact, setCompact] = useState(false)
   useEffect(() => {
     const onScroll = () => {
-      const scrolled = window.scrollY > 64
+      const scrolled = Math.max(window.scrollY, document.body.scrollTop, document.documentElement.scrollTop) > 64
       setCompact(scrolled)
       if (scrolled) setOpen(false)
     }
     onScroll()
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
+    window.addEventListener("scroll", onScroll, { passive: true, capture: true })
+    return () => window.removeEventListener("scroll", onScroll, true)
   }, [])
   return <header data-compact={compact} className="slark-site-header pointer-events-none fixed inset-x-0 top-2 z-40 px-2 sm:top-3 sm:px-3" onKeyDown={event => { if (event.key === "Escape") setOpen(false) }}>
     <style>{`
