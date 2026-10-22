@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import { useAppEntrance } from '../hooks/useAppEntrance'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import DemoSwitcher from './DemoSwitcher'
 import BottomNav from './BottomNav'
 import LogoSlark from './LogoSlark'
 import '../styles/slark-app.css'
@@ -34,7 +35,8 @@ export default function AppLayout({ children }) {
           <span className="app-profile-avatar" aria-hidden="true">{perfil?.avatar_url ? <img src={perfil.avatar_url} alt="" /> : perfil?.nome?.[0]?.toUpperCase() || 'U'}</span>
         </Link>
       </header>
-      <main id="app-conteudo" className="w-full relative">
+      <DemoSwitcher />
+      <main key={perfil?.id} id="app-conteudo" className="w-full relative">
         <div ref={content} data-page-layout={layoutBento ? 'bento' : 'original'} className="app-content px-4 sm:px-8 pt-6 sm:pt-8 pb-28 sm:pb-32 max-w-[1500px] mx-auto">{children}</div>
       </main>
       <BottomNav />

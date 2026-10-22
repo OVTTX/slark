@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { CalendarRange, Wand2, Loader2, AlertTriangle, School } from 'lucide-react'
+import { CalendarRange, Wand2, Loader2, AlertTriangle, School, GripVertical } from 'lucide-react'
 import { gerarGradeEscola, DIAS_SEMANA_GRADE, NOME_DIA_SEMANA, PERIODOS_POR_ETAPA } from '../../lib/gerarGrade'
 
 export default function DiretorCronograma() {
@@ -15,6 +15,52 @@ export default function DiretorCronograma() {
   const [gerando, setGerando] = useState(false)
   const [erro, setErro] = useState('')
   const [avisos, setAvisos] = useState([])
+  const [selecionada, setSelecionada] = useState(null)
+  const [salvando, setSalvando] = useState(false)
+  const [mensagem, setMensagem] = useState('')
+
+  async function moverAula(id, dia, periodo) {
+    if (salvando || gerando) return
+    const aula = grade.find((g) => g.id === id && g.sala_id === salaAtiva)
+    if (!aula || (aula.dia_semana === dia && aula.periodo === periodo)) return
+    setErro('')
+    setMensagem('')
+    setSalvando(true)
+    try {
+      // Releia a grade antes de validar para considerar edições de outro diretor.
+      const { data: atual, error: leitura } = await supabase.from('grade_horarios')
+        .select('*').eq('escola_id', perfil.escola_id)
+      if (leitura) throw leitura
+      const origem = atual.find((g) => g.id === id)
+      if (!origem || origem.dia_semana !== aula.dia_semana || origem.periodo !== aula.periodo) {
+        throw new Error('A grade mudou. Atualize a página antes de mover esta aula.')
+      }
+      const conflito = atual.find((g) => g.id !== id && g.dia_semana === dia && g.periodo === periodo
+        && (g.sala_id === salaAtiva || (aula.professor_id && g.professor_id === aula.professor_id)))
+      if (conflito) throw new Error(conflito.sala_id === salaAtiva
+        ? 'Este horário já tem uma aula. Escolha um horário vazio.'
+        : 'O professor já tem aula em outra turma neste horário.')
+      const { data: disp, error: eDisp } = await supabase.from('disponibilidade_professor')
+        .select('dia_semana, periodo').eq('escola_id', perfil.escola_id).eq('professor_id', aula.professor_id)
+      if (eDisp) throw eDisp
+      if (disp.length && !disp.some((d) => d.dia_semana === dia && d.periodo === periodo)) {
+        throw new Error('O professor não está disponível neste horário.')
+      }
+      const { data, error } = await supabase.from('grade_horarios')
+        .update({ dia_semana: dia, periodo })
+        .eq('id', id).eq('escola_id', perfil.escola_id)
+        .eq('dia_semana', aula.dia_semana).eq('periodo', aula.periodo)
+        .select('id').single()
+      if (error || !data) throw new Error('Não foi possível salvar a mudança. Atualize a grade e tente novamente.')
+      setGrade((anterior) => anterior.map((g) => g.id === id ? { ...g, dia_semana: dia, periodo } : g))
+      setSelecionada(null)
+      setMensagem(`Aula movida para ${NOME_DIA_SEMANA[dia]}, ${periodo}º período. Alteração salva.`)
+    } catch (e) {
+      setErro(e.message || 'Não foi possível mover a aula. Tente novamente.')
+    } finally {
+      setSalvando(false)
+    }
+  }
 
   async function carregar() {
     if (!perfil?.escola_id) return
@@ -109,7 +155,7 @@ export default function DiretorCronograma() {
           </p>
         </div>
         <button
-          onClick={gerarGrade} disabled={gerando || salas.length === 0}
+          onClick={gerarGrade} disabled={gerando || salvando || carregando || salas.length === 0}
           className="flex items-center gap-2 px-5 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/30 disabled:opacity-50"
         >
           {gerando ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
@@ -117,7 +163,8 @@ export default function DiretorCronograma() {
         </button>
       </div>
 
-      {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
+      {mensagem && <p role="status" className="mt-4 text-sm text-texto/80">{mensagem}</p>}
+      {erro && <p role="alert" className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 
       {avisos.length > 0 && (
         <div className="mt-6 rounded-2xl bg-[#F5C451]/10 border border-[#F5C451]/25 p-5">
@@ -142,7 +189,7 @@ export default function DiretorCronograma() {
           <div className="mt-8 flex flex-wrap gap-2">
             {salas.map((s) => (
               <button
-                key={s.id} onClick={() => setSalaAtiva(s.id)}
+                key={s.id} disabled={salvando || gerando} onClick={() => { setSalaAtiva(s.id); setSelecionada(null) }}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition ${salaAtiva === s.id ? 'bg-azul text-white' : 'bg-card border text-texto/60 hover:text-white'}`}
               >
                 {s.nome}
@@ -150,6 +197,10 @@ export default function DiretorCronograma() {
             ))}
           </div>
 
+          <p className="mt-4 text-sm text-texto/60" aria-live="polite">
+            {salvando ? 'Salvando alteração…' : selecionada ? 'Escolha um horário vazio para mover a aula.' : 'Arraste uma aula para um horário vazio. No celular ou teclado, selecione a aula e depois o destino.'}
+            {selecionada && !salvando && <button onClick={() => setSelecionada(null)} className="ml-2 underline">Cancelar</button>}
+          </p>
           {gradeDaSala.length === 0 ? (
             <div className="mt-6 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
               <CalendarRange className="mx-auto text-azul/60" size={40} />
@@ -175,14 +226,28 @@ export default function DiretorCronograma() {
                       {DIAS_SEMANA_GRADE.map((dia) => {
                         const aula = porSlot[`${dia}-${periodo}`]
                         return (
-                          <td key={dia} className="px-2 py-2 text-center">
+                          <td key={dia} className="px-2 py-2 text-center"
+                            onDragOver={(e) => { if (!salvando && !gerando) { e.preventDefault(); e.dataTransfer.dropEffect = 'move' } }}
+                            onDrop={(e) => { e.preventDefault(); moverAula(e.dataTransfer.getData('text/plain'), dia, periodo) }}
+                          >
                             {aula ? (
-                              <div className="rounded-lg bg-azul/10 border border-azul/25 px-2 py-2">
+                              <button type="button" draggable={!salvando && !gerando} disabled={salvando || gerando}
+                                onDragStart={(e) => { e.dataTransfer.setData('text/plain', String(aula.id)); e.dataTransfer.effectAllowed = 'move'; setSelecionada(aula.id) }}
+                                onClick={() => { setSelecionada(selecionada === aula.id ? null : aula.id); setMensagem('') }}
+                                aria-pressed={selecionada === aula.id}
+                                aria-label={`Mover ${aula.materias?.nome || 'aula'}, ${NOME_DIA_SEMANA[dia]}, ${periodo}º período`}
+                                className={`w-full rounded-lg bg-azul/10 border border-azul/25 px-2 py-2 cursor-grab active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-azul ${selecionada === aula.id ? 'ring-2 ring-azul' : ''}`}>
+                                <GripVertical size={12} className="mx-auto mb-1 text-texto/40" />
                                 <div className="text-xs font-semibold text-white truncate">{aula.materias?.nome}</div>
                                 <div className="text-[11px] text-texto/50 truncate">{aula.usuarios?.nome || '—'}</div>
-                              </div>
+                              </button>
                             ) : (
-                              <div className="h-full py-2 text-texto/20 text-xs">—</div>
+                              <button type="button" disabled={!selecionada || salvando || gerando}
+                                onClick={() => moverAula(selecionada, dia, periodo)}
+                                aria-label={`Mover para ${NOME_DIA_SEMANA[dia]}, ${periodo}º período`}
+                                className="w-full min-h-14 rounded-lg border border-dashed border-azul/20 py-2 text-texto/50 text-xs enabled:hover:bg-azul/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-azul">
+                                {selecionada ? 'Soltar aqui' : 'Livre'}
+                              </button>
                             )}
                           </td>
                         )
