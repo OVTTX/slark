@@ -28,3 +28,13 @@ test('Noir is available from the start and can be restored without spending poin
  assert.equal(preferenciasValidas({...PADRAO,skin:'noir'},0,false).skin,'noir')
  assert.equal(CATALOGO.find(i=>i.id==='noir').fundo,'#000000')
 })
+
+test('professors and directors can optionally use every cosmetic with zero points', () => {
+  for (const perfil of ['professor', 'diretor']) {
+    const completo = acessoCompleto({ perfil, nome: 'Conta comum', email: 'conta@escola.test' })
+    assert.equal(completo, true)
+    for (const item of CATALOGO) assert.equal(podeUsar(item, 0, completo), true)
+    assert.deepEqual(preferenciasValidas({ skin: 'slark', texto: 'padrao', moldura: 'padrao' }, 0, completo), { skin: 'slark', texto: 'padrao', moldura: 'padrao' })
+  }
+  assert.equal(acessoCompleto({ perfil: 'aluno', nome: 'Aluno', email: 'aluno@escola.test' }), false)
+})

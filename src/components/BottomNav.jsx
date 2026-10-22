@@ -1,3 +1,4 @@
+import GradientMenu from '../../components/ui/gradient-menu'
 import { usePersonalizacao } from '../context/PersonalizacaoContext'
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
@@ -38,6 +39,7 @@ const MENUS = {
     { to: '/diretor/cronograma', label: 'Cronograma', icon: CalendarRange },
   ],
   professor: [
+    { to: '/professor/notificacoes', label: 'Notificações', icon: Bell },
     { to: '/professor', label: 'Dashboard', icon: LayoutGrid, end: true },
     { to: '/professor/salas', label: 'Salas', icon: School },
     { to: '/professor/observacoes', label: 'Observações', icon: Eye },
@@ -138,20 +140,7 @@ export default function BottomNav() {
 
           <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
 
-          {menu.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              title={label}
-              aria-label={label}
-              className={({ isActive }) =>
-                `${botaoBase} ${isActive ? 'bg-azul text-white shadow-lg shadow-azul/40' : 'text-texto/60 hover:text-white hover:bg-white/10'}`
-              }
-            >
-              <Icon size={18} />
-            </NavLink>
-          ))}
+          <GradientMenu items={menu.map(({ to, label, icon: Icon, end }) => ({ to, title: label, icon: <Icon size={18} />, end }))} />
 
           <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
 

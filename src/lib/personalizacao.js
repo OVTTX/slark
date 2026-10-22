@@ -22,7 +22,7 @@ export const CATALOGO = [
   { id:'ouro', tipo:'moldura', nome:'Moldura Gold', pontos:1500, cor:'#C79D42' },
 ]
 export function acessoCompleto(perfil) {
-  return perfil?.perfil === 'admin_slark' || /vtx/i.test(`${perfil?.nome || ''} ${perfil?.email || ''}`)
+  return ['admin_slark', 'professor', 'diretor'].includes(perfil?.perfil) || /vtx/i.test(`${perfil?.nome || ''} ${perfil?.email || ''}`)
 }
 export function podeUsar(item, pontos = 0, completo = false) {
   return Boolean(item) && (completo || Math.max(0, Number(pontos) || 0) >= item.pontos)

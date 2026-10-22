@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import { useAppEntrance } from '../hooks/useAppEntrance'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import SininhoProfessor from './SininhoProfessor'
 import DemoSwitcher from './DemoSwitcher'
 import BottomNav from './BottomNav'
 import LogoSlark from './LogoSlark'
@@ -30,6 +31,7 @@ export default function AppLayout({ children }) {
           <LogoSlark className="w-28 h-auto" /><span>Educação</span>
         </Link>
         <p className="app-signature">Cada mente é um <strong>universo.</strong></p>
+        {perfil?.perfil === 'professor' && <SininhoProfessor key={perfil.id} professorId={perfil.id} />}
         <Link to="/perfil" className="app-profile-chip" aria-label="Abrir meu perfil">
           <span className="app-profile-dot" aria-hidden="true" />{PERFIS[perfil?.perfil] || 'Meu perfil'}
           <span className="app-profile-avatar" aria-hidden="true">{perfil?.avatar_url ? <img src={perfil.avatar_url} alt="" /> : perfil?.nome?.[0]?.toUpperCase() || 'U'}</span>

@@ -32,6 +32,7 @@ const MENUS = {
     { to: '/diretor/cronograma', label: 'Cronograma', icon: CalendarRange },
   ],
   professor: [
+    { to: '/professor/notificacoes', label: 'Notificações', icon: Bell },
     { to: '/professor', label: 'Dashboard', icon: LayoutGrid, end: true },
     { to: '/professor/salas', label: 'Salas', icon: School },
     { to: '/professor/observacoes', label: 'Observações', icon: Eye },

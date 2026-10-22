@@ -1,0 +1,52 @@
+begin;
+-- Disposable demo data; the entire transaction is rolled back.
+delete from public.solicitacoes_grade where professor_id='00000000-0000-0000-0000-000000000003';
+delete from public.grade_horarios where professor_id='00000000-0000-0000-0000-000000000003';
+delete from public.disponibilidade_professor where professor_id='00000000-0000-0000-0000-000000000003';
+insert into public.disponibilidade_professor(escola_id,professor_id,dia_semana,periodo) values('10000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000003',1,1);
+set local role authenticated;
+do $$
+declare atrib uuid; result jsonb; pedido uuid; aula uuid; denied boolean;
+begin
+  select id into atrib from public.sala_materias where professor_id='00000000-0000-0000-0000-000000000003' limit 1;
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+  result := public.agendar_aula_slark(atrib,null,2,1);
+  if result->>'status'<>'pendente' then raise exception 'TEST: outside availability should be pending'; end if;
+  pedido := (result->>'id')::uuid;
+  if exists(select 1 from public.grade_horarios where professor_id='00000000-0000-0000-0000-000000000003') then raise exception 'TEST: pending request must not alter timetable'; end if;
+  denied := false;
+  begin perform public.responder_aula_slark(pedido,'aceitar'); exception when insufficient_privilege then denied := true; end;
+  if not denied then raise exception 'TEST: director cannot accept for teacher'; end if;
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
+  if exists(select 1 from public.solicitacoes_grade where id=pedido) then raise exception 'TEST: student can read teacher request'; end if;
+  denied := false;
+  begin perform public.agendar_aula_slark(atrib,null,3,1); exception when insufficient_privilege then denied := true; end;
+  if not denied then raise exception 'TEST: student can schedule'; end if;
+  denied := false;
+  begin perform public.responder_aula_slark(pedido,'aceitar'); exception when insufficient_privilege then denied := true; end;
+  if not denied then raise exception 'TEST: student can answer'; end if;
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+  result := public.responder_aula_slark(pedido,'aceitar');
+  if result->>'status'<>'aceita' then raise exception 'TEST: teacher acceptance'; end if;
+  select id into aula from public.grade_horarios where professor_id='00000000-0000-0000-0000-000000000003' and dia_semana=2 and periodo=1;
+  if aula is null then raise exception 'TEST: accepted request not applied'; end if;
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+  result := public.agendar_aula_slark(atrib,aula,3,1);
+  pedido := (result->>'id')::uuid;
+  if not exists(select 1 from public.grade_horarios where id=aula and dia_semana=2) then raise exception 'TEST: source moved before acceptance'; end if;
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+  perform public.responder_aula_slark(pedido,'recusar');
+  if not exists(select 1 from public.grade_horarios where id=aula and dia_semana=2) then raise exception 'TEST: refusal moved source'; end if;
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+  result := public.agendar_aula_slark(atrib,aula,4,1);
+  pedido := (result->>'id')::uuid;
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+  perform public.responder_aula_slark(pedido,'aceitar');
+  if not exists(select 1 from public.grade_horarios where id=aula and dia_semana=4) then raise exception 'TEST: accepted move not applied'; end if;
+  -- Staff themes do not require points. Ownership checks still apply.
+  insert into public.personalizacoes_slark(usuario_id,skin,texto,moldura) values(auth.uid(),'rubi','dourado','ouro') on conflict(usuario_id) do update set skin='rubi',texto='dourado',moldura='ouro';
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+  insert into public.personalizacoes_slark(usuario_id,skin,texto,moldura) values(auth.uid(),'ouro','dourado','ouro') on conflict(usuario_id) do update set skin='ouro',texto='dourado',moldura='ouro';
+end $$;
+select 'PASS: pending creation, restricted access, accept, refuse, source preservation, approved move, teacher and director skins' as resultado;
+rollback;

@@ -39,6 +39,7 @@ import ProfessorRunaway from './pages/professor/ProfessorRunaway'
 import ProfessorAulaSlark from './pages/professor/ProfessorAulaSlark'
 import ProfessorRanking from './pages/professor/ProfessorRanking'
 import ProfessorDisponibilidade from './pages/professor/ProfessorDisponibilidade'
+import ProfessorNotificacoes from './pages/professor/ProfessorNotificacoes'
 import ProfessorGrade from './pages/professor/ProfessorGrade'
 import AlunoInicio from './pages/aluno/AlunoInicio'
 import AlunoBoletim from './pages/aluno/AlunoBoletim'
@@ -89,6 +90,7 @@ export default function App() {
           <Route path="/diretor/cronograma" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorCronograma /></AppLayout></RotaProtegida>} />
 
           {/* ---------- PROFESSOR ---------- */}
+          <Route path="/professor/notificacoes" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorNotificacoes /></AppLayout></RotaProtegida>} />
           <Route path="/professor" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorInicio /></AppLayout></RotaProtegida>} />
           <Route path="/professor/salas" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorSalas /></AppLayout></RotaProtegida>} />
           <Route path="/professor/salas/:id" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorSalaDetalhe /></AppLayout></RotaProtegida>} />
