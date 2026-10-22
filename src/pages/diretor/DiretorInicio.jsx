@@ -1,3 +1,4 @@
+import { PainelLoading } from '../../components/SlarkLoading'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
@@ -64,7 +65,7 @@ export default function DiretorInicio() {
       <p className="mt-2 text-texto/60">Visão geral da {perfil?.escolas?.nome || 'sua escola'}.</p>
 
       {carregando ? (
-        <div className="mt-10 text-texto/50">Carregando dados…</div>
+        <PainelLoading />
       ) : (
         <>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

@@ -1,3 +1,4 @@
+import { SlarkLoading } from './SlarkLoading'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authRouteState } from '../lib/auth-session'
@@ -8,7 +9,7 @@ export default function RotaProtegida({ children, perfilNecessario }) {
   const status = authRouteState(auth, perfilNecessario)
 
   if (status === 'loading') {
-    return <div role="status" className="min-h-screen flex items-center justify-center bg-bg text-texto/60 font-display">Preparando seu espaço…</div>
+    return <SlarkLoading fullPage />
   }
   if (status === 'error') {
     return <div className="min-h-screen flex flex-col items-center justify-center gap-5 bg-bg px-6 text-center font-display text-texto">

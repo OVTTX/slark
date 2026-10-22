@@ -1,3 +1,4 @@
+import { PainelLoading } from '../../components/SlarkLoading'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Building2, Users, CreditCard, DollarSign, TrendingUp, Trophy } from 'lucide-react'
@@ -58,7 +59,7 @@ export default function AdminInicio() {
       <p className="mt-2 text-texto/60">Visão geral do ecossistema — todas as escolas clientes.</p>
 
       {carregando ? (
-        <div className="mt-10 text-texto/50">Carregando dados…</div>
+        <PainelLoading columns={3} count={6} withDetails={false} />
       ) : (
         <>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

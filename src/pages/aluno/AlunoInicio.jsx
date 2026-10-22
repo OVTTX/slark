@@ -1,3 +1,4 @@
+import { PainelLoading } from '../../components/SlarkLoading'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -98,7 +99,7 @@ export default function AlunoInicio() {
     carregar()
   }, [perfil?.id, perfil?.escola_id])
 
-  if (carregando) return <div className="text-texto/50">Carregando seu painel…</div>
+  if (carregando) return <PainelLoading withTitle />
 
   if (!aluno) {
     return (

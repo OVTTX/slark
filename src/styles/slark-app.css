@@ -24,10 +24,9 @@
   --app-shadow: 0 12px 36px rgb(11 6 151 / .055);
 }
 .app-universe { pointer-events:none; position:absolute; inset:0; overflow:hidden; z-index:-1; }
-.app-universe span { position:absolute; right:-22rem; top:2rem; width:70rem; height:42rem; border:1px solid rgb(6 81 195 / .18); border-radius:50%; transform:rotate(-28deg); }
-.app-universe span:nth-child(2) { right:-13rem; top:8rem; width:51rem; height:31rem; }
-.app-universe span:nth-child(3) { right:-5rem; top:15rem; width:33rem; height:20rem; }
-.app-universe span::after { content:''; position:absolute; top:16%; left:18%; width:8px; height:8px; border:1px solid #0651c3; border-radius:50%; background:rgb(var(--c-bg)); }
+.app-orbit-art { position:absolute; right:-22rem; top:0; width:70rem; height:45rem; }
+.app-universe .slark-draw-ring { stroke-opacity:.2; animation-duration:1.8s; }
+.app-universe .slark-entry-planet { fill:rgb(var(--c-bg)); stroke:#0651c3; stroke-opacity:.4; }
 .slark-app .app-topbar { position:relative; display:flex; align-items:center; justify-content:space-between; gap:1.5rem; max-width:1500px; margin:auto; min-height:88px; padding:1.25rem 2rem; border-bottom:1px solid var(--app-line); }
 .app-wordmark { display:flex; align-items:center; gap:1rem; color:rgb(var(--c-onbg)); }
 .app-wordmark>span { font-size:10px; padding-left:1rem; border-left:1px solid var(--app-line); letter-spacing:.04em; }

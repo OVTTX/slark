@@ -1,3 +1,4 @@
+import { SlarkLoading } from '../components/SlarkLoading'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -33,54 +34,6 @@ function CampoComBotao({ tipo = 'text', valor, onChange, placeholder, carregando
       >
         {carregando ? <Loader2 size={24} className="animate-spin" /> : <ArrowRight size={24} />}
       </button>
-    </div>
-  )
-}
-
-// Intro exclusiva do mobile: mostra a logo em tela cheia, um instante de fundo
-// limpo e então revela o painel de login (que já está pronto por baixo).
-// Roda uma única vez ao entrar na tela; não interfere na lógica de login.
-function IntroMobile() {
-  const [fase, setFase] = useState('splash')
-
-  useEffect(() => {
-    const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduz) {
-      setFase('removida')
-      return
-    }
-    const t1 = setTimeout(() => setFase('blank'), 1400)
-    const t2 = setTimeout(() => setFase('revelada'), 2200)
-    const t3 = setTimeout(() => setFase('removida'), 2900)
-    return () => {
-      clearTimeout(t1)
-      clearTimeout(t2)
-      clearTimeout(t3)
-    }
-  }, [])
-
-  if (fase === 'removida') return null
-
-  const conteudoVisivel = fase !== 'blank' && fase !== 'revelada'
-
-  return (
-    <div
-      className="lg:hidden fixed inset-0 z-30 transition-opacity duration-700 ease-out"
-      style={{ opacity: fase === 'revelada' ? 0 : 1, pointerEvents: fase === 'revelada' ? 'none' : 'auto' }}
-      aria-hidden="true"
-    >
-      <FundoLogin />
-      <div className="relative z-10 h-full flex flex-col p-8">
-        <div className="transition-opacity duration-500" style={{ opacity: conteudoVisivel ? 1 : 0 }}>
-          <p className="font-mono text-4xl font-medium text-white leading-tight">Conheça a</p>
-          <LogoSlark className="w-64 h-auto -mt-1" />
-        </div>
-        <div className="mt-auto transition-opacity duration-500" style={{ opacity: conteudoVisivel ? 1 : 0 }}>
-          <div className="h-16 rounded-full bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center">
-            <span className="font-mono text-lg font-medium text-white/90">Entre no seu espaço</span>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
@@ -214,7 +167,6 @@ export default function Login() {
   return (
     <div className="slark-login min-h-screen w-full relative font-display overflow-hidden text-[#FFFFFF]" style={{ '--c-onbg': '255 255 255' }}>
       <FundoLogin />
-      <IntroMobile />
 
       <div className="login-split relative z-10 min-h-screen flex flex-col lg:flex-row">
         {/* Coluna esquerda: chamada de marca (some em telas pequenas), sobre o degradê cru */}
@@ -292,7 +244,7 @@ export default function Login() {
             </>
           )}
 
-          {preparandoAcesso && <p role="status" className="flex items-center gap-3 text-sm text-white/90"><Loader2 size={18} className="animate-spin" />Preparando seu espaço…</p>}
+          {preparandoAcesso && <SlarkLoading compact />}
           {erroAuth && !preparandoAcesso && <div className="space-y-4"><p role="alert" className="text-sm leading-relaxed text-white/90">{erroAuth}</p><button type="button" onClick={() => { setErro(''); tentarNovamente() }} className="rounded-full border border-white/30 px-5 py-3 text-sm text-white">Tentar carregar novamente</button><button type="button" onClick={sair} className="ml-4 text-sm text-white/80 underline underline-offset-4">Voltar ao login</button></div>}
           {erro && !erroAuth && <p role="alert" className="mt-3 text-sm text-white bg-red-500/25 backdrop-blur-md border border-red-200/30 px-4 py-3 rounded-2xl">{erro}</p>}
           {aviso && <p role="status" className="mt-3 text-sm text-white bg-[#3FD08A]/25 backdrop-blur-md border border-white/20 px-4 py-3 rounded-2xl">{aviso}</p>}

@@ -1,3 +1,4 @@
+import { PainelLoading } from '../../components/SlarkLoading'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -229,7 +230,7 @@ export default function ProfessorInicio() {
       <p className="mt-2 text-texto/60">Bem-vindo à Slark, a nova educação.</p>
 
       {carregando ? (
-        <div className="mt-10 text-texto/50">Carregando painel…</div>
+        <PainelLoading />
       ) : (
         <>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
