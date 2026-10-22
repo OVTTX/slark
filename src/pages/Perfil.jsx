@@ -1,3 +1,4 @@
+import LojaPersonalizacao from '../components/LojaPersonalizacao'
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -224,6 +225,7 @@ export default function Perfil() {
               >
                 <ShieldCheck size={16} /> Segurança
               </button>
+              <button onClick={() => setAba('personalizacao')} className={`mt-1 w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${aba === 'personalizacao' ? 'bg-azul/15 text-white' : 'text-texto/60 hover:bg-white/5'}`}><Crown size={16} /> Loja de estilos</button>
             </div>
 
             {meses != null && (
@@ -259,7 +261,7 @@ export default function Perfil() {
 
           {/* Coluna direita: conteúdo da aba selecionada */}
           <div className="space-y-5">
-            {aba === 'geral' ? (
+            {aba === 'personalizacao' ? <LojaPersonalizacao /> : aba === 'geral' ? (
               <div className="rounded-2xl bg-card border p-6">
                 <div className="text-lg font-bold text-white">Informações da Conta</div>
                 <p className="text-sm text-texto/50 mt-1">Seus dados de identificação na Slark.</p>

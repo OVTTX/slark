@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { PersonalizacaoProvider } from './context/PersonalizacaoContext'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import RotaProtegida from './components/RotaProtegida'
@@ -56,6 +57,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <PersonalizacaoProvider>
         <BrowserRouter>
           <Routes>
           <Route path="/" element={<Landing />} />
@@ -120,7 +122,8 @@ export default function App() {
           <Route path="*" element={<NaoEncontrada />} />
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+    </PersonalizacaoProvider>
+      </AuthProvider>
     </ThemeProvider>
   )
 }
