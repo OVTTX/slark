@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { BookMarked, Plus, X, Loader2, Pencil, Trash2, School, AlertTriangle } from 'lucide-react'
-import { sugerirAulasSemana } from '../../lib/bnccAulasSemana'
 
 export default function DiretorMaterias() {
   const { perfil } = useAuth()
@@ -19,7 +18,7 @@ export default function DiretorMaterias() {
   const [salvandoMateria, setSalvandoMateria] = useState(false)
 
   const [modalAtribuir, setModalAtribuir] = useState(null) // matéria sendo atribuída a uma sala
-  const [formAtribuir, setFormAtribuir] = useState({ sala_id: '', professor_id: '', aulas_semana: 2 })
+  const [formAtribuir, setFormAtribuir] = useState({ sala_id: '', professor_id: '', aulas_semana: '' })
   const [salvandoAtribuicao, setSalvandoAtribuicao] = useState(false)
   const [editandoAulas, setEditandoAulas] = useState(null) // id da atribuição com o campo de aulas/semana aberto
   const [aulasSemanaEdit, setAulasSemanaEdit] = useState(2)
@@ -112,16 +111,14 @@ export default function DiretorMaterias() {
     setFormAtribuir({
       sala_id: salaInicial?.id || '',
       professor_id: '',
-      aulas_semana: sugerirAulasSemana(materia.nome, salaInicial?.etapa) ?? 2,
+      aulas_semana: '',
     })
   }
 
   function mudarSalaAtribuir(salaId) {
-    const sala = salas.find((s) => s.id === salaId)
     setFormAtribuir((f) => ({
       ...f,
       sala_id: salaId,
-      aulas_semana: sugerirAulasSemana(modalAtribuir?.nome, sala?.etapa) ?? f.aulas_semana,
     }))
   }
 
@@ -245,7 +242,7 @@ export default function DiretorMaterias() {
                           {editandoAulas === a.id ? (
                             <span className="flex items-center gap-1 ml-1">
                               <input
-                                type="number" min={1} max={10} value={aulasSemanaEdit}
+                                type="number" min={1} max={30} value={aulasSemanaEdit}
                                 onChange={(e) => setAulasSemanaEdit(Number(e.target.value))}
                                 className="w-14 px-1.5 py-1 rounded-md bg-card border border-azul/20 text-white text-xs"
                               />
@@ -346,13 +343,13 @@ export default function DiretorMaterias() {
               <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Aulas por semana</label>
                 <input
-                  type="number" min={1} max={10} required
+                  type="number" min={1} max={30} required
                   value={formAtribuir.aulas_semana}
                   onChange={(e) => setFormAtribuir({ ...formAtribuir, aulas_semana: Number(e.target.value) })}
                   className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
                 />
                 <p className="mt-1.5 text-xs text-texto/45">
-                  Sugestão baseada na distribuição comum usada por redes de ensino pra atender a BNCC — ajuste se a sua grade curricular for diferente. Usado para montar o cronograma semanal automaticamente em "Cronograma".
+                  A escola define a quantidade conforme sua própria grade curricular. O cronograma usa o número informado aqui.
                 </p>
               </div>
               <button

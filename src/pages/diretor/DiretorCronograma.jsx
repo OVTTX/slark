@@ -20,6 +20,25 @@ export default function DiretorCronograma() {
   const [mensagem, setMensagem] = useState('')
 
   const [solicitacoes, setSolicitacoes] = useState([])
+  const [cargas, setCargas] = useState({})
+  async function salvarCarga(event, atribuicao, minimo) {
+    event.preventDefault()
+    const quantidade = Number(cargas[atribuicao.id] ?? atribuicao.aulas_semana)
+    if (!Number.isInteger(quantidade) || quantidade < 1 || quantidade > periodosPorDia * 5) {
+      setErro(`Defina de 1 a ${periodosPorDia * 5} aulas por semana.`)
+      return
+    }
+    setSalvando(true); setErro('')
+    try {
+      const { data, error } = await supabase.from('sala_materias').update({ aulas_semana: quantidade })
+        .eq('id', atribuicao.id).eq('escola_id', perfil.escola_id).select('id').single()
+      if (error || !data) throw error || new Error('Alteração não confirmada.')
+      setAtribuicoes((anteriores) => anteriores.map((a) => a.id === atribuicao.id ? { ...a, aulas_semana: quantidade } : a))
+      setMensagem(`Quantidade de ${atribuicao.materiaNome} definida pela escola: ${quantidade} aulas por semana.${quantidade < minimo ? ' A grade atual foi preservada; cancele os pedidos pendentes e gere novamente para ajustar as aulas já alocadas.' : ''}`)
+    } catch { setErro('Não foi possível salvar a quantidade de aulas. Tente novamente.') }
+    finally { setSalvando(false) }
+  }
+
 
   async function moverAula(token, dia, periodo) {
     if (salvando || gerando || !token) return
@@ -209,7 +228,7 @@ export default function DiretorCronograma() {
           </p>
           <section className="mt-6 rounded-2xl bg-card border p-5" aria-label="Aulas desta turma">
             <h2 className="text-lg font-semibold text-white">Aulas desta turma</h2>
-            <p className="mt-2 text-xs text-texto/60">Matérias, professores e carga semanal cadastrados em Matérias. Arraste uma aula disponível para a grade. Fora da disponibilidade, o professor recebe um pedido de aceite.</p>
+            <p className="mt-2 text-xs text-texto/60">A escola define aqui quantas aulas de cada matéria a turma terá por semana. Arraste uma aula disponível para a grade. Fora da disponibilidade, o professor recebe um pedido de aceite.</p>
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {atribuicoes.filter((a) => a.sala_id === salaAtiva).map((a) => {
                 const alocadas = gradeDaSala.filter((g) => g.materia_id === a.materia_id).length
@@ -217,15 +236,28 @@ export default function DiretorCronograma() {
                 const faltam = Math.max(0, a.aulas_semana - alocadas - aguardando)
                 const token = `atribuicao:${a.id}`
                 const desabilitada = !a.professor_id || !faltam || salvando || gerando
-                return <button key={a.id} type="button" draggable={!desabilitada} disabled={desabilitada}
+                return <article key={a.id} className="rounded-xl border p-4">
+                  <form onSubmit={(event) => salvarCarga(event, a, alocadas + aguardando)} className="mb-3">
+                    <label htmlFor={`carga-${a.id}`} className="block text-xs text-texto/70 mb-2">Aulas por semana · definido pela escola</label>
+                    <div className="flex gap-2">
+                      <input id={`carga-${a.id}`} type="number" min={1} max={periodosPorDia * 5} step={1} required
+                        value={cargas[a.id] ?? a.aulas_semana} disabled={salvando || gerando}
+                        onChange={(event) => setCargas((atual) => ({ ...atual, [a.id]: event.target.value }))}
+                        aria-label={`Aulas por semana de ${a.materiaNome}`}
+                        className="w-20 rounded-lg border bg-card px-3 py-2 text-sm text-white" />
+                      <button type="submit" disabled={salvando || gerando} className="rounded-full bg-azul px-4 py-2 text-xs text-white disabled:opacity-50">Salvar</button>
+                    </div>
+                  </form>
+                  <button type="button" draggable={!desabilitada} disabled={desabilitada}
                   onDragStart={(e) => { e.dataTransfer.setData('text/plain', token); e.dataTransfer.effectAllowed = 'move'; setSelecionada(token) }}
                   onClick={() => { setSelecionada(token === selecionada ? null : token); setMensagem('') }}
                   aria-pressed={selecionada === token}
-                  className={`rounded-xl border p-4 text-left disabled:opacity-50 enabled:cursor-grab ${selecionada === token ? 'ring-2 ring-azul bg-azul/10' : ''}`}>
+                  className={`w-full rounded-xl border p-3 text-left disabled:opacity-50 enabled:cursor-grab ${selecionada === token ? 'ring-2 ring-azul bg-azul/10' : ''}`}>
                   <span className="flex items-center gap-2 font-semibold text-sm text-white"><GripVertical size={16}/>{a.materiaNome}</span>
                   <span className="block mt-2 text-xs text-texto/70">{a.professorNome || 'Sem professor definido'}</span>
                   <span className="block mt-2 text-xs text-texto/60">{alocadas}/{a.aulas_semana} alocadas · {aguardando} pendentes · {faltam} para arrastar</span>
                 </button>
+                </article>
               })}
             </div>
             {!atribuicoes.some((a) => a.sala_id === salaAtiva) && <p className="mt-4 text-sm text-texto/60">Cadastre as matérias e os professores desta turma em Matérias.</p>}
