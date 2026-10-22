@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
@@ -62,7 +62,7 @@ const MENUS = {
   ],
 }
 
-const botaoBase = 'shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition'
+const botaoBase = 'slark-dock-link shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition'
 const slarkLiveUrl = 'https://slarklive.vercel.app'
 
 export default function BottomNav() {
@@ -72,6 +72,32 @@ export default function BottomNav() {
   const menu = MENUS[perfil?.perfil] || []
   const landing = import.meta.env.VITE_LANDING_URL || '#'
   const [aberto, setAberto] = useState(false)
+  const mobileMenu = useRef(null)
+  const toggle = useRef(null)
+
+  useEffect(() => {
+    if (!aberto) return
+    const before = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const controls = () => [toggle.current, ...Array.from(mobileMenu.current?.querySelectorAll('a[href],button:not(:disabled)') || [])].filter(Boolean)
+    controls()[1]?.focus()
+    const onKeyDown = event => {
+      if (event.key === 'Escape') setAberto(false)
+      if (event.key !== 'Tab') return
+      const items = controls()
+      const index = items.indexOf(document.activeElement)
+      if ((event.shiftKey && index <= 0) || (!event.shiftKey && index === items.length - 1)) {
+        event.preventDefault()
+        items[event.shiftKey ? items.length - 1 : 0]?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = before
+      document.removeEventListener('keydown', onKeyDown)
+      toggle.current?.focus()
+    }
+  }, [aberto])
 
   const handleSair = async () => {
     setAberto(false)
@@ -83,24 +109,26 @@ export default function BottomNav() {
     <>
       {/* Desktop/tablet: menu em pílula, como antes */}
       <nav
+        aria-label="Navegação do aplicativo"
         className="hidden sm:block fixed left-1/2 -translate-x-1/2 z-50 max-w-[95vw]"
         style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
       >
-        <div className="flex items-center gap-1 px-2.5 py-2 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-x-auto">
+        <div className="slark-dock flex items-center gap-1 px-2.5 py-2 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-x-auto">
           {/* Logo pequeno */}
           <a
             href="https://slark.site"
             title="Site da Slark"
+            aria-label="Site da Slark"
             className={`${botaoBase} font-mono font-bold text-white/80 hover:text-white hover:bg-white/10`}
           >
-            S
+            <img src="/favicon-32x32.png" alt="" className="w-6 h-6" />
           </a>
 
           <a
             href={slarkLiveUrl}
             title="Abrir Slark Live"
             aria-label="Abrir Slark Live"
-            className={`${botaoBase} bg-white/90 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-azul`}
+            className={`slark-live-link ${botaoBase} bg-white/90 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-azul`}
           >
             <img src="/slark-live.svg" alt="" className="w-6 h-6" />
           </a>
@@ -113,6 +141,7 @@ export default function BottomNav() {
               to={to}
               end={end}
               title={label}
+              aria-label={label}
               className={({ isActive }) =>
                 `${botaoBase} ${isActive ? 'bg-azul text-white shadow-lg shadow-azul/40' : 'text-texto/60 hover:text-white hover:bg-white/10'}`
               }
@@ -126,6 +155,7 @@ export default function BottomNav() {
           <NavLink
             to="/perfil"
             title={perfil?.nome || 'Perfil'}
+            aria-label="Abrir perfil"
             className={({ isActive }) =>
               `shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center overflow-hidden transition ${isActive ? 'ring-2 ring-azul' : 'hover:ring-2 hover:ring-white/20'}`
             }
@@ -142,12 +172,13 @@ export default function BottomNav() {
           <button
             onClick={alternarTema}
             title={tema === 'claro' ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
+            aria-label={tema === 'claro' ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
             className={`${botaoBase} text-texto/50 hover:text-white hover:bg-white/10`}
           >
             {tema === 'claro' ? <Moon size={16} /> : <Sun size={16} />}
           </button>
 
-          <button onClick={handleSair} title="Sair" className={`${botaoBase} text-texto/50 hover:text-red-400 hover:bg-red-400/10`}>
+          <button onClick={handleSair} title="Sair" aria-label="Sair" className={`${botaoBase} text-texto/50 hover:text-red-400 hover:bg-red-400/10`}>
             <LogOut size={17} />
           </button>
         </div>
@@ -155,21 +186,25 @@ export default function BottomNav() {
 
       {/* Mobile: bolinha no canto que abre um menu retrátil, só com texto */}
       <button
+        ref={toggle}
         onClick={() => setAberto((v) => !v)}
-        className="sm:hidden fixed right-4 z-[60] w-14 h-14 rounded-full bg-azul text-white font-display font-semibold text-[13px] tracking-tight shadow-2xl shadow-azul/40 border border-white/10 flex items-center justify-center active:scale-95 transition"
-        style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+        aria-label={aberto ? "Fechar menu" : "Abrir menu"}
+        aria-expanded={aberto}
+        aria-controls="slark-app-mobile-menu"
+        className="slark-mobile-toggle sm:hidden fixed right-4 z-[60] w-14 h-14 rounded-full bg-azul text-white font-display font-semibold text-[13px] tracking-tight shadow-2xl shadow-azul/40 border border-white/10 flex items-center justify-center active:scale-95 transition"
+        style={aberto ? { top: '1rem' } : { bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
       >
         {aberto ? 'Fechar' : 'Menu'}
       </button>
 
       {aberto && (
-        <div className="sm:hidden fixed inset-0 z-50 bg-bg/97 backdrop-blur-xl flex flex-col" onClick={() => setAberto(false)}>
+        <div ref={mobileMenu} id="slark-app-mobile-menu" role="dialog" aria-modal="true" aria-label="Menu do aplicativo" className="slark-mobile-menu sm:hidden fixed inset-0 z-50 bg-bg/97 backdrop-blur-xl flex flex-col" onClick={() => setAberto(false)}>
           <div className="flex-1 overflow-y-auto px-8 pt-20 pb-8" onClick={(e) => e.stopPropagation()}>
             <a href={landing} className="block text-texto/40 font-mono text-sm mb-8" onClick={() => setAberto(false)}>
-              Slark
+              Slark Educação
             </a>
 
-            <div className="flex flex-col gap-1">
+            <nav aria-label="Navegação mobile" className="flex flex-col gap-1">
               <a
                 href={slarkLiveUrl}
                 onClick={() => setAberto(false)}
@@ -201,7 +236,7 @@ export default function BottomNav() {
               >
                 Perfil
               </NavLink>
-            </div>
+            </nav>
           </div>
 
           <div

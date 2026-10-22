@@ -5,7 +5,7 @@ import { supabase, carregarPerfil } from '../lib/supabase'
 import { HOME_POR_PERFIL } from '../lib/rotasPorPerfil'
 import { ArrowRight, Loader2, CheckCircle2 } from 'lucide-react'
 import LogoSlark from '../components/LogoSlark'
-import orbitaSlark from '../assets/orbita-slark.svg'
+import '../styles/slark-login.css'
 
 const EMAIL_DEMO_SUFIXO = '@slarkdemo.com.br'
 
@@ -13,50 +13,7 @@ const EMAIL_DEMO_SUFIXO = '@slarkdemo.com.br'
 // feixe curvo mais claro cruzando a tela — mesma linguagem visual do mockup.
 // Fica dentro do cartão arredondado (glassmorphism retangular) que envolve a tela toda.
 function FundoLogin() {
-  return (
-    <svg
-      className="absolute inset-0 w-full h-full"
-      viewBox="0 0 1280 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id="baseLogin" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#03002E" />
-          <stop offset="30%" stopColor="#000026" />
-          <stop offset="62%" stopColor="#0B39D6" />
-          <stop offset="100%" stopColor="#0651C3" />
-        </linearGradient>
-        <radialGradient id="glowLogin" cx="88%" cy="92%" r="65%">
-          <stop offset="0%" stopColor="#F3FAFF" stopOpacity="1" />
-          <stop offset="40%" stopColor="#9FD6FF" stopOpacity="0.65" />
-          <stop offset="100%" stopColor="#0651C3" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="poolLogin" cx="8%" cy="4%" r="45%">
-          <stop offset="0%" stopColor="#010026" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#010026" stopOpacity="0" />
-        </radialGradient>
-        <filter id="blurLogin1" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="45" />
-        </filter>
-        <filter id="blurLogin2" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="18" />
-        </filter>
-      </defs>
-      <rect width="1280" height="800" fill="url(#baseLogin)" />
-      <rect width="1280" height="800" fill="url(#poolLogin)" />
-      <rect width="1280" height="800" fill="url(#glowLogin)" />
-      <path
-        d="M -80 60 C 180 220, 300 380, 520 620 C 600 720, 700 780, 900 800"
-        stroke="#BFE6FF" strokeOpacity="0.5" strokeWidth="70" fill="none" strokeLinecap="round"
-        filter="url(#blurLogin1)"
-      />
-      <path
-        d="M -80 60 C 180 220, 300 380, 520 620"
-        stroke="#EAF7FF" strokeOpacity="0.55" strokeWidth="14" fill="none" strokeLinecap="round"
-        filter="url(#blurLogin2)"
-      />
-      <image href={orbitaSlark} x="-80" y="90" width="520" height="644" opacity="0.55" />
-    </svg>
-  )
+  return <div className="login-universe" aria-hidden="true"><div className="login-orbit orbit-one" /><div className="login-orbit orbit-two" /><div className="login-orbit orbit-three" /><span className="login-planet planet-one" /><span className="login-planet planet-two" /></div>
 }
 
 // Input em formato de pílula + botão circular de enviar, no mesmo estilo "vidro"
@@ -65,12 +22,13 @@ function CampoComBotao({ tipo = 'text', valor, onChange, placeholder, carregando
   return (
     <div className="mt-5 flex items-center gap-3">
       <input
+        aria-label={tipo === 'email' ? 'Seu e-mail' : 'Sua senha'} autoComplete={tipo === 'email' ? 'email' : 'current-password'}
         type={tipo} required autoFocus={autoFocus} value={valor} onChange={onChange}
         placeholder={placeholder}
         className="flex-1 min-w-0 h-16 px-7 text-lg rounded-full bg-white/25 backdrop-blur-md border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:bg-white/35 focus:border-white/50 transition"
       />
       <button
-        type="submit" disabled={carregando}
+        type="submit" disabled={carregando} aria-label="Continuar" aria-busy={carregando}
         className="shrink-0 w-16 h-16 rounded-full bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center text-white hover:bg-white/35 transition disabled:opacity-60"
       >
         {carregando ? <Loader2 size={24} className="animate-spin" /> : <ArrowRight size={24} />}
@@ -119,7 +77,7 @@ function IntroMobile() {
         </div>
         <div className="mt-auto transition-opacity duration-500" style={{ opacity: conteudoVisivel ? 1 : 0 }}>
           <div className="h-16 rounded-full bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center">
-            <span className="font-mono text-lg font-medium text-white/90">Faça Log-in</span>
+            <span className="font-mono text-lg font-medium text-white/90">Entre no seu espaço</span>
           </div>
         </div>
       </div>
@@ -251,29 +209,31 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen w-full relative font-display overflow-hidden" style={{ '--c-onbg': '255 255 255' }}>
+    <div className="slark-login min-h-screen w-full relative font-display overflow-hidden text-[#FFFFFF]" style={{ '--c-onbg': '255 255 255' }}>
       <FundoLogin />
       <IntroMobile />
 
-      <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
+      <div className="login-split relative z-10 min-h-screen flex flex-col lg:flex-row">
         {/* Coluna esquerda: chamada de marca (some em telas pequenas), sobre o degradê cru */}
-        <div className="hidden lg:flex w-1/2 flex-col justify-end p-16">
-          <h1 className="font-mono text-5xl xl:text-6xl font-medium text-white leading-[1.05] tracking-tight">
-            O método que<br />enxerga cada aluno.
+        <div className="login-story hidden lg:flex w-1/2 flex-col justify-end p-16">
+          <p className="login-kicker">SLARK EDUCAÇÃO</p>
+          <h1 className="text-5xl xl:text-6xl font-light text-white leading-[1.05] tracking-tight">
+            Cada mente<br />é um <strong className="font-bold italic">universo.</strong>
           </h1>
+          <p className="login-story-copy">Diferentes caminhos. Novas conexões.<br />Um espaço para evoluir juntos.</p>
         </div>
 
         {/* Coluna direita: painel retangular em glassmorphism — a "divisória" entre as duas metades */}
-        <div className="flex-1 flex flex-col justify-between p-8 sm:p-12 lg:p-16 bg-white/10 backdrop-blur-2xl border-l border-white/20">
+        <div className="login-panel flex-1 flex flex-col justify-between p-8 sm:p-12 lg:p-16">
           <div>
-            <p className="font-mono text-4xl sm:text-5xl font-medium text-white leading-tight">Conheça a</p>
-            <LogoSlark className="w-72 sm:w-96 h-auto -mt-1" />
+            <p className="login-kicker">BEM-VINDO AO SEU UNIVERSO</p>
+            <div className="login-brand"><LogoSlark className="w-56 h-auto" /><span>Educação</span></div>
           </div>
 
           <div className="w-full max-w-lg lg:ml-auto">
           {etapa === 'email' && (
             <>
-              <p className="font-mono text-2xl sm:text-3xl font-medium text-white/90">Faça Log-in</p>
+              <p className="font-mono text-2xl sm:text-3xl font-medium text-white/90">Entre no seu espaço</p>
               <form onSubmit={continuarComEmail}>
                 <CampoComBotao
                   tipo="email" valor={email} onChange={(e) => setEmail(e.target.value)}
@@ -329,8 +289,8 @@ export default function Login() {
             </>
           )}
 
-          {erro && <p className="mt-3 text-sm text-white bg-red-500/25 backdrop-blur-md border border-red-200/30 px-4 py-3 rounded-2xl">{erro}</p>}
-          {aviso && <p className="mt-3 text-sm text-white bg-[#3FD08A]/25 backdrop-blur-md border border-white/20 px-4 py-3 rounded-2xl">{aviso}</p>}
+          {erro && <p role="alert" className="mt-3 text-sm text-white bg-red-500/25 backdrop-blur-md border border-red-200/30 px-4 py-3 rounded-2xl">{erro}</p>}
+          {aviso && <p role="status" className="mt-3 text-sm text-white bg-[#3FD08A]/25 backdrop-blur-md border border-white/20 px-4 py-3 rounded-2xl">{aviso}</p>}
 
           <Link to="/" className="mt-5 inline-block text-sm text-white/80 hover:text-white">← Voltar ao início</Link>
           <p className="mt-4 text-sm text-white/80">

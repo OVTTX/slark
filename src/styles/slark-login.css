@@ -1,0 +1,29 @@
+.slark-login { --c-onbg:255 255 255; color-scheme:dark; background:#000026; font-family:'Plus Jakarta Sans',sans-serif; -webkit-font-smoothing:antialiased; }
+.slark-login .login-universe { position:absolute; inset:0; overflow:hidden; background:radial-gradient(ellipse at 15% 100%,#0b0697aa,transparent 65%),linear-gradient(145deg,#000026 15%,#030240 70%,#0b0697); }
+.login-orbit { position:absolute; width:850px; height:460px; border:1px solid #ffffff20; border-radius:50%; left:-280px; top:30%; transform:rotate(-32deg); }
+.login-orbit.orbit-two { width:660px; height:350px; left:-190px; top:38%; }
+.login-orbit.orbit-three { width:440px; height:230px; left:-90px; top:46%; border-color:#0651c399; }
+.login-planet { position:absolute; border:1px solid #ffffff70; border-radius:50%; background:#0b0697; }
+.planet-one { width:20px; height:20px; left:16%; top:34%; box-shadow:0 0 30px #0651c370; }
+.planet-two { width:9px; height:9px; left:35%; top:56%; background:#fff; }
+.slark-login .login-split { max-width:1600px; margin:auto; }
+.slark-login .login-story { position:relative; padding-bottom:80px; }
+.slark-login .login-kicker { font-size:10px; font-weight:500; letter-spacing:.15em; color:#b9c7e9; margin-bottom:24px; }
+.slark-login .login-story h1 { font-size:clamp(3.5rem,5.5vw,6rem); font-weight:300; letter-spacing:-.065em; line-height:1.08; }
+.slark-login .login-story-copy { margin-top:24px; font-size:14px; line-height:1.9; font-weight:300; color:#c4cbe2; }
+.slark-login .login-panel { margin:24px; border:1px solid #ffffff24; border-radius:32px; background:linear-gradient(145deg,#ffffff0b,#ffffff04); backdrop-filter:blur(24px); box-shadow:inset 0 1px 0 #ffffff12,0 20px 80px #00002625; gap:80px; }
+.slark-login .login-brand { display:flex; flex-direction:column; align-items:flex-start; gap:12px; }
+.slark-login .login-brand>span { font-size:12px; color:#c4cbe2; letter-spacing:.12em; }
+.slark-login :is(input) { background:#00002660; border:1px solid #ffffff30; border-radius:18px; font-size:16px; color:#fff; min-height:56px; }
+.slark-login input::placeholder { color:#a9b4d4; }
+.slark-login input:focus { outline:none; border-color:#8cb7ff; box-shadow:0 0 0 3px #0651c340; background:#00002680; }
+.slark-login button[type=submit] { background:#0651c3; border:1px solid #ffffff20; color:#fff; box-shadow:0 6px 24px #0651c330; }
+.slark-login button[type=submit]:hover { background:#1764d9; }
+.slark-login :is(button,a):focus-visible { outline:2px solid #8cb7ff; outline-offset:5px; }
+.slark-login .login-panel .font-mono { font-family:inherit; font-weight:500; letter-spacing:-.04em; }
+@media(max-width:1023px) {
+  .slark-login .login-panel { margin:16px; min-height:calc(100svh - 32px); padding:32px 24px; }
+  .slark-login .login-orbit { top:10%; opacity:.55; }
+  .slark-login .login-brand svg { width:min(220px,70vw); }
+}
+@media(prefers-reduced-motion:reduce) { .slark-login * { animation:none!important; transition:none!important; } }

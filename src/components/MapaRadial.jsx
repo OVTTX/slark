@@ -30,7 +30,7 @@ export default function MapaRadial({ dados, tamanho = 340 }) {
   const pontosValor = eixos.map((e) => `${e.vx.toFixed(1)},${e.vy.toFixed(1)}`).join(' ')
 
   return (
-    <svg viewBox={`0 0 ${tamanho} ${tamanho}`} width="100%" style={{ maxWidth: tamanho, display: 'block', margin: '0 auto' }}>
+    <svg className="slark-radar" viewBox={`0 0 ${tamanho} ${tamanho}`} width="100%" style={{ maxWidth: tamanho, display: 'block', margin: '0 auto' }}>
       <defs>
         <linearGradient id="tracoGradiente" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#6FA8FF" stopOpacity="0.85" />
@@ -39,9 +39,9 @@ export default function MapaRadial({ dados, tamanho = 340 }) {
       </defs>
 
       {/* grade guia: contorno externo + raios até cada eixo */}
-      <polygon points={pontosGuia} fill="none" stroke="rgba(255,255,255,0.16)" strokeDasharray="2 6" strokeLinecap="round" />
+      <polygon className="radar-grid" points={pontosGuia} fill="none" stroke="rgba(255,255,255,0.16)" strokeDasharray="2 6" strokeLinecap="round" />
       {eixos.map((e) => (
-        <line key={`g${e.id}`} x1={cx} y1={cy} x2={e.gx} y2={e.gy} stroke="rgba(255,255,255,0.16)" strokeDasharray="2 6" strokeLinecap="round" />
+        <line className="radar-grid" key={`g${e.id}`} x1={cx} y1={cy} x2={e.gx} y2={e.gy} stroke="rgba(255,255,255,0.16)" strokeDasharray="2 6" strokeLinecap="round" />
       ))}
 
       {/* forma preenchida com o perfil de características do aluno */}

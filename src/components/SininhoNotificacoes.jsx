@@ -31,12 +31,13 @@ export default function SininhoNotificacoes() {
 
   return (
     <button
+      aria-label={naoLidas > 0 ? `Notificações, ${naoLidas} não lidas` : 'Notificações'}
       onClick={() => navigate('/aluno/notificacoes')}
       className="relative shrink-0 w-11 h-11 rounded-full bg-white/[0.04] backdrop-blur-xl border border-white/10 flex items-center justify-center text-texto/60 hover:text-white transition"
     >
       <Bell size={17} />
       {naoLidas > 0 && (
-        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#FF6FA5] text-white text-[10px] font-bold flex items-center justify-center">
+        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#0651C3] text-white text-[10px] font-bold flex items-center justify-center">
           {naoLidas > 9 ? '9+' : naoLidas}
         </span>
       )}
