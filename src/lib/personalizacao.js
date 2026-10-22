@@ -1,6 +1,7 @@
 export const PADRAO = Object.freeze({ skin: 'slark', texto: 'padrao', moldura: 'padrao' })
 export const CATALOGO = [
   { id:'slark', tipo:'skin', nome:'Slark Original', pontos:0, cor:'#0651C3', fundo:'#000026', descricao:'O seu universo em azul-noite.' },
+  { id:'noir', tipo:'skin', nome:'Noir', pontos:0, cor:'#D1D1D1', fundo:'#000000', descricao:'Preto puro. Texto cinza-claro. O essencial em foco.' },
   { id:'aurora', tipo:'skin', nome:'Aurora', pontos:100, cor:'#3FD08A', fundo:'#052823', descricao:'Novas conexões em verde e azul.' },
   { id:'oceano', tipo:'skin', nome:'Oceano', pontos:300, cor:'#45BDEB', fundo:'#051C35', descricao:'Azul profundo para explorar ideias.' },
   { id:'ametista', tipo:'skin', nome:'Ametista', pontos:750, cor:'#BF88FF', fundo:'#200E38', descricao:'Uma atmosfera violeta para criar.' },

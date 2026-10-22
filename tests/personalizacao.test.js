@@ -12,14 +12,19 @@ test('unknown or locked stored selections fall back to accessible originals',()=
  assert.deepEqual(preferenciasValidas({skin:'ouro',texto:'inexistente',moldura:'ouro'},0,false),PADRAO)
  assert.deepEqual(preferenciasValidas({skin:'ouro',texto:'dourado',moldura:'ouro'},0,true),{skin:'ouro',texto:'dourado',moldura:'ouro'})
 })
-test('thresholds and style levels handle invalid and negative points',()=>{assert.equal(podeUsar(CATALOGO[1],99),false);assert.equal(podeUsar(CATALOGO[1],100),true);assert.equal(progressoNivel(-1).nivel,1);assert.equal(progressoNivel(1500).nivel,16);assert.equal(progressoNivel(NaN).progresso,0)})
+test('thresholds and style levels handle invalid and negative points',()=>{assert.equal(podeUsar(CATALOGO.find(i=>i.id==='aurora'),99),false);assert.equal(podeUsar(CATALOGO.find(i=>i.id==='aurora'),100),true);assert.equal(progressoNivel(-1).nivel,1);assert.equal(progressoNivel(1500).nivel,16);assert.equal(progressoNivel(NaN).progresso,0)})
 test('every theme unlocks at its threshold and survives saved preference validation',()=>{
  const skins=CATALOGO.filter(i=>i.tipo==='skin')
- assert.equal(skins.length,11)
+ assert.equal(skins.length,12)
  for(const skin of skins){
   if(skin.pontos>0) assert.equal(podeUsar(skin,skin.pontos-1),false,skin.id)
   assert.equal(podeUsar(skin,skin.pontos),true,skin.id)
   assert.equal(preferenciasValidas({...PADRAO,skin:skin.id},skin.pontos,false).skin,skin.id)
   assert.equal(preferenciasValidas({...PADRAO,skin:skin.id},0,true).skin,skin.id)
  }
+})
+
+test('Noir is available from the start and can be restored without spending points',()=>{
+ assert.equal(preferenciasValidas({...PADRAO,skin:'noir'},0,false).skin,'noir')
+ assert.equal(CATALOGO.find(i=>i.id==='noir').fundo,'#000000')
 })

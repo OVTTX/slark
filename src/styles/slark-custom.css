@@ -101,3 +101,25 @@
 }
 .slark-app[data-skin]:not([data-skin=slark]) .slark-mobile-toggle {background:var(--skin-accent);}
 .slark-app[data-skin]:not([data-skin=slark]) :is(input,textarea,select):focus {border-color:var(--skin-accent);}
+
+/* Noir stays black in both system modes and uses a neutral text palette. */
+.slark-app[data-skin=noir],.light .slark-app[data-skin=noir] {
+ color-scheme:dark;--c-bg:0 0 0;--c-bg2:0 0 0;--c-card:0 0 0;--c-texto:209 209 209;--c-onbg:209 209 209;
+ --skin-accent:#000;--app-line:#363636;--app-panel:#000;--app-raised:#000;--app-muted:#AAA;--app-secondary:#BDBDBD;--app-brand-text:#D1D1D1;--app-input:#000;--app-shadow:none;
+ color:#D1D1D1;background:#000;
+}
+.slark-app[data-skin=noir][data-texto] :is(h1,h2,h3),.light .slark-app[data-skin=noir][data-texto] :is(h1,h2,h3) {color:#D1D1D1;}
+.slark-app[data-skin=noir] :is(.app-topbar,.slark-dock,.slark-mobile-menu,.slark-mobile-toggle,.slark-stat-icon,.app-profile-avatar,.slark-dock-link[aria-current=page],button.bg-azul,a.bg-azul) {background:#000;color:#D1D1D1;border:1px solid #363636;box-shadow:none;}
+.slark-app[data-skin=noir] :is(.app-wordmark,.text-azul,.text-rosa,.slark-live-link) {color:#D1D1D1;}
+.slark-app[data-skin=noir] .slark-live-link {background:#000;border-color:#363636;}
+.slark-app[data-skin=noir] [class*="bg-azul/"],.slark-app[data-skin=noir] [class*="bg-rosa/"] {background:#000;}
+.slark-app[data-skin=noir] :is(input,select,textarea):focus {border-color:#BDBDBD;box-shadow:0 0 0 2px #D1D1D126;}
+.slark-app[data-skin=noir] :is(input[type=checkbox],input[type=radio],input[type=range]) {accent-color:#BDBDBD;}
+.slark-app[data-skin=noir] svg {filter:grayscale(1);}
+.slark-app[data-skin=noir] .slark-draw-ring {stroke:#777;}
+.slark-app[data-skin=noir] .slark-entry-planet {stroke:#AAA;}
+.slark-app[data-skin=noir] :is(button,a):not(:disabled):hover {border-color:#AAA;}
+.slark-app[data-skin=noir] .app-profile-avatar {outline-color:#AAA;}
+.slark-app[data-skin=noir] :is([class*="text-green"],[class*="text-red"],[class*="text-yellow"],[class*="text-emerald"]) {color:#D1D1D1;}
+.slark-app[data-skin=noir] [class*="bg-white"] {background:#000;}
+.slark-app[data-skin=noir] :is(button.bg-white,a.bg-white) {color:#D1D1D1;border:1px solid #363636;}

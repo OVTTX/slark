@@ -70,6 +70,7 @@ export default function BottomNav() {
   const { tema, alternarTema } = useTheme()
   const { preferencias } = usePersonalizacao()
   const gold = preferencias.skin === 'ouro'
+  const noir = preferencias.skin === 'noir'
   const navigate = useNavigate()
   const menu = MENUS[perfil?.perfil] || []
   const landing = import.meta.env.VITE_LANDING_URL || '#'
@@ -173,9 +174,9 @@ export default function BottomNav() {
 
           <button
             onClick={alternarTema}
-            disabled={gold}
-            title={gold ? 'Slark Gold usa visual claro' : tema === 'claro' ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
-            aria-label={gold ? 'Slark Gold usa visual claro' : tema === 'claro' ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
+            disabled={gold || noir}
+            title={gold ? 'Slark Gold usa visual claro' : noir ? 'Noir usa visual preto' : tema === 'claro' ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
+            aria-label={gold ? 'Slark Gold usa visual claro' : noir ? 'Noir usa visual preto' : tema === 'claro' ? 'Mudar para modo escuro' : 'Mudar para modo claro'}
             className={`${botaoBase} text-texto/50 hover:text-white hover:bg-white/10`}
           >
             {tema === 'claro' ? <Moon size={16} /> : <Sun size={16} />}
@@ -249,10 +250,10 @@ export default function BottomNav() {
           >
             <button
               onClick={alternarTema}
-            disabled={gold}
+            disabled={gold || noir}
               className="flex-1 py-3.5 rounded-full bg-white/5 border border-white/10 text-texto/70 font-semibold text-sm"
             >
-              {gold ? 'Slark Gold · claro' : tema === 'claro' ? 'Modo escuro' : 'Modo claro'}
+              {gold ? 'Slark Gold · claro' : noir ? 'Noir · preto' : tema === 'claro' ? 'Modo escuro' : 'Modo claro'}
             </button>
             <button
               onClick={handleSair}
