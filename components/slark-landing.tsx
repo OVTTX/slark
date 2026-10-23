@@ -210,7 +210,7 @@ export default function SlarkLanding() {
               </div>
               <div className="mt-12 flex items-center gap-3 border-t border-[#E8E6FF]/10 pt-6 text-xs text-[#E8E6FF]/40"><span aria-hidden="true" className="text-2xl text-[#FBE3EA]">✳</span> Cada mente é um universo.</div>
             </div>
-            <div className="slark-hero-visual relative flex min-h-[340px] items-center justify-center lg:absolute lg:bottom-16 lg:right-14 lg:w-[380px]" aria-label="Uma prévia interativa do ecossistema Slark">
+            <div className="slark-hero-visual relative flex min-h-[340px] items-center justify-center lg:absolute lg:bottom-16 xl:bottom-48 lg:right-14 lg:w-[380px]" aria-label="Uma prévia interativa do ecossistema Slark">
               <div aria-hidden="true" className="hero-orbit h-[260px] w-[110%] max-w-[570px]" /><div aria-hidden="true" className="hero-orbit h-[350px] w-[80%] max-w-[450px]" />
               <span aria-hidden="true" className="absolute left-[10%] top-[20%] h-2 w-2 rounded-full bg-[#FBE3EA] shadow-[0_0_24px_#FBE3EA80]" />
               <div className="relative max-w-full"><GlassFolder label="Seu próximo universo" meta="COMECE PELA CURIOSIDADE" art="aurora" tone="dark" action="none" width={275} appear={false} files={PILLARS[0].files} onFileSelect={(_, i) => showFile(PILLARS[0], i)} /></div>
