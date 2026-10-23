@@ -201,7 +201,6 @@ export default function SlarkLanding() {
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_80%_50%,#03005B_0%,transparent_60%)]" />
           <div className="relative mx-auto max-w-[1440px] px-6 pb-10 pt-36 sm:px-10 lg:px-16 lg:pb-20 lg:pt-40">
             <div className="relative z-10">
-              <div className="micro flex items-center gap-3 text-[#FBE3EA]"><span className="h-1.5 w-1.5 rounded-full bg-[#2E5BFF] shadow-[0_0_15px_#2E5BFF]" /> SLARK EDUCAÇÃO</div>
               <h1 aria-label="A escola mudou. E o jeito de aprender também." className="slark-hero-title mt-7 font-medium leading-[1.06] tracking-[-0.065em]"><span className="block whitespace-nowrap">A escola mudou</span><span className="block whitespace-nowrap">E o jeito de aprender</span><span className="editorial block text-[#FBE3EA]">também</span></h1>
               <p data-motion-reveal className="mt-8 max-w-[43ch] text-base leading-relaxed text-[#E8E6FF]/60 sm:text-lg">IA para conhecer cada estudante. Times para somar diferenças. Uma educação que enxerga pessoas por inteiro.</p>
               <div data-motion-reveal className="mt-9 flex flex-wrap items-center gap-6">
