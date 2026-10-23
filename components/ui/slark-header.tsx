@@ -2,8 +2,9 @@ import { useEffect, useState } from "react"
 import { ShinyButton } from "./shiny-button"
 
 const links = [
-  { href: "/#ecossistema", label: "O ecossistema" },
   { href: "/#causa", label: "Nossa causa" },
+  { href: "/#implementacao", label: "Na sua escola" },
+  { href: "/#ecossistema", label: "O ecossistema" },
   { href: "/#slark-live", label: "Slark Live" },
   { href: "/documentacao", label: "Documentação" },
   { href: "/#contato", label: "Contato" },
