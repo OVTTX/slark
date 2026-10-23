@@ -140,6 +140,8 @@ function FolderCard({ pillar, index, onSelect }: {
 
 export default function SlarkLanding() {
   const [selected, setSelected] = useState<{ pillar: Pillar; index: number } | null>(null)
+  const [noir, setNoir] = useState(false)
+  const logoClicks = useRef({ count: 0, last: 0 })
   const [liveAnswer, setLiveAnswer] = useState<number | null>(null)
   const dialog = useRef<HTMLDialogElement>(null)
   const scope = useRef<HTMLDivElement>(null)
@@ -161,11 +163,15 @@ export default function SlarkLanding() {
   const showFile = (pillar: Pillar, index: number) => setSelected({ pillar, index })
 
   return (
-    <div ref={scope} className="slark-marketing min-h-screen overflow-x-clip bg-[#05031F] text-[#E8E6FF]">
+    <div ref={scope} data-theme={noir ? "noir" : "slark"} className="slark-marketing min-h-screen overflow-x-clip bg-[#05031F] text-[#E8E6FF]">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
         html:has(.slark-marketing){scroll-behavior:smooth;scroll-padding-top:100px}
         .slark-marketing{font-family:'Plus Jakarta Sans',sans-serif;color-scheme:dark;--slark-blue:#2E5BFF}
+        .slark-marketing[data-theme=noir]{background:#000;color:#d1d1d1;--slark-blue:#d1d1d1}
+        .slark-marketing[data-theme=noir]>:is(main,footer,header,dialog){filter:grayscale(1)}
+        .slark-marketing[data-theme=noir] .cta-primary{background:#d1d1d1;color:#000;box-shadow:none}
+        .slark-marketing[data-theme=noir] .cta-primary:hover{background:#fff}
         .slark-marketing .editorial{font-family:inherit;font-style:italic;font-weight:700}
         .slark-marketing .micro{font-family:inherit;font-weight:600;font-size:9px;letter-spacing:.12em}
         .slark-marketing .slark-brand{display:block;width:116px;height:auto;max-width:none}
@@ -194,7 +200,16 @@ export default function SlarkLanding() {
       `}</style>
       <a href="#conteudo" className="sr-only z-50 rounded-lg bg-[#E8E6FF] p-4 text-[#05031F] focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Pular para o conteúdo</a>
 
-      <SlarkHeader />
+      <SlarkHeader onLogoClick={event => {
+        event.preventDefault()
+        const now = Date.now()
+        const count = now - logoClicks.current.last < 700 ? logoClicks.current.count + 1 : 1
+        logoClicks.current = { count, last: now }
+        if (count === 3) {
+          setNoir(value => !value)
+          logoClicks.current.count = 0
+        }
+      }} />
 
       <main id="conteudo">
         <section className="slark-hero relative isolate border-b border-[#E8E6FF]/10">

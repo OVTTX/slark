@@ -10,7 +10,7 @@ const links = [
   { href: "/#contato", label: "Contato" },
 ]
 
-export function SlarkHeader({ documentation = false }: { documentation?: boolean }) {
+export function SlarkHeader({ documentation = false, onLogoClick }: { documentation?: boolean; onLogoClick?: React.MouseEventHandler<HTMLAnchorElement> }) {
   const [open, setOpen] = useState(false)
   const [compact, setCompact] = useState(false)
   useEffect(() => {
@@ -42,7 +42,7 @@ export function SlarkHeader({ documentation = false }: { documentation?: boolean
       @media(max-width:639px){.slark-site-header .header-logo{width:67px}}
     `}</style>
     <div className="slark-navbar relative mx-auto flex min-h-[60px] max-w-[1440px] items-center gap-2 rounded-full py-[7px] pl-4 pr-[7px] sm:gap-5 sm:pl-6">
-      <a href="/" aria-label="Slark Educação, início" className="flex shrink-0 items-center gap-2 sm:gap-3"><img className="header-logo" src="/landing/logo.svg" width="116" height="24" alt="Slark" /><span className="header-section-label border-l border-[#FFFFFF]/20 pl-2 text-[9px] font-medium text-[#FFFFFF]/90 sm:pl-3 sm:text-xs">Educação</span></a>
+      <a href="/" onClick={onLogoClick} aria-label="Slark Educação, início" className="flex shrink-0 items-center gap-2 sm:gap-3"><img className="header-logo" src="/landing/logo.svg" width="116" height="24" alt="Slark" /><span className="header-section-label border-l border-[#FFFFFF]/20 pl-2 text-[9px] font-medium text-[#FFFFFF]/90 sm:pl-3 sm:text-xs">Educação</span></a>
       <nav aria-label="Menu principal" className="header-main-nav ml-auto hidden items-center gap-6 text-xs font-semibold lg:flex">{links.map(link => <a className="menu-link" key={link.href} href={link.href} aria-current={documentation && link.href === "/documentacao" ? "page" : undefined}>{link.label}</a>)}</nav>
       <div className="header-actions ml-auto flex items-center gap-1 lg:ml-0">
         <ShinyButton href="/login" compact>Entrar no app <span aria-hidden="true" className="hidden sm:inline">↗</span></ShinyButton>
