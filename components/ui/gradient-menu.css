@@ -1,20 +1,20 @@
 .gradient-menu { display:flex; align-items:center; gap:4px; padding:0; margin:0; list-style:none; font-family:'Plus Jakarta Sans',sans-serif; }
 .gradient-menu li { flex:none; }
-.slark-app .gradient-menu-item { position:relative; isolation:isolate; display:flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:999px; color:rgb(var(--c-texto) / .7); text-decoration:none; transition:width .4s ease,background .4s ease; }
-.gradient-menu-bg,.gradient-menu-glow { position:absolute; inset:0; border-radius:inherit; background:linear-gradient(45deg,var(--gradient-from),var(--gradient-to)); opacity:0; transition:opacity .4s ease; pointer-events:none; }
+.slark-app .gradient-menu .gradient-menu-item { position:relative; isolation:isolate; display:flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:999px; color:rgb(var(--c-texto) / .7); text-decoration:none; transition:width 480ms cubic-bezier(.22,1,.36,1),background 300ms ease,color 200ms ease; }
+.gradient-menu-bg,.gradient-menu-glow { position:absolute; inset:0; border-radius:inherit; background:linear-gradient(45deg,var(--gradient-from),var(--gradient-to)); opacity:0; transition:opacity 360ms ease; pointer-events:none; }
 .gradient-menu-glow { inset:5px; filter:blur(10px); z-index:-1; }
-.gradient-menu-icon { position:relative; display:flex; transition:transform .3s ease,opacity .2s ease; }
-.gradient-menu-title { position:absolute; padding:0 16px; white-space:nowrap; font-size:12px; font-weight:600; color:#fff; transform:scale(.7); opacity:0; transition:transform .3s ease,opacity .2s ease; pointer-events:none; }
+.gradient-menu-icon { position:relative; display:flex; transition:transform 280ms cubic-bezier(.22,1,.36,1),opacity 160ms ease; }
+.gradient-menu-title { position:absolute; padding:0 16px; white-space:nowrap; font-size:12px; font-weight:600; color:#fff; transform:translateY(5px) scale(.96); opacity:0; transition:transform 360ms cubic-bezier(.22,1,.36,1),opacity 180ms ease; pointer-events:none; }
 .slark-app .gradient-menu-item[aria-current=page] { color:#fff; background:#0651c3; }
 .slark-app .gradient-menu-item:focus-visible { outline:2px solid rgb(var(--c-texto)); outline-offset:3px; width:176px; }
 .gradient-menu-item:focus-visible .gradient-menu-bg { opacity:1; }
-.gradient-menu-item:focus-visible .gradient-menu-icon { transform:scale(0); opacity:0; }
-.gradient-menu-item:focus-visible .gradient-menu-title { transform:scale(1); opacity:1; }
+.gradient-menu-item:focus-visible .gradient-menu-icon { transform:translateY(-2px) scale(.75); opacity:0; }
+.gradient-menu-item:focus-visible .gradient-menu-title { transform:translateY(0) scale(1); opacity:1; transition-delay:100ms; }
 @media(hover:hover) and (pointer:fine) {
   .slark-app .gradient-menu-item:hover { width:176px; }
   .gradient-menu-item:hover .gradient-menu-bg { opacity:1; }
   .gradient-menu-item:hover .gradient-menu-glow { opacity:.4; }
-  .gradient-menu-item:hover .gradient-menu-icon { transform:scale(0); opacity:0; }
-  .gradient-menu-item:hover .gradient-menu-title { transform:scale(1); opacity:1; }
+  .gradient-menu-item:hover .gradient-menu-icon { transform:translateY(-2px) scale(.75); opacity:0; }
+  .gradient-menu-item:hover .gradient-menu-title { transform:translateY(0) scale(1); opacity:1; transition-delay:100ms; }
 }
 @media(prefers-reduced-motion:reduce) { .gradient-menu-item,.gradient-menu-item span { transition:none !important; } }
