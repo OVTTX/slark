@@ -6,8 +6,8 @@
 - Live Room: o professor escolhe uma trilha vinculada à turma, prepara slides/quizzes, gera o PIN e controla a apresentação ou mata-mata. Os quartetos continuam sendo os times cadastrados com quatro integrantes.
 - O aluno informa o PIN e o código fixo do próprio quarteto. A API verifica sua identidade no Supabase Auth e sua participação no quarteto; só aceita uma resposta por pergunta e um dispositivo por equipe.
 - Live Solo: o professor publica as perguntas para revisão individual nas trilhas; alunos praticam com flashcards, quizzes e bot simulado. Treino não concede premiação competitiva.
-- A aba do Live mostra quartetos da turma, comparação de turmas da mesma série/etapa e de toda a escola. Pontuação do App continua em sua própria aba.
-- O total de uma turma é a soma dos pontos dos seus times, contado uma vez por equipe, sem multiplicar pelos quatro integrantes.
+- A aba do Live classifica somente times, com filtros de Sala (seletor), Salas da mesma série/etapa e Escola. Pontuação do App continua em sua própria aba.
+- Cada linha do ranking representa um time e seus próprios pontos; a sala serve como filtro e identificação da equipe.
 - O PIN é um link para `/slark-live/telao/:pin`; o telão não exige login. Mostra apenas dados de apresentação e classificações agregadas, nunca códigos de equipe, integrantes, observações ou gabarito não revelado.
 - O telão segue o desenho enviado: classificação geral, quartetos da turma, PIN e chaveamento; durante perguntas, o conteúdo ocupa a área principal.
 
