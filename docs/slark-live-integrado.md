@@ -17,13 +17,13 @@ Novas partidas usam `rankingVersion: 2`. A premiação ocorre uma única vez, no
 
 Quiz: classificação por acertos. Mata-mata: campeão, finalista e demais equipes por fase alcançada e acertos; os semifinalistas são ordenados por acertos para definir terceiro e quarto. Empates compartilham a colocação e pulam a seguinte (1, 2, 2, 4). Os pontos já concedidos pelo sistema anterior são preservados.
 
-## Implantação pendente de aprovação
+## Implantação aprovada
 
-A revisão automática rejeitou a aplicação em produção da migração `20261025030553_integrar_live_no_app.sql`, pois ela cria uma role de servidor, funções privilegiadas restritas e altera triggers de premiação. A migração não foi aplicada, a role não foi criada, e este recurso não foi publicado em produção.
+Após a aprovação específica do usuário para o deploy, a migração `20261025030553_integrar_live_no_app.sql` foi aplicada em produção. Ela cria uma role restrita para o servidor e funções/triggers privados que registram a premiação. Nenhuma pontuação histórica é recalculada.
 
 O SQL cria `slarkapp_live`, sem superusuário, sem bypass de RLS e sem criação de bancos/roles. Essa conexão só lê/escreve o estado privado do Live e chama uma função privada de classificações do telão. O acesso às tabelas de premiação não é concedido a clientes nem a essa role. A função pública de ranking é SECURITY INVOKER, delegando a uma função privada que verifica a sessão e a escola. Triggers privados executam os créditos atômicos e mantêm registros únicos por partida/aluno e partida/time.
 
-Após a aprovação: aplicar a migração, gerar senha exclusiva da nova role, configurar `DATABASE_URL` apenas no servidor do projeto Vercel `slark-kvy7` e copiar a configuração pública do certificado CA do armazenamento existente. `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` aceitam os valores `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` já existentes; nenhum service-role é necessário. Não reaproveitar banco de produção em previews. Nunca colocar senha/URL de conexão nas variáveis VITE, no código ou em logs.
+Configuração de produção: gerar senha exclusiva da nova role, configurar `DATABASE_URL` apenas no servidor do projeto Vercel `slark-kvy7` e copiar a configuração pública do certificado CA do armazenamento existente. `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` aceitam os valores `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` já existentes; nenhum service-role é necessário. Não reaproveitar banco de produção em previews. Nunca colocar senha/URL de conexão nas variáveis VITE, no código ou em logs.
 
 A conexão da produção deve ser verificada com o pooler real do projeto Supabase antes do deploy. O valor da variável DATABASE_URL do projeto antigo é do tipo sensitive e não pode ser exportado pelo conector; por isso a proposta usa uma credencial nova, sem rotacionar a existente. O site antigo só deve ser retirado após validação da integração.
 
