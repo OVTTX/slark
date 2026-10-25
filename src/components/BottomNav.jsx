@@ -65,7 +65,7 @@ const MENUS = {
 }
 
 const botaoBase = 'slark-dock-link shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition'
-const slarkLiveUrl = 'https://slarklive.vercel.app'
+
 
 export default function BottomNav() {
   const { perfil, sair } = useAuth()
@@ -73,6 +73,7 @@ export default function BottomNav() {
   const { preferencias } = usePersonalizacao()
   const gold = preferencias.skin === 'ouro'
   const noir = preferencias.skin === 'noir'
+  const slarkLiveUrl = `/${perfil?.perfil === 'admin_slark' ? 'admin' : perfil?.perfil || 'aluno'}/slark-live`
   const navigate = useNavigate()
   const menu = MENUS[perfil?.perfil] || []
   const landing = import.meta.env.VITE_LANDING_URL || '#'
@@ -129,14 +130,14 @@ export default function BottomNav() {
             <img src="/favicon-32x32.png" alt="" className="w-6 h-6" />
           </a>
 
-          <a
-            href={slarkLiveUrl}
+          <NavLink
+            to={slarkLiveUrl}
             title="Abrir Slark Live"
             aria-label="Abrir Slark Live"
             className={`slark-live-link ${botaoBase} bg-white/90 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-azul`}
           >
             <img src="/slark-live.svg" alt="" className="w-6 h-6" />
-          </a>
+          </NavLink>
 
           <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
 
@@ -198,8 +199,8 @@ export default function BottomNav() {
             </a>
 
             <nav aria-label="Navegação mobile" className="flex flex-col gap-1">
-              <a
-                href={slarkLiveUrl}
+              <NavLink
+                to={slarkLiveUrl}
                 onClick={() => setAberto(false)}
                 className="py-3 text-3xl font-display font-semibold tracking-tight text-white/90 flex items-center gap-3"
               >
@@ -207,7 +208,7 @@ export default function BottomNav() {
                   <img src="/slark-live.svg" alt="" className="w-6 h-6" />
                 </span>
                 Slark Live
-              </a>
+              </NavLink>
               {menu.map(({ to, label, end }) => (
                 <NavLink
                   key={to}

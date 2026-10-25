@@ -11,6 +11,7 @@ import LogoSlark from './LogoSlark'
 // Menus por perfil (espelham as telas do app real)
 const MENUS = {
   admin_slark: [
+    { to: '/admin/slark-live', label: 'Slark Live', icon: Target },
     { to: '/admin', label: 'Visão Geral', icon: LayoutGrid, end: true },
     { to: '/admin/escolas', label: 'Escolas', icon: Building2 },
     { to: '/admin/alunos', label: 'Alunos e Turmas', icon: Users },
@@ -20,6 +21,7 @@ const MENUS = {
     { to: '/admin/leads', label: 'Leads', icon: UserPlus },
   ],
   diretor: [
+    { to: '/diretor/slark-live', label: 'Slark Live', icon: Target },
     { to: '/diretor', label: 'Início', icon: LayoutGrid, end: true },
     { to: '/diretor/alunos', label: 'Alunos', icon: Users },
     { to: '/diretor/salas', label: 'Salas', icon: School },
@@ -32,6 +34,7 @@ const MENUS = {
     { to: '/diretor/cronograma', label: 'Cronograma', icon: CalendarRange },
   ],
   professor: [
+    { to: '/professor/slark-live', label: 'Slark Live', icon: Target },
     { to: '/professor/notificacoes', label: 'Notificações', icon: Bell },
     { to: '/professor', label: 'Dashboard', icon: LayoutGrid, end: true },
     { to: '/professor/salas', label: 'Salas', icon: School },
@@ -48,6 +51,7 @@ const MENUS = {
     { to: '/professor/ranking', label: 'Ranking', icon: Trophy },
   ],
   aluno: [
+    { to: '/aluno/slark-live', label: 'Slark Live', icon: Target },
     { to: '/aluno', label: 'Meu Painel', icon: LayoutGrid, end: true },
     { to: '/aluno/notificacoes', label: 'Notificações', icon: Bell },
     { to: '/aluno/boletim', label: 'Boletim', icon: ClipboardList },

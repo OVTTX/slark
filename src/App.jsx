@@ -1,3 +1,5 @@
+import SlarkLive from './pages/live/SlarkLive'
+import LiveScreen from './pages/live/LiveScreen'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { PersonalizacaoProvider } from './context/PersonalizacaoContext'
 import { AuthProvider } from './context/AuthContext'
@@ -62,6 +64,12 @@ export default function App() {
           <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/documentacao" element={<SlarkDocumentation />} />
+          <Route path="/slark-live/telao/:pin" element={<LiveScreen />} />
+          <Route path="/slark-live" element={<RotaProtegida><AppLayout><SlarkLive /></AppLayout></RotaProtegida>} />
+          <Route path="/professor/slark-live" element={<RotaProtegida perfilNecessario="professor"><AppLayout><SlarkLive /></AppLayout></RotaProtegida>} />
+          <Route path="/aluno/slark-live" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><SlarkLive /></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/slark-live" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><SlarkLive /></AppLayout></RotaProtegida>} />
+          <Route path="/admin/slark-live" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><SlarkLive /></AppLayout></RotaProtegida>} />
           <Route path="/login" element={<Login />} />
           <Route path="/perfil" element={<RotaProtegida><Perfil /></RotaProtegida>} />
 
