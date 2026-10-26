@@ -2,7 +2,7 @@ import MobileOrbitMenu from './MobileOrbitMenu'
 import GradientMenu from '../../components/ui/gradient-menu'
 import { usePersonalizacao } from '../context/PersonalizacaoContext'
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import {
@@ -76,11 +76,14 @@ export default function BottomNav() {
   const noir = preferencias.skin === 'noir'
   const slarkLiveUrl = `/${perfil?.perfil === 'admin_slark' ? 'admin' : perfil?.perfil || 'aluno'}/slark-live`
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const menu = MENUS[perfil?.perfil] || []
   const landing = import.meta.env.VITE_LANDING_URL || '#'
   const [aberto, setAberto] = useState(false)
   const mobileMenu = useRef(null)
   const toggle = useRef(null)
+
+  useEffect(() => { setAberto(false) }, [pathname])
 
   useEffect(() => {
     if (!aberto) return
@@ -89,7 +92,7 @@ export default function BottomNav() {
     document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
     const controls = () => [toggle.current, ...Array.from(mobileMenu.current?.querySelectorAll('a[href],button:not(:disabled)') || [])].filter(Boolean)
-    controls()[1]?.focus()
+    toggle.current?.focus({ preventScroll: true })
     const onKeyDown = event => {
       if (event.key === 'Escape') setAberto(false)
       if (event.key !== 'Tab') return
@@ -108,7 +111,7 @@ export default function BottomNav() {
       document.body.style.overflow = before
       document.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('resize',onResize)
-      toggle.current?.focus()
+      toggle.current?.focus({ preventScroll: true })
     }
   }, [aberto])
 
@@ -185,7 +188,7 @@ export default function BottomNav() {
         </div>
       </nav>
 
-      {/* Mobile: bolinha no canto que abre um menu retrátil, só com texto */}
+      {/* Mobile: menu em arco com rolagem por toque. */}
       <button
         ref={toggle}
         onClick={() => setAberto((v) => !v)}
