@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import {
-  Building2, Plus, X, Loader2, Users, Pencil, Power, MapPin, Trash2, AlertTriangle,
+  Building2, Plus, X, Loader2, Users, Pencil, MapPin, Trash2, AlertTriangle,
   Search, ChevronLeft, ChevronRight, KeyRound, Check,
 } from 'lucide-react'
 
@@ -13,10 +14,9 @@ const ESTADOS = [
 ]
 
 const STATUS_ASSINATURA = [
-  { valor: 'trial', rotulo: 'Trial', cor: '#F5C451' },
   { valor: 'ativa', rotulo: 'Ativa', cor: '#3FD08A' },
   { valor: 'inadimplente', rotulo: 'Inadimplente', cor: '#FF6B6B' },
-  { valor: 'cancelada', rotulo: 'Cancelada', cor: '#8892B0' },
+  { valor: 'inativa', rotulo: 'Inativa', cor: '#8892B0' },
 ]
 
 function badgeStatus(status) {
@@ -35,10 +35,11 @@ function badgeStatus(status) {
 const FORM_VAZIO = {
   nome: '', cidade: '', estado: 'SP',
   responsavel_nome: '', responsavel_email: '', responsavel_telefone: '',
-  status: 'trial', preco_por_aluno: '18.00', qtd_alunos_contratada: '0',
+  status: 'ativa', plano: 'base', escola_farol: false,
 }
 
 export default function AdminEscolas() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [escolas, setEscolas] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
@@ -61,7 +62,7 @@ export default function AdminEscolas() {
       const [{ data: escolasData, error: e1 }, { data: assinaturasData, error: e2 }, { data: alunosData, error: e3 }] =
         await Promise.all([
           supabase.from('escolas').select('*').order('criada_em', { ascending: false }),
-          supabase.from('assinaturas').select('*').order('criada_em', { ascending: false }),
+          supabase.from('assinaturas').select('id,escola_id,status,plano,criada_em').order('criada_em', { ascending: false }).order('id', { ascending: false }),
           supabase.from('alunos').select('escola_id'),
         ])
       if (e1) throw e1
@@ -87,6 +88,14 @@ export default function AdminEscolas() {
   }
 
   useEffect(() => { carregar() }, [])
+  useEffect(() => {
+    const escolaId = searchParams.get('editar')
+    if (carregando || !escolaId) return
+    const escola = escolas.find(item => item.id === escolaId)
+    if (!escola) return
+    abrirEdicao(escola)
+    setSearchParams(previous => { const next = new URLSearchParams(previous); next.delete('editar'); return next }, { replace: true })
+  }, [carregando, escolas, searchParams, setSearchParams])
 
   const escolasFiltradas = useMemo(() => {
     const termo = busca.trim().toLowerCase()
@@ -117,9 +126,9 @@ export default function AdminEscolas() {
       responsavel_nome: escola.responsavel_nome || '',
       responsavel_email: escola.responsavel_email || '',
       responsavel_telefone: escola.responsavel_telefone || '',
-      status: escola.assinatura?.status || 'trial',
-      preco_por_aluno: escola.assinatura?.preco_por_aluno ?? '18.00',
-      qtd_alunos_contratada: escola.assinatura?.qtd_alunos_contratada ?? '0',
+      status: !escola.ativa || escola.assinatura?.status === 'cancelada' ? 'inativa' : escola.assinatura?.status === 'inadimplente' ? 'inadimplente' : 'ativa',
+      plano: escola.assinatura?.plano === 'live' ? 'live' : 'base',
+      escola_farol: Boolean(escola.escola_farol),
     })
     setModalAberto(true)
   }
@@ -145,6 +154,8 @@ export default function AdminEscolas() {
       if (editandoId) {
         const { error } = await supabase.from('escolas').update({
           nome: form.nome,
+          ativa: form.status !== 'inativa',
+          escola_farol: form.escola_farol,
           cidade: form.cidade,
           estado: form.estado,
           responsavel_nome: form.responsavel_nome,
@@ -155,6 +166,8 @@ export default function AdminEscolas() {
       } else {
         const { data, error } = await supabase.from('escolas').insert({
           nome: form.nome,
+          ativa: form.status !== 'inativa',
+          escola_farol: form.escola_farol,
           cidade: form.cidade,
           estado: form.estado,
           responsavel_nome: form.responsavel_nome,
@@ -169,17 +182,15 @@ export default function AdminEscolas() {
       const escolaAtual = escolas.find((x) => x.id === escolaId)
       if (escolaAtual?.assinatura) {
         const { error } = await supabase.from('assinaturas').update({
-          status: form.status,
-          preco_por_aluno: Number(form.preco_por_aluno),
-          qtd_alunos_contratada: Number(form.qtd_alunos_contratada),
-        }).eq('id', escolaAtual.assinatura.id)
+          status: form.status === 'inativa' ? 'cancelada' : form.status,
+          plano: form.plano,
+        }).eq('id', escolaAtual.assinatura.id).select('id').single()
         if (error) throw error
       } else {
         const { error } = await supabase.from('assinaturas').insert({
           escola_id: escolaId,
-          status: form.status,
-          preco_por_aluno: Number(form.preco_por_aluno),
-          qtd_alunos_contratada: Number(form.qtd_alunos_contratada),
+          status: form.status === 'inativa' ? 'cancelada' : form.status,
+          plano: form.plano,
         })
         if (error) throw error
       }
@@ -213,17 +224,6 @@ export default function AdminEscolas() {
       setErro('Não foi possível salvar. Confira os campos e tente de novo.')
     } finally {
       setSalvando(false)
-    }
-  }
-
-  async function alternarAtiva(escola) {
-    try {
-      const { error } = await supabase.from('escolas').update({ ativa: !escola.ativa }).eq('id', escola.id)
-      if (error) throw error
-      await carregar()
-    } catch (e) {
-      console.error(e)
-      setErro('Não foi possível alterar o status da escola.')
     }
   }
 
@@ -340,7 +340,7 @@ export default function AdminEscolas() {
               <tr className="text-left text-texto/50 border-b">
                 <th className="px-6 py-4 font-medium">Escola</th>
                 <th className="px-6 py-4 font-medium">Responsável</th>
-                <th className="px-6 py-4 font-medium">Assinatura</th>
+                <th className="px-6 py-4 font-medium">Status e plano</th>
                 <th className="px-6 py-4 font-medium">Alunos</th>
                 <th className="px-6 py-4 font-medium text-right">Ações</th>
               </tr>
@@ -355,31 +355,21 @@ export default function AdminEscolas() {
                         <MapPin size={12} /> {[esc.cidade, esc.estado].filter(Boolean).join(' - ')}
                       </div>
                     )}
-                    {!esc.ativa && (
-                      <span className="inline-block mt-1 text-xs text-red-400">Inativa</span>
-                    )}
                   </td>
                   <td className="px-6 py-4 text-texto/70">
                     <div>{esc.responsavel_nome || '—'}</div>
                     <div className="text-xs text-texto/45">{esc.responsavel_email}</div>
                   </td>
                   <td className="px-6 py-4">
-                    {esc.assinatura ? badgeStatus(esc.assinatura.status) : (
-                      <span className="text-texto/40 text-xs">sem assinatura</span>
-                    )}
-                    {esc.assinatura && (
-                      <div className="text-xs text-texto/45 mt-1">
-                        R$ {Number(esc.assinatura.preco_por_aluno).toLocaleString('pt-BR')} / aluno
-                      </div>
-                    )}
+                    {badgeStatus(!esc.ativa || esc.assinatura?.status === 'cancelada' ? 'inativa' : esc.assinatura?.status === 'inadimplente' ? 'inadimplente' : 'ativa')}
+                    <div className="text-xs text-texto/60 mt-2">{esc.assinatura?.plano === 'live' ? 'Slark Live' : 'Slark Base'}</div>
+                    {esc.escola_farol && <span className="inline-block mt-1 text-[10px] text-texto/60">Escola-Farol</span>}
                   </td>
                   <td className="px-6 py-4 text-texto/70">
                     <div className="flex items-center gap-1.5">
                       <Users size={14} className="text-texto/40" />
                       {esc.qtdAlunos}
-                      {esc.assinatura?.qtd_alunos_contratada ? (
-                        <span className="text-texto/40"> / {esc.assinatura.qtd_alunos_contratada}</span>
-                      ) : null}
+
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -400,13 +390,6 @@ export default function AdminEscolas() {
                         className="p-2 rounded-lg text-texto/60 hover:text-white hover:bg-white/5 transition"
                       >
                         <Pencil size={16} />
-                      </button>
-                      <button
-                        onClick={() => alternarAtiva(esc)}
-                        title={esc.ativa ? 'Desativar' : 'Ativar'}
-                        className={`p-2 rounded-lg transition ${esc.ativa ? 'text-texto/60 hover:text-red-400 hover:bg-red-400/10' : 'text-texto/60 hover:text-[#3FD08A] hover:bg-[#3FD08A]/10'}`}
-                      >
-                        <Power size={16} />
                       </button>
                       <button
                         onClick={() => abrirExclusao(esc)}
@@ -506,36 +489,22 @@ export default function AdminEscolas() {
                 </p>
               </div>
 
-              <div className="pt-2 border-t">
-                <div className="text-sm font-semibold text-white/90 mt-4 mb-3">Assinatura</div>
-                <div className="grid grid-cols-3 gap-3">
+              <fieldset className="pt-4 border-t space-y-4">
+                <legend className="text-sm font-semibold text-white/90 px-1">Acesso da escola</legend>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-texto/70 mb-1.5">Status</label>
-                    <select
-                      value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
-                    >
-                      {STATUS_ASSINATURA.map((s) => <option key={s.valor} value={s.valor}>{s.rotulo}</option>)}
+                    <label htmlFor="escola-status" className="block text-sm font-medium text-texto/70 mb-1.5">Status</label>
+                    <select id="escola-status" required value={form.status} onChange={event => setForm({...form,status:event.target.value})} className="w-full px-3 py-2.5 rounded-xl bg-card border border-azul/15 text-white">
+                      {STATUS_ASSINATURA.map(item=><option key={item.valor} value={item.valor}>{item.rotulo}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-texto/70 mb-1.5">R$ / aluno</label>
-                    <input
-                      type="number" step="0.01" min="0" value={form.preco_por_aluno}
-                      onChange={(e) => setForm({ ...form, preco_por_aluno: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-texto/70 mb-1.5">Alunos contratados</label>
-                    <input
-                      type="number" min="0" value={form.qtd_alunos_contratada}
-                      onChange={(e) => setForm({ ...form, qtd_alunos_contratada: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
-                    />
+                    <label htmlFor="escola-plano" className="block text-sm font-medium text-texto/70 mb-1.5">Plano</label>
+                    <select id="escola-plano" required value={form.plano} onChange={event => setForm({...form,plano:event.target.value})} className="w-full px-3 py-2.5 rounded-xl bg-card border border-azul/15 text-white"><option value="base">Slark Base</option><option value="live">Slark Live</option></select>
                   </div>
                 </div>
-              </div>
+                <label className="flex items-center gap-3 text-sm text-texto/70 cursor-pointer"><input type="checkbox" checked={form.escola_farol} onChange={event=>setForm({...form,escola_farol:event.target.checked})} className="h-4 w-4 accent-azul" />Escola-Farol</label>
+              </fieldset>
 
               <button
                 type="submit" disabled={salvando}

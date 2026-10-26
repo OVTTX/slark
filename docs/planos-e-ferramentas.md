@@ -1,6 +1,6 @@
 # Slark Base e Slark Live
 
-Somente os contratos `base` e `live` são aceitos. Os antigos contratos foram normalizados para Base; nenhum preço, assinatura Base ou nome de equipe existente foi alterado. A gestão fica em Administrativo → Financeiro → Assinaturas.
+Somente os contratos `base` e `live` são aceitos. Os antigos contratos foram normalizados para Base; nenhum preço, assinatura Base ou nome de equipe existente foi alterado. A edição fica em Administrativo → Escolas → Editar escola. Financeiro → Assinaturas exibe um resumo com atalho para essa mesma edição.
 
 - Base: aplicativo e materiais Runaway; novas equipes recebem nomes automáticos. Sem Live nos menus.
 - Live: aplicativo, Slark Live e nomes personalizados para equipes.
@@ -22,3 +22,5 @@ Somente os contratos `base` e `live` são aceitos. Os antigos contratos foram no
 - Resultados locais da atividade não alteram quartetos, pontos ou cadastros e são reiniciados quando a lista muda.
 
 Validação: testes Node, testes SQL transacionais com rollback de planos/permissões/nomes/telões, e prévia de interface com dados fictícios (mobile, desktop, temas, sorteio sem repetição, grupos e pausa/continuação do timer). A API de tela cheia não foi disponibilizada pelo navegador de prévia; o aviso de indisponibilidade foi verificado.
+
+A edição da escola reúne status Ativa/Inativa/Inadimplente, plano Base/Live e a marcação independente Escola-Farol. Inativa é armazenada como escola desativada e assinatura cancelada; ao ativar novamente, o contrato volta a ativa. Essa tela não edita valores por aluno, quantidades contratadas ou datas de cobrança. Os valores financeiros existentes são preservados.
