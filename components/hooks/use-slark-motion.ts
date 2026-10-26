@@ -1,4 +1,5 @@
 import { useEffect, type RefObject } from "react"
+import { FULL_MOTION_QUERY } from "../../src/lib/motion"
 
 /** Scroll-linked motion stays scoped to the landing and is reverted on navigation. */
 export function useSlarkMotion(scope: RefObject<HTMLDivElement>) {
@@ -16,7 +17,7 @@ export function useSlarkMotion(scope: RefObject<HTMLDivElement>) {
       gsap.registerPlugin(ScrollTrigger, SplitText)
       const media = gsap.matchMedia()
       dispose = () => media.revert()
-      media.add({ motion: "(prefers-reduced-motion: no-preference)", desktop: "(min-width: 768px)" }, context => {
+      media.add({ motion: FULL_MOTION_QUERY, desktop: "(min-width: 768px)" }, context => {
         if (!context.conditions?.motion) return
         const desktop = Boolean(context.conditions.desktop)
         const splits: SplitText[] = []

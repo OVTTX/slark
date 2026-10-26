@@ -72,7 +72,7 @@ export function ShinyButton({ children, onClick, className = "", href, compact =
       @keyframes slark-shimmer{to{rotate:360deg}}
       @keyframes slark-breathe{from,to{scale:1}50%{scale:1.2}}
       @media(max-width:639px){.shiny-cta.shiny-cta-compact{padding:12px;font-size:10px}}
-      @media(prefers-reduced-motion:reduce){.shiny-cta,.shiny-cta::before,.shiny-cta::after,.shiny-cta>span::before{animation:none!important;transition:none!important}}
+      @media (prefers-reduced-motion: reduce) and (max-width: 767px){.shiny-cta,.shiny-cta::before,.shiny-cta::after,.shiny-cta>span::before{animation:none!important;transition:none!important}}
     `}</style>
     {href ? <a href={href} className={classes} onClick={onClick}><span>{children}</span></a> : <button type="button" className={classes} onClick={onClick}><span>{children}</span></button>}
   </>

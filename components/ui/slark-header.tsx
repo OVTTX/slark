@@ -37,7 +37,7 @@ export function SlarkHeader({ documentation = false, onLogoClick }: { documentat
       .slark-site-header[data-compact=true] .header-actions{margin-left:auto}
       .slark-site-header[data-compact=true] .header-logo{width:88px}
       .slark-site-header[data-compact=true] .shiny-cta.shiny-cta-compact{min-height:36px;padding:10px 16px}
-      @media(prefers-reduced-motion:reduce){.slark-site-header .slark-navbar{transition:none}}
+      @media (prefers-reduced-motion: reduce) and (max-width: 767px){.slark-site-header .slark-navbar{transition:none}}
       @media(max-width:639px){.slark-site-header[data-compact=true] .slark-navbar{max-width:320px}.slark-site-header[data-compact=true] .header-logo{width:67px}}
       @media(max-width:639px){.slark-site-header .header-logo{width:67px}}
     `}</style>

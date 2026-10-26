@@ -1,13 +1,14 @@
 import { useLayoutEffect } from 'react'
+import { useSlarkReducedMotion } from '../../components/hooks/use-slark-reduced-motion'
 
 const SURFACES = 'h1, div[class*="rounded-"][class*="bg-card"], section[class*="rounded-"][class*="bg-card"], article[class*="rounded-"][class*="bg-card"], div[class*="rounded-"][class~="bg-white/[0.04]"], .slark-panel'
 
 // Animate existing page surfaces, including cards mounted after an async query.
 export function useAppEntrance(root, route) {
+  const reduced = useSlarkReducedMotion()
   useLayoutEffect(() => {
     const element = root.current
-    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
-    if (!element || preference.matches || !Element.prototype.animate) return
+    if (!element || reduced || !Element.prototype.animate) return
     const seen = new WeakSet()
     const animations = new Set()
     let frame
@@ -29,22 +30,14 @@ export function useAppEntrance(root, route) {
       }
     }
     function schedule() { cancelAnimationFrame(frame); frame = requestAnimationFrame(reveal) }
-    function reduceMotion() {
-      if (!preference.matches) return
-      stopped = true
-      cancelAnimationFrame(frame)
-      for (const animation of animations) animation.cancel()
-    }
     const observer = new MutationObserver(schedule)
     observer.observe(element, { childList:true, subtree:true })
-    preference.addEventListener('change', reduceMotion)
     reveal()
     return () => {
       stopped = true
       observer.disconnect()
-      preference.removeEventListener('change', reduceMotion)
       cancelAnimationFrame(frame)
       for (const animation of animations) animation.cancel()
     }
-  }, [root, route])
+  }, [root, route, reduced])
 }

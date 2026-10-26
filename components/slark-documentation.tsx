@@ -92,7 +92,7 @@ export default function SlarkDocumentation() {
       .slark-doc .doc-tab[aria-selected=true]{background:#2e5bff20;color:#e8e6ff;border-color:#2e5bff80}
       .slark-doc .doc-panel{animation:slark-doc-appear .3s ease-out}
       @keyframes slark-doc-appear{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:none}}
-      @media(prefers-reduced-motion:reduce){.slark-doc .doc-panel{animation:none}.slark-doc .doc-tab{transition:none}}
+      @media (prefers-reduced-motion: reduce) and (max-width: 767px){.slark-doc .doc-panel{animation:none}.slark-doc .doc-tab{transition:none}}
     `}</style>
     <a href="#documentacao-conteudo" className="sr-only z-50 rounded-lg bg-[#E8E6FF] p-4 text-[#05031F] focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Pular para o conteúdo</a>
     <SlarkHeader documentation />

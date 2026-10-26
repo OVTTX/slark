@@ -1,3 +1,4 @@
+import { prefersSlarkReducedMotion } from '../lib/motion'
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, useLocation, matchPath } from 'react-router-dom'
 import { ChevronUp, ChevronDown, Sun, Moon, LogOut, UserRound, Radio } from 'lucide-react'
@@ -33,7 +34,7 @@ export default function MobileOrbitMenu({items,liveUrl,perfil,landing,tema,theme
     const node=wheel.current
     if(!node)return
     const next=Math.max(0,Math.min(links.length-1,index))
-    const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduce=prefersSlarkReducedMotion()
     node.scrollTo({top:next*metrics.current.row,behavior:smooth&&!reduce?'smooth':'instant'})
     if(!smooth||reduce)paint()
     if(focus)node.querySelectorAll('a')[next]?.focus({preventScroll:true})

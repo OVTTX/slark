@@ -26,4 +26,4 @@
   .slark-login .login-orbit { top:10%; opacity:.55; }
   .slark-login .login-brand svg { width:min(220px,70vw); }
 }
-@media(prefers-reduced-motion:reduce) { .slark-login * { animation:none!important; transition:none!important; } }
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) { .slark-login * { animation:none!important; transition:none!important; } }

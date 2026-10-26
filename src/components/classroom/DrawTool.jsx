@@ -1,3 +1,4 @@
+import { prefersSlarkReducedMotion } from '../../lib/motion'
 import { useEffect, useRef, useState } from 'react'
 import { Dices, RotateCcw, Sparkles } from 'lucide-react'
 import { drawParticipant } from '../../lib/classroom-tools'
@@ -20,7 +21,7 @@ export default function DrawTool({ participants, busy }) {
       setError('')
       setDrawing(true)
       const finish = () => { setResult(chosen); setHistory(previous => [chosen, ...previous]); setDrawing(false) }
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) finish()
+      if (prefersSlarkReducedMotion()) finish()
       else timeout.current = setTimeout(finish, 650)
     } catch { setError('Não foi possível realizar o sorteio. Tente novamente.') }
   }

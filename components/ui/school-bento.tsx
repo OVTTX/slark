@@ -1,5 +1,6 @@
+import { useSlarkReducedMotion } from '../hooks/use-slark-reduced-motion'
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { ArrowUpRight, BookOpen, CalendarDays, Check, CreditCard, GraduationCap, LayoutGrid, RefreshCw, School, Sparkles, Trophy, Users, UsersRound } from 'lucide-react'
@@ -37,7 +38,7 @@ const digits:Record<string,string[]>={
  '.':['0','0','0','0','0','1','1'],
 }
 function AnimatedNumber({ value, dotted = false }: {value:Metric;dotted?:boolean}) {
-  const reduce=useReducedMotion()
+  const reduce=useSlarkReducedMotion()
   const [display,setDisplay]=useState(0)
   const previous=useRef(0)
   useEffect(()=>{
@@ -67,7 +68,7 @@ function AnimatedNumber({ value, dotted = false }: {value:Metric;dotted?:boolean
   return <svg className="sb-dot-number" role="img" aria-label={number(value)} viewBox={`0 0 ${Math.max(1,offset-7)} 49`} width={offset-7} height={49}>{cells}</svg>
 }
 function Card({children,className='',index=0,label}:{children:ReactNode;className?:string;index?:number;label:string}){
-  const reduce=useReducedMotion()
+  const reduce=useSlarkReducedMotion()
   return <motion.section aria-label={label} className={`sb-card ${className}`} initial={reduce?false:{opacity:0,y:16,scale:.985}} animate={reduce?{opacity:1,y:0,scale:1}:undefined} whileInView={reduce?undefined:{opacity:1,y:0,scale:1}} viewport={{once:true,amount:.08}} transition={{duration:.72,delay:Math.min(index*.055,.35),ease:[.22,1,.36,1]}}>{children}</motion.section>
 }
 function CardHeader({title,to,children}:{title:string;to?:string;children?:ReactNode}){
@@ -78,7 +79,7 @@ function ChartTip({active,payload,label}:{active?:boolean;payload?:{name?:string
   return <div className="sb-tooltip"><strong>{payload[0].payload?.nome || label}</strong>{payload.map((row,index)=><p key={index}><span>{row.name}</span><b>{Number(row.value).toLocaleString('pt-BR')}</b></p>)}</div>
 }
 function MappingGauge({traits,total,mapped}:{traits:SchoolBentoData['traits'];total:Metric;mapped:Metric}){
-  const reduce=useReducedMotion()
+  const reduce=useSlarkReducedMotion()
   const progress=ratio(mapped,total)
   const cumulative:number[]=[]
   let sum=0
@@ -103,7 +104,7 @@ function ProgressTicks({value}:{value:Metric}){
 
 export default function SchoolBento({data,schoolName,refreshing=false,onRefresh}:{data:SchoolBentoData;schoolName:string;refreshing?:boolean;onRefresh:()=>void}){
   const [period,setPeriod]=useState(6)
-  const reduce=useReducedMotion()
+  const reduce=useSlarkReducedMotion()
   const chartId=useId().replace(/:/g,'')
   const history=useMemo(()=>data.history?.slice(-period) || [],[data.history,period])
   const classes=useMemo(()=>[...(data.classrooms || [])].sort((a,b)=>a.nome.localeCompare(b.nome, 'pt-BR',{numeric:true})),[data.classrooms])

@@ -1315,7 +1315,7 @@ canvas.gf-sheet-art[data-ready] { opacity: 1; filter: none; }
 .gf-root[data-entered] .gf-front { transition-delay: 0s, .42s, .42s; }
 .gf-key { transition: transform .35s var(--gf-spring), box-shadow .35s var(--gf-ease), opacity .6s var(--gf-ease) .7s, scale .7s var(--gf-spring) .7s; }
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
   .gf-root *, .gf-root *::before, .gf-root *::after {
     transition-duration: 0s !important;
     transition-delay: 0s !important;

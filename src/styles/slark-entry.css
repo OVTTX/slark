@@ -25,4 +25,4 @@
 @keyframes slark-skeleton-light { from { background-position:120% 0; } to { background-position:-120% 0; } }
 @media(max-width:1023px) { .slark-skeleton-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:639px) { .slark-skeleton-grid { grid-template-columns:1fr;gap:12px; }.slark-skeleton-card { min-height:152px; padding:20px; border-radius:20px; }.slark-skeleton-bottom { grid-template-columns:1fr;gap:12px; }.slark-skeleton-bottom>div { height:150px;border-radius:20px; } }
-@media(prefers-reduced-motion:reduce) { .slark-entry *, .slark-panel-skeleton * { animation:none!important; transition:none!important; } }
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) { .slark-entry *, .slark-panel-skeleton * { animation:none!important; transition:none!important; } }

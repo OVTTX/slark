@@ -95,7 +95,7 @@
   .slark-app :is(div,section,article,form):is(.slark-panel,[class*="rounded-"][class*="bg-card"],[class*="rounded-"][class~="bg-white/[0.04]"]) { border-radius:20px; }
   .slark-app .slark-stat { min-height:152px; }
 }
-@media(prefers-reduced-motion:reduce) {
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
   .slark-app *, .slark-app *::before,.slark-app *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
 }
 

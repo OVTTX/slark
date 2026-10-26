@@ -1,8 +1,10 @@
 "use client";
 
+import { useSlarkReducedMotion } from '../hooks/use-slark-reduced-motion'
+
 import { Children, cloneElement, isValidElement, useRef } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import type { Variants } from "framer-motion";
 
 // ─── Helper Functions ─────────────────────────────────────────────────────────
@@ -178,7 +180,7 @@ export const RevealText = ({
   inheritTypography = false,
   id,
 }: RevealTextProps) => {
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useSlarkReducedMotion();
   const ref = useRef<HTMLElement | null>(null);
   const isInView = useInView(ref, {
     once,

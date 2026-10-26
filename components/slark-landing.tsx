@@ -198,7 +198,7 @@ export default function SlarkLanding() {
         .slark-marketing dialog::backdrop{background:#03021fbd;backdrop-filter:blur(8px)}
         .slark-marketing dialog{color:#E8E6FF;background:#0E0B40}
         .slark-marketing :is(a,button,summary):focus-visible{outline:2px solid #99B1FF;outline-offset:5px}
-        @media(prefers-reduced-motion:reduce){.slark-marketing *, .slark-marketing *::before,.slark-marketing *::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+        @media (prefers-reduced-motion: reduce) and (max-width: 767px){.slark-marketing *, .slark-marketing *::before,.slark-marketing *::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
       `}</style>
       <a href="#conteudo" className="sr-only z-50 rounded-lg bg-[#E8E6FF] p-4 text-[#05031F] focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Pular para o conteúdo</a>
 
