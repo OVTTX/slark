@@ -1,3 +1,4 @@
+import MobileOrbitMenu from './MobileOrbitMenu'
 import GradientMenu from '../../components/ui/gradient-menu'
 import { usePersonalizacao } from '../context/PersonalizacaoContext'
 import { useEffect, useRef, useState } from 'react'
@@ -5,7 +6,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import {
-  LayoutGrid, School, Users, Eye, UsersRound, Target, Trophy,
+  Menu as MenuIcon, X, LayoutGrid, School, Users, Eye, UsersRound, Target, Trophy,
   BarChart3, BookOpen, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut,
   Kanban, UserPlus, Wallet, ShieldCheck, Sun, Moon,
@@ -84,6 +85,8 @@ export default function BottomNav() {
   useEffect(() => {
     if (!aberto) return
     const before = document.body.style.overflow
+    const htmlBefore = document.documentElement.style.overflow
+    document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
     const controls = () => [toggle.current, ...Array.from(mobileMenu.current?.querySelectorAll('a[href],button:not(:disabled)') || [])].filter(Boolean)
     controls()[1]?.focus()
@@ -97,10 +100,14 @@ export default function BottomNav() {
         items[event.shiftKey ? items.length - 1 : 0]?.focus()
       }
     }
+    const onResize=()=>{if(window.innerWidth>=640)setAberto(false)}
+    window.addEventListener('resize',onResize)
     document.addEventListener('keydown', onKeyDown)
     return () => {
+      document.documentElement.style.overflow = htmlBefore
       document.body.style.overflow = before
       document.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('resize',onResize)
       toggle.current?.focus()
     }
   }, [aberto])
@@ -185,72 +192,16 @@ export default function BottomNav() {
         aria-label={aberto ? "Fechar menu" : "Abrir menu"}
         aria-expanded={aberto}
         aria-controls="slark-app-mobile-menu"
-        className="slark-mobile-toggle sm:hidden fixed right-4 z-[60] w-14 h-14 rounded-full bg-azul text-white font-display font-semibold text-[13px] tracking-tight shadow-2xl shadow-azul/40 border border-white/10 flex items-center justify-center active:scale-95 transition"
+        className={`${perfil?.perfil === 'admin_slark' ? 'mobile-admin-orb ' : ''}slark-mobile-toggle sm:hidden fixed right-4 z-[60] w-14 h-14 rounded-full bg-azul text-white font-display font-semibold text-[13px] tracking-tight shadow-2xl shadow-azul/40 border border-white/10 flex items-center justify-center active:scale-95 transition`}
         style={aberto ? { top: '1rem' } : { bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
       >
-        {aberto ? 'Fechar' : 'Menu'}
+        {aberto ? <X size={21} /> : perfil?.perfil === 'admin_slark' ? <ShieldCheck size={22} /> : <MenuIcon size={22} />}
       </button>
 
       {aberto && (
         <div ref={mobileMenu} id="slark-app-mobile-menu" role="dialog" aria-modal="true" aria-label="Menu do aplicativo" className="slark-mobile-menu sm:hidden fixed inset-0 z-50 bg-bg/97 backdrop-blur-xl flex flex-col" onClick={() => setAberto(false)}>
-          <div className="flex-1 overflow-y-auto px-8 pt-20 pb-8" onClick={(e) => e.stopPropagation()}>
-            <a href={landing} className="block text-texto/40 font-mono text-sm mb-8" onClick={() => setAberto(false)}>
-              Slark Educação
-            </a>
-
-            <nav aria-label="Navegação mobile" className="flex flex-col gap-1">
-              <NavLink
-                to={slarkLiveUrl}
-                onClick={() => setAberto(false)}
-                className="py-3 text-3xl font-display font-semibold tracking-tight text-white/90 flex items-center gap-3"
-              >
-                <span className="w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shrink-0">
-                  <img src="/slark-live.svg" alt="" className="w-6 h-6" />
-                </span>
-                Slark Live
-              </NavLink>
-              {menu.map(({ to, label, end }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={end}
-                  onClick={() => setAberto(false)}
-                  className={({ isActive }) =>
-                    `py-3 text-3xl font-display font-semibold tracking-tight transition ${isActive ? 'text-azul' : 'text-white/90'}`
-                  }
-                >
-                  {label}
-                </NavLink>
-              ))}
-
-              <NavLink
-                to="/perfil"
-                onClick={() => setAberto(false)}
-                className={({ isActive }) => `py-3 text-3xl font-display font-semibold tracking-tight transition ${isActive ? 'text-azul' : 'text-white/90'}`}
-              >
-                Perfil
-              </NavLink>
-            </nav>
-          </div>
-
-          <div
-            className="px-8 pb-8 flex items-center gap-3"
-            style={{ paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom) + 1.5rem))' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={alternarTema}
-            disabled={gold || noir}
-              className="flex-1 py-3.5 rounded-full bg-white/5 border border-white/10 text-texto/70 font-semibold text-sm"
-            >
-              {gold ? 'Slark Gold · claro' : noir ? 'Noir · preto' : tema === 'claro' ? 'Modo escuro' : 'Modo claro'}
-            </button>
-            <button
-              onClick={handleSair}
-              className="flex-1 py-3.5 rounded-full bg-white/10 border border-white/10 text-white font-semibold text-sm"
-            >
-              Sair
-            </button>
+          <div onClick={event => event.stopPropagation()}>
+            <MobileOrbitMenu items={menu} liveUrl={slarkLiveUrl} perfil={perfil} landing={landing} tema={tema} themeLocked={gold || noir} onTheme={alternarTema} onClose={() => setAberto(false)} onLogout={handleSair} />
           </div>
         </div>
       )}
