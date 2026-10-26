@@ -1,10 +1,11 @@
+import { usePlano } from '../lib/usePlano'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
   LayoutGrid, School, Users, Eye, UsersRound, Award, Target, Trophy,
   BarChart3, BookOpen, ClipboardList, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut, ArrowLeft,
-  Settings, Kanban, UserPlus, Bell, CalendarClock, CalendarDays, CalendarRange,
+  Settings, Kanban, UserPlus, Bell, CalendarClock, CalendarDays, CalendarRange, Wrench,
 } from 'lucide-react'
 import LogoSlark from './LogoSlark'
 
@@ -34,6 +35,7 @@ const MENUS = {
     { to: '/diretor/cronograma', label: 'Cronograma', icon: CalendarRange },
   ],
   professor: [
+    { to: '/professor/ferramentas', label: 'Ferramentas', icon: Wrench },
     { to: '/professor/slark-live', label: 'Slark Live', icon: Target },
     { to: '/professor/notificacoes', label: 'Notificações', icon: Bell },
     { to: '/professor', label: 'Dashboard', icon: LayoutGrid, end: true },
@@ -72,8 +74,9 @@ const ROTULO_PERFIL = {
 
 export default function Sidebar() {
   const { perfil, sair } = useAuth()
+  const { temLive } = usePlano()
   const navigate = useNavigate()
-  const menu = MENUS[perfil?.perfil] || []
+  const menu = (MENUS[perfil?.perfil] || []).filter(item=>temLive || !item.to.endsWith('/slark-live'))
   const landing = import.meta.env.VITE_LANDING_URL || '#'
 
   const handleSair = async () => {

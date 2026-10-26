@@ -1,3 +1,4 @@
+import { usePlano } from '../lib/usePlano'
 import { usePersonalizacao } from '../context/PersonalizacaoContext'
 import { useRef } from 'react'
 import { useAppEntrance } from '../hooks/useAppEntrance'
@@ -17,6 +18,7 @@ const PERFIS = { admin_slark: 'Equipe Slark', diretor: 'Diretor', professor: 'Pr
 // Bento is the default application layout; learning paths and notifications keep their original layout.
 export default function AppLayout({ children }) {
   const { perfil } = useAuth()
+  const { nomePlano, carregando: carregandoPlano } = usePlano()
   const { preferencias } = usePersonalizacao()
   const content = useRef(null)
   const { pathname } = useLocation()
@@ -33,7 +35,7 @@ export default function AppLayout({ children }) {
         <p className="app-signature">Cada mente é um <strong>universo.</strong></p>
         {perfil?.perfil === 'professor' && <SininhoProfessor key={perfil.id} professorId={perfil.id} />}
         <Link to="/perfil" className="app-profile-chip" aria-label="Abrir meu perfil">
-          <span className="app-profile-dot" aria-hidden="true" />{PERFIS[perfil?.perfil] || 'Meu perfil'}
+          <span className="app-profile-dot" aria-hidden="true" /><span className="flex flex-col text-left leading-tight"><span>{PERFIS[perfil?.perfil] || 'Meu perfil'}</span>{!carregandoPlano && perfil?.perfil!=='admin_slark' && <small className="text-[9px] opacity-70">{nomePlano}</small>}</span>
           <span className="app-profile-avatar" aria-hidden="true">{perfil?.avatar_url ? <img src={perfil.avatar_url} alt="" /> : perfil?.nome?.[0]?.toUpperCase() || 'U'}</span>
         </Link>
       </header>

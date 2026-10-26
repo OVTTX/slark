@@ -72,7 +72,7 @@ function Assinaturas() {
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [editando, setEditando] = useState(null)
-  const [form, setForm] = useState({ status: 'trial', preco_por_aluno: '0', qtd_alunos_contratada: '0', proxima_cobranca: '' })
+  const [form, setForm] = useState({ status: 'trial', plano: 'base', preco_por_aluno: '0', qtd_alunos_contratada: '0', proxima_cobranca: '' })
   const [salvando, setSalvando] = useState(false)
 
   async function carregar() {
@@ -102,6 +102,7 @@ function Assinaturas() {
     setEditando(a)
     setForm({
       status: a.status,
+      plano: a.plano || 'base',
       preco_por_aluno: a.preco_por_aluno ?? '0',
       qtd_alunos_contratada: a.qtd_alunos_contratada ?? '0',
       proxima_cobranca: a.proxima_cobranca || '',
@@ -114,6 +115,7 @@ function Assinaturas() {
     try {
       const { error } = await supabase.from('assinaturas').update({
         status: form.status,
+        plano: form.plano,
         preco_por_aluno: Number(form.preco_por_aluno),
         qtd_alunos_contratada: Number(form.qtd_alunos_contratada),
         proxima_cobranca: form.proxima_cobranca || null,
@@ -149,6 +151,7 @@ function Assinaturas() {
               <tr className="text-left text-texto/50 border-b">
                 <th className="px-6 py-4 font-medium">Escola</th>
                 <th className="px-6 py-4 font-medium">Status</th>
+                <th className="px-6 py-4 font-medium">Plano</th>
                 <th className="px-6 py-4 font-medium">R$ / aluno</th>
                 <th className="px-6 py-4 font-medium">Alunos contratados</th>
                 <th className="px-6 py-4 font-medium">Próxima cobrança</th>
@@ -160,6 +163,7 @@ function Assinaturas() {
                 <tr key={a.id} className="border-b last:border-0 hover:bg-white/[0.02] transition">
                   <td className="px-6 py-4 font-semibold text-white">{a.escolaNome}</td>
                   <td className="px-6 py-4">{badgeAssinatura(a.status)}</td>
+                  <td className="px-6 py-4">{a.plano === 'live' ? 'Plano Live' : 'Plano Base'}</td>
                   <td className="px-6 py-4 text-texto/70">R$ {Number(a.preco_por_aluno).toLocaleString('pt-BR')}</td>
                   <td className="px-6 py-4 text-texto/70">{a.qtd_alunos_contratada}</td>
                   <td className="px-6 py-4 text-texto/70">
@@ -201,6 +205,11 @@ function Assinaturas() {
                 </select>
               </div>
 
+              <div>
+                <label htmlFor="school-plan" className="block text-sm font-medium text-texto/70 mb-1.5">Plano da escola</label>
+                <select id="school-plan" className="w-full px-4 py-2.5 rounded-xl bg-card border" value={form.plano} onChange={event=>setForm({...form,plano:event.target.value})}><option value="base">Plano Base</option><option value="live">Plano Live</option></select>
+                <p className="mt-2 text-xs text-texto/60">Base: Slark App, com nomes automáticos nas equipes. Live: inclui Slark Live e personalização dos nomes das equipes.</p>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-texto/70 mb-1.5">R$ / aluno</label>

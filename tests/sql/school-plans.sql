@@ -1,0 +1,62 @@
+-- Integration assertions are transactional: no subscriptions or teams survive.
+begin;
+select set_config('request.jwt.claim.sub',(select id::text from public.usuarios where email='professor@slarkdemo.com.br'),true);
+select set_config('slark.test_school',(select escola_id::text from public.usuarios where id=auth.uid()),true);
+select set_config('slark.test_room',(select id::text from public.salas where escola_id=current_setting('slark.test_school')::uuid order by id limit 1),true);
+select set_config('slark.test_subscription',(select id::text from public.assinaturas where escola_id=current_setting('slark.test_school')::uuid order by criada_em desc,id desc limit 1),true);
+update public.assinaturas set plano='base',status='ativa' where id=current_setting('slark.test_subscription')::uuid;
+set local role authenticated;
+do $$ declare f jsonb; t uuid; n text; blocked boolean:=false; affected integer; begin
+ insert into public.materiais_runaway(escola_id,titulo,criado_por) values(current_setting('slark.test_school')::uuid,'QA plano base',auth.uid());
+ assert exists(select 1 from public.materiais_runaway where titulo='QA plano base' and escola_id=current_setting('slark.test_school')::uuid),'Base App materials inaccessible';
+ f:=public.slark_recursos_escola();
+ assert f->>'plano'='base' and not (f->>'slark_live')::boolean,'Base must deny Live';
+ begin perform public.slark_recursos_escola(gen_random_uuid()); exception when insufficient_privilege then blocked:=true; end;
+ assert blocked,'Other school access was allowed';
+ blocked:=false;
+ insert into public.times(sala_id,nome) values(current_setting('slark.test_room')::uuid,'Custom must be replaced') returning id,nome into t,n;
+ assert n ~ '^Equipe [0-9]+$','Base team did not get an automatic name';
+ begin update public.times set nome='Not allowed' where id=t; exception when insufficient_privilege then blocked:=true; end;
+ assert blocked,'Base team rename was allowed';
+ update public.assinaturas set plano='live' where id=current_setting('slark.test_subscription')::uuid;
+ get diagnostics affected=row_count;
+ assert affected=0,'Teacher changed the subscription';
+ blocked:=false;
+ begin perform slarklive_private.room_plan_enabled('PLANQA'); exception when insufficient_privilege then blocked:=true; end;
+ assert blocked,'Authenticated client executed private room capability check';
+end $$;
+reset role;
+update public.assinaturas set plano='live',status='ativa' where id=current_setting('slark.test_subscription')::uuid;
+set local role authenticated;
+do $$ declare f jsonb; t uuid; n text; begin
+ f:=public.slark_recursos_escola();
+ assert (f->>'slark_live')::boolean and (f->>'personalizar_equipes')::boolean,'Live contract did not unlock resources';
+ insert into public.times(sala_id,nome) values(current_setting('slark.test_room')::uuid,'Equipe personalizada QA') returning id,nome into t,n;
+ assert n='Equipe personalizada QA','Live custom name was replaced';
+ update public.times set nome='Novo nome QA' where id=t;
+ assert (select nome='Novo nome QA' from public.times where id=t),'Live rename failed';
+end $$;
+reset role;
+do $$ begin
+ assert not exists(select 1 from slarklive_private.state where id=1 and data->'rooms' ? 'PLANQA'),'Test PIN already exists';
+end $$;
+update slarklive_private.state set data=jsonb_set(data,array['rooms','PLANQA'],jsonb_build_object('trailId',(select id::text from public.trilhas where escola_id=current_setting('slark.test_school')::uuid and sala_id is not null order by id limit 1))) where id=1;
+do $$ begin assert slarklive_private.room_plan_enabled('PLANQA'),'Backend denied screen of Live school'; end $$;
+reset role;
+update public.assinaturas set status='cancelada' where id=current_setting('slark.test_subscription')::uuid;
+do $$ begin assert not slarklive_private.room_plan_enabled('PLANQA'),'Cancelled contract left screen accessible'; end $$;
+reset role;
+set local role authenticated;
+do $$ begin assert not (public.slark_recursos_escola()->>'slark_live')::boolean,'Cancelled contract kept Live'; end $$;
+reset role;
+update public.assinaturas set plano='base',status='ativa' where id=current_setting('slark.test_subscription')::uuid;
+do $$ begin assert not slarklive_private.room_plan_enabled('PLANQA'),'Downgrade left screen accessible'; end $$;
+reset role;
+do $$ declare blocked boolean:=false; begin
+ begin update public.assinaturas set plano='pro' where id=current_setting('slark.test_subscription')::uuid; exception when check_violation then blocked:=true; end;
+ assert blocked,'Old plan is still accepted';
+ assert has_function_privilege('slarkapp_live','slarklive_private.room_plan_enabled(text)','execute'),'Backend cannot execute room capability check';
+ assert not has_function_privilege('anon','public.slark_recursos_escola(uuid)','execute'),'Anonymous can query plans';
+end $$;
+rollback;
+select 'all plan, RLS, automatic naming and screen assertions passed; rolled back' as result;

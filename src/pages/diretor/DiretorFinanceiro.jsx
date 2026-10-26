@@ -92,6 +92,7 @@ function AssinaturaSlark() {
   return (
     <div>
       <p className="mt-6 text-texto/60">Assinatura e histórico de cobranças da sua escola com a Slark.</p>
+      {assinatura && <p className="text-sm font-semibold text-texto/70">{assinatura.plano === 'live' ? 'Plano Live' : 'Plano Base'}</p>}
 
       {erro && <p className="mt-6 text-sm text-red-400 bg-red-400/10 px-4 py-3 rounded-xl">{erro}</p>}
 

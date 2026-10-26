@@ -1,3 +1,4 @@
+import { usePlano } from '../lib/usePlano'
 import MobileOrbitMenu from './MobileOrbitMenu'
 import GradientMenu from '../../components/ui/gradient-menu'
 import { usePersonalizacao } from '../context/PersonalizacaoContext'
@@ -10,7 +11,7 @@ import {
   BarChart3, BookOpen, GraduationCap, DollarSign,
   Calendar, FileText, Building2, CreditCard, LogOut,
   Kanban, UserPlus, Wallet, ShieldCheck, Sun, Moon,
-  ClipboardList, Bell, CalendarClock, CalendarDays, CalendarRange,
+  ClipboardList, Bell, CalendarClock, CalendarDays, CalendarRange, Wrench,
 } from 'lucide-react'
 
 // Menus por perfil (espelham as telas do app real)
@@ -40,6 +41,7 @@ const MENUS = {
     { to: '/diretor/cronograma', label: 'Cronograma', icon: CalendarRange },
   ],
   professor: [
+    { to: '/professor/ferramentas', label: 'Ferramentas', icon: Wrench },
     { to: '/professor/notificacoes', label: 'Notificações', icon: Bell },
     { to: '/professor', label: 'Dashboard', icon: LayoutGrid, end: true },
     { to: '/professor/salas', label: 'Salas', icon: School },
@@ -70,6 +72,7 @@ const botaoBase = 'slark-dock-link shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full
 
 export default function BottomNav() {
   const { perfil, sair } = useAuth()
+  const { temLive } = usePlano()
   const { tema, alternarTema } = useTheme()
   const { preferencias } = usePersonalizacao()
   const gold = preferencias.skin === 'ouro'
@@ -140,14 +143,14 @@ export default function BottomNav() {
             <img src="/favicon-32x32.png" alt="" className="w-6 h-6" />
           </a>
 
-          <NavLink
+          {temLive && <NavLink
             to={slarkLiveUrl}
             title="Abrir Slark Live"
             aria-label="Abrir Slark Live"
             className={`slark-live-link ${botaoBase} bg-white/90 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-azul`}
           >
             <img src="/slark-live.svg" alt="" className="w-6 h-6" />
-          </NavLink>
+          </NavLink>}
 
           <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
 
@@ -204,7 +207,7 @@ export default function BottomNav() {
       {aberto && (
         <div ref={mobileMenu} id="slark-app-mobile-menu" role="dialog" aria-modal="true" aria-label="Menu do aplicativo" className="slark-mobile-menu sm:hidden fixed inset-0 z-50 bg-bg/97 backdrop-blur-xl flex flex-col" onClick={() => setAberto(false)}>
           <div onClick={event => event.stopPropagation()}>
-            <MobileOrbitMenu items={menu} liveUrl={slarkLiveUrl} perfil={perfil} landing={landing} tema={tema} themeLocked={gold || noir} onTheme={alternarTema} onClose={() => setAberto(false)} onLogout={handleSair} />
+            <MobileOrbitMenu items={menu} liveUrl={temLive ? slarkLiveUrl : null} perfil={perfil} landing={landing} tema={tema} themeLocked={gold || noir} onTheme={alternarTema} onClose={() => setAberto(false)} onLogout={handleSair} />
           </div>
         </div>
       )}

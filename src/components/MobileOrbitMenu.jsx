@@ -4,7 +4,7 @@ import { ChevronUp, ChevronDown, Sun, Moon, LogOut, UserRound, Radio } from 'luc
 import './mobile-orbit-menu.css'
 
 export default function MobileOrbitMenu({items,liveUrl,perfil,landing,tema,themeLocked,onTheme,onClose,onLogout}) {
-  const links=useMemo(()=>[...items,{to:liveUrl,label:'Slark Live',icon:Radio},{to:'/perfil',label:'Meu perfil',icon:UserRound}],[items,liveUrl])
+  const links=useMemo(()=>[...items,...(liveUrl?[{to:liveUrl,label:'Slark Live',icon:Radio}]:[]),{to:'/perfil',label:'Meu perfil',icon:UserRound}],[items,liveUrl])
   const {pathname}=useLocation()
   const initial=Math.max(0,links.findIndex(item=>matchPath({path:item.to,end:item.end ?? false},pathname)))
   const [selected,setSelected]=useState(initial)
@@ -44,8 +44,8 @@ export default function MobileOrbitMenu({items,liveUrl,perfil,landing,tema,theme
     const measure=()=>{
       const entries=Array.from(node.querySelectorAll('.orbit-entry'))
       const row=entries[0]?.getBoundingClientRect().height || 80
-      if(metrics.current.height===node.clientHeight && metrics.current.row===row)return
-      const index=Math.round(position.current)
+      if(metrics.current.height===node.clientHeight && metrics.current.row===row && entries.length===metrics.current.entries.length && entries.every((entry,index)=>entry===metrics.current.entries[index]))return
+      const index=Math.min(links.length-1,Math.round(position.current))
       node.style.setProperty('--wheel-space',`${node.clientHeight}px`)
       metrics.current={row,height:node.clientHeight,entries}
       node.scrollTo({top:index*metrics.current.row,behavior:'instant'})
@@ -56,7 +56,7 @@ export default function MobileOrbitMenu({items,liveUrl,perfil,landing,tema,theme
     resize.observe(node)
     if(metrics.current.entries[0])resize.observe(metrics.current.entries[0])
     return ()=>{resize.disconnect();cancelAnimationFrame(frame.current)}
-  },[paint])
+  },[paint,links.length])
   function onScroll(){
     cancelAnimationFrame(frame.current)
     frame.current=requestAnimationFrame(paint)

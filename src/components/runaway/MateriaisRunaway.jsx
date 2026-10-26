@@ -6,11 +6,10 @@ import { BookMarked, Lock, Plus, X, Loader2, Trash2, ExternalLink, Sparkles } fr
 
 const FORM_VAZIO = { titulo: '', descricao: '', url: '', materia_id: '' }
 
-// Lista o material das apostilas Runaway. Só aparece de verdade pra escolas no plano Pro
-// (RLS já bloqueia no banco — aqui é só a experiência de upsell pra quem tá no Base).
+// Materiais do aplicativo, disponíveis nos planos Base e Live ativos.
 export default function MateriaisRunaway({ gerencia = false }) {
   const { perfil } = useAuth()
-  const { plano, ehPro, carregando: carregandoPlano } = usePlano()
+  const { nomePlano, temMateriais, carregando: carregandoPlano } = usePlano()
   const [materiais, setMateriais] = useState([])
   const [materias, setMaterias] = useState([])
   const [carregando, setCarregando] = useState(true)
@@ -20,7 +19,7 @@ export default function MateriaisRunaway({ gerencia = false }) {
   const [salvando, setSalvando] = useState(false)
 
   async function carregar() {
-    if (!perfil?.escola_id || !ehPro) { setCarregando(false); return }
+    if (!perfil?.escola_id || !temMateriais) { setCarregando(false); return }
     setCarregando(true)
     setErro('')
     try {
@@ -41,7 +40,7 @@ export default function MateriaisRunaway({ gerencia = false }) {
     }
   }
 
-  useEffect(() => { if (!carregandoPlano) carregar() }, [perfil?.escola_id, ehPro, carregandoPlano])
+  useEffect(() => { if (!carregandoPlano) carregar() }, [perfil?.escola_id, temMateriais, carregandoPlano])
 
   function abrirNovo() { setForm(FORM_VAZIO); setModalAberto(true) }
 
@@ -82,15 +81,15 @@ export default function MateriaisRunaway({ gerencia = false }) {
 
   if (carregandoPlano) return <div className="mt-10 text-texto/50">Carregando…</div>
 
-  if (!ehPro) {
+  if (!temMateriais) {
     return (
       <div className="mt-10 rounded-3xl border border-dashed border-azul/30 bg-card/40 p-12 text-center">
         <Lock className="mx-auto text-azul/60" size={40} />
-        <h2 className="mt-4 text-xl font-bold text-white">Disponível no Slark Pro</h2>
+        <h2 className="mt-4 text-xl font-bold text-white">Consulte o plano da escola</h2>
         <p className="mt-2 text-texto/60 max-w-md mx-auto leading-relaxed">
-          O material das apostilas Runaway é liberado no plano Slark Pro. Sua escola está no plano {plano === 'base' ? 'Base' : plano} hoje.
+          Os materiais Runaway fazem parte do Slark Base e do Slark Live. Consulte a direção para verificar a assinatura da escola.
         </p>
-        {gerencia && <p className="mt-3 text-xs text-texto/40">Fale com a equipe Slark pra fazer upgrade.</p>}
+        {gerencia && <p className="mt-3 text-xs text-texto/40">Fale com a equipe Slark para verificar a assinatura.</p>}
       </div>
     )
   }
@@ -99,7 +98,7 @@ export default function MateriaisRunaway({ gerencia = false }) {
     <div>
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2 text-[#3FD08A] text-sm font-semibold bg-[#3FD08A]/10 px-3 py-1.5 rounded-full">
-          <Sparkles size={14} /> Slark Pro ativo
+          <Sparkles size={14} /> {nomePlano}
         </div>
         {gerencia && (
           <button onClick={abrirNovo} className="flex items-center gap-2 px-5 py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/30">

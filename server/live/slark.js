@@ -11,8 +11,8 @@ export async function accountInfo(id){
  const r=await fetch((process.env.SUPABASE_URL||process.env.VITE_SUPABASE_URL)+'/auth/v1/user',{headers:credentials(),signal:AbortSignal.timeout(10000)});const user=await r.json();if(!r.ok||user.id!==id)fail('Sessão da Slark inválida ou expirada.',401);
  const rows=await rest('usuarios',{select:'id,nome,email,perfil,escola_id,ativo,avatar_url',id:'eq.'+id});const p=rows[0];if(!p||p.ativo===false||!['aluno','professor','admin_slark','diretor'].includes(p.perfil))fail('Perfil sem acesso ao Slark Live.',403);return p;
 }
-export async function catalog(id){const user=await teacherInfo(id);const q={select:'id,titulo,sala_id',order:'criada_em.desc'};if(user.perfil==='professor')q.professor_id='eq.'+id;if(user.perfil==='diretor'){if(!user.escola_id)fail('Conta sem escola vinculada.',403);q.escola_id='eq.'+user.escola_id;}return rest('trilhas',q);}
-async function trailFor(id,trailId){const available=await catalog(id);const trail=available.find(t=>t.id===trailId);if(!trail?.sala_id)fail('Trilha fora do seu acesso ou sem turma.',403);return trail;}
+export async function catalog(id){const user=await teacherInfo(id);const q={select:'id,titulo,sala_id,escola_id',order:'criada_em.desc'};if(user.perfil==='professor')q.professor_id='eq.'+id;if(user.perfil==='diretor'){if(!user.escola_id)fail('Conta sem escola vinculada.',403);q.escola_id='eq.'+user.escola_id;}return rest('trilhas',q);}
+async function trailFor(id,trailId){const available=await catalog(id);const trail=available.find(t=>t.id===trailId);if(!trail?.sala_id)fail('Trilha fora do seu acesso ou sem turma.',403);await requireSchoolLive(trail.escola_id);return trail;}
 export async function loadTeams(id,trailId){
  const trail=await trailFor(id,trailId);const teams=await rest('times',{select:'id,nome',sala_id:'eq.'+trail.sala_id});
  if(!teams.length)fail('Defina os quartetos da turma na Slark primeiro.');
@@ -32,7 +32,7 @@ export async function studentCatalog(id){
  const rows=await rest('alunos',{select:'id,sala_id',usuario_id:'eq.'+id});
  const classrooms=[...new Set(rows.map(x=>x.sala_id).filter(Boolean))];
  if(!classrooms.length)return [];
- return rest('trilhas',{select:'id,titulo,sala_id',sala_id:'in.('+classrooms.join(',')+')',order:'criada_em.desc'});
+ return rest('trilhas',{select:'id,titulo,sala_id,escola_id',sala_id:'in.('+classrooms.join(',')+')',order:'criada_em.desc'});
 }
 
 export async function accountWins(){return Number(await rest('rpc/slarklive_minhas_vitorias',{},'POST',{}));}
@@ -42,4 +42,10 @@ export async function saveLiveStyle(id,preferencias){
  const rows=await rest('personalizacoes_slarklive',{on_conflict:'usuario_id'},'POST',{usuario_id:id,...preferencias},'resolution=merge-duplicates,return=representation');
  if(!rows[0])fail('Não foi possível salvar o estilo. Tente novamente.',503);
  return rows[0];
+}
+
+export async function requireSchoolLive(schoolId) {
+ if(!schoolId)fail('Conta ou turma sem escola vinculada.',403);
+ const features=await rest('rpc/slark_recursos_escola',{},'POST',{p_escola:schoolId});
+ if(features?.slark_live!==true)fail('O plano desta escola não inclui o Slark Live. Consulte a direção sobre o Plano Live.',403);
 }

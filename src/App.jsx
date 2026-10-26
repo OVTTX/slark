@@ -2,6 +2,8 @@ import SlarkLive from './pages/live/SlarkLive'
 import LiveScreen from './pages/live/LiveScreen'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { PersonalizacaoProvider } from './context/PersonalizacaoContext'
+import { PlanoProvider } from './context/PlanoContext'
+import AcessoLive from './components/AcessoLive'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import RotaProtegida from './components/RotaProtegida'
@@ -43,6 +45,7 @@ import ProfessorRanking from './pages/professor/ProfessorRanking'
 import ProfessorDisponibilidade from './pages/professor/ProfessorDisponibilidade'
 import ProfessorNotificacoes from './pages/professor/ProfessorNotificacoes'
 import ProfessorGrade from './pages/professor/ProfessorGrade'
+import ProfessorFerramentas from './pages/professor/ProfessorFerramentas'
 import AlunoInicio from './pages/aluno/AlunoInicio'
 import AlunoBoletim from './pages/aluno/AlunoBoletim'
 import AlunoRunaway from './pages/aluno/AlunoRunaway'
@@ -59,17 +62,17 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <PersonalizacaoProvider>
+        <PlanoProvider><PersonalizacaoProvider>
         <BrowserRouter>
           <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/documentacao" element={<SlarkDocumentation />} />
           <Route path="/slark-live/telao/:pin" element={<LiveScreen />} />
-          <Route path="/slark-live" element={<RotaProtegida><AppLayout><SlarkLive /></AppLayout></RotaProtegida>} />
-          <Route path="/professor/slark-live" element={<RotaProtegida perfilNecessario="professor"><AppLayout><SlarkLive /></AppLayout></RotaProtegida>} />
-          <Route path="/aluno/slark-live" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><SlarkLive /></AppLayout></RotaProtegida>} />
-          <Route path="/diretor/slark-live" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><SlarkLive /></AppLayout></RotaProtegida>} />
-          <Route path="/admin/slark-live" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><SlarkLive /></AppLayout></RotaProtegida>} />
+          <Route path="/slark-live" element={<RotaProtegida><AppLayout><AcessoLive><SlarkLive /></AcessoLive></AppLayout></RotaProtegida>} />
+          <Route path="/professor/slark-live" element={<RotaProtegida perfilNecessario="professor"><AppLayout><AcessoLive><SlarkLive /></AcessoLive></AppLayout></RotaProtegida>} />
+          <Route path="/aluno/slark-live" element={<RotaProtegida perfilNecessario="aluno"><AppLayout><AcessoLive><SlarkLive /></AcessoLive></AppLayout></RotaProtegida>} />
+          <Route path="/diretor/slark-live" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><AcessoLive><SlarkLive /></AcessoLive></AppLayout></RotaProtegida>} />
+          <Route path="/admin/slark-live" element={<RotaProtegida perfilNecessario="admin_slark"><AppLayout><AcessoLive><SlarkLive /></AcessoLive></AppLayout></RotaProtegida>} />
           <Route path="/login" element={<Login />} />
           <Route path="/perfil" element={<RotaProtegida><Perfil /></RotaProtegida>} />
 
@@ -98,6 +101,7 @@ export default function App() {
           <Route path="/diretor/cronograma" element={<RotaProtegida perfilNecessario="diretor"><AppLayout><DiretorCronograma /></AppLayout></RotaProtegida>} />
 
           {/* ---------- PROFESSOR ---------- */}
+          <Route path="/professor/ferramentas" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorFerramentas /></AppLayout></RotaProtegida>} />
           <Route path="/professor/notificacoes" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorNotificacoes /></AppLayout></RotaProtegida>} />
           <Route path="/professor" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorInicio /></AppLayout></RotaProtegida>} />
           <Route path="/professor/salas" element={<RotaProtegida perfilNecessario="professor"><AppLayout><ProfessorSalas /></AppLayout></RotaProtegida>} />
@@ -130,7 +134,7 @@ export default function App() {
           <Route path="*" element={<NaoEncontrada />} />
         </Routes>
       </BrowserRouter>
-    </PersonalizacaoProvider>
+    </PersonalizacaoProvider></PlanoProvider>
       </AuthProvider>
     </ThemeProvider>
   )

@@ -12,7 +12,7 @@ test('App session: verified bearer, own quartet only, public screen, no gabarito
  const originalCwd=process.cwd(),originalFetch=global.fetch,originalNow=Date.now
  const originalEnv={...process.env}
  process.chdir(directory);process.env.DATABASE_URL='';process.env.VERCEL='';process.env.SUPABASE_URL='https://fixture.invalid';process.env.SUPABASE_PUBLISHABLE_KEY='public-fixture'
- const users={teacher:{id:'teacher',perfil:'professor',ativo:true},student:{id:'student',perfil:'aluno',ativo:true},stranger:{id:'stranger',perfil:'aluno',ativo:true}}
+ const users={teacher:{id:'teacher',perfil:'professor',escola_id:'school',ativo:true},student:{id:'student',perfil:'aluno',escola_id:'school',ativo:true},stranger:{id:'stranger',perfil:'aluno',escola_id:'school',ativo:true}}
  const roster=Array.from({length:4},(_,index)=>({time_id:'team1',alunos:{id:'aluno'+index,nome:'Fixture '+index,sala_id:'sala',usuario_id:index===0?'student':null}}))
  global.fetch=async(url,options={})=>{
   const href=String(url)
@@ -21,8 +21,9 @@ test('App session: verified bearer, own quartet only, public screen, no gabarito
   const user=users[token]
   if(href.includes('/auth/v1/user'))return Response.json(user?{id:user.id}:{error:'invalid'},{status:user?200:401})
   const pathname=new URL(href).pathname
+  if(pathname.endsWith('/rpc/slark_recursos_escola'))return Response.json({plano:users[token]?.base?'base':'live',slark_live:!users[token]?.base})
   if(pathname.endsWith('/usuarios'))return Response.json(user?[user]:[])
-  if(pathname.endsWith('/trilhas'))return Response.json([{id:'trail',titulo:'Runaway',sala_id:'sala'}])
+  if(pathname.endsWith('/trilhas'))return Response.json([{id:'trail',titulo:'Runaway',sala_id:'sala',escola_id:'school'}])
   if(pathname.endsWith('/times'))return Response.json([{id:'team1',nome:'Bulls'}])
   if(pathname.endsWith('/time_membros'))return Response.json(roster)
   throw Error('Unexpected fixture request '+pathname)
@@ -61,6 +62,13 @@ test('App session: verified bearer, own quartet only, public screen, no gabarito
   assert.equal(finished.status,200);assert.equal(finished.data.completed,true)
   assert.deepEqual(finished.data.standings.map(row=>[row.place,row.points]),[[1,20]])
   assert.equal((await call('answer',{pin,token,option:1},'student')).status,400)
+  users.student.base=true
+  assert.equal((await call('join',{pin,teamCode:code},'student')).status,403)
+  assert.equal((await call('state',null,'student',{pin,token})).status,403)
+  users.teacher.base=true
+  assert.equal((await call('create',{trailId:'trail',items:[item]},'teacher')).status,403)
+  assert.equal((await call('catalog',null,'teacher')).status,403)
+  assert.equal((await call('control',{pin,command:'close'},'teacher')).status,403)
  } finally {
   global.fetch=originalFetch;Date.now=originalNow;process.chdir(originalCwd)
   for(const key of Object.keys(process.env))if(!(key in originalEnv))delete process.env[key]

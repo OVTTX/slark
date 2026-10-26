@@ -21,7 +21,7 @@ export function transact(fn){
    const q=await c.query(`SELECT data FROM ${schema}.state WHERE id=1 FOR UPDATE`);
    const state=q.rows[0]?.data;
    if(q.rowCount!==1||!state||typeof state!=='object'||Array.isArray(state)||!state.rooms||typeof state.rooms!=='object'||Array.isArray(state.rooms))throw Object.assign(new Error('O armazenamento das salas não foi inicializado corretamente.'),{status:503});
-   const result=await fn(state);
+   const result=await fn(state,c);
    const updated=await c.query(`UPDATE ${schema}.state SET data=$1 WHERE id=1`,[JSON.stringify(state)]);
    if(updated.rowCount!==1)throw Object.assign(new Error('Não foi possível salvar o estado da sala.'),{status:503});
    await c.query('COMMIT');begun=false;return result;
@@ -43,4 +43,10 @@ export async function screenRankings(pin) {
  if(screenCache.size>200)screenCache.clear();
  screenCache.set(pin,{until:Date.now()+10000,value});
  return value;
+}
+
+export async function assertRoomPlan(pin, client) {
+ if (!client) { if(process.env.VERCEL)throw Object.assign(new Error('Não foi possível verificar o plano da escola.'),{status:503});return; }
+ const result=await client.query('select slarklive_private.room_plan_enabled($1) as enabled',[pin]);
+ if(result.rows[0]?.enabled!==true)throw Object.assign(new Error('O plano desta escola não inclui o Slark Live.'),{status:403});
 }

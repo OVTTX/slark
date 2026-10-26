@@ -1,3 +1,4 @@
+import { usePlano } from '../../lib/usePlano'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
@@ -121,6 +122,7 @@ export default function ProfessorAulaSlark() {
 }
 
 function Dinamicas() {
+  const { temLive } = usePlano()
   const [categoriaAtiva, setCategoriaAtiva] = useState(CATEGORIAS[0].nome)
   const categoria = CATEGORIAS.find((c) => c.nome === categoriaAtiva)
 
@@ -142,7 +144,7 @@ function Dinamicas() {
       </div>
 
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {categoria.dinamicas.map((d) => (
+        {categoria.dinamicas.filter(d=>temLive || d.material !== 'Slark Live').map((d) => (
           <div key={d.titulo} className="rounded-2xl bg-card border p-6">
             <div className="font-bold text-white text-lg">{d.titulo}</div>
             <p className="text-sm text-texto/60 mt-2 leading-relaxed">{d.descricao}</p>

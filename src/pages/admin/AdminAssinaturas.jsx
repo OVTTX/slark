@@ -122,8 +122,8 @@ export default function AdminAssinaturas() {
                   <td className="px-6 py-4 font-semibold text-white">{a.escolaNome}</td>
                   <td className="px-6 py-4">{badge(a.status)}</td>
                   <td className="px-6 py-4">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${a.plano === 'pro' ? 'bg-[#0651C3]/20 text-azul' : 'bg-white/10 text-texto/60'}`}>
-                      {a.plano === 'pro' ? 'Slark Pro' : 'Slark Base'}
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${a.plano === 'live' ? 'bg-[#0651C3]/20 text-azul' : 'bg-white/10 text-texto/60'}`}>
+                      {a.plano === 'live' ? 'Plano Live' : 'Plano Base'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-texto/70">R$ {Number(a.preco_por_aluno).toLocaleString('pt-BR')}</td>
@@ -170,10 +170,10 @@ export default function AdminAssinaturas() {
               <div>
                 <label className="block text-sm font-medium text-texto/70 mb-1.5">Plano</label>
                 <div className="flex rounded-xl bg-card border border-azul/15 p-1">
-                  <button type="button" onClick={() => setForm({ ...form, plano: 'base' })} className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${form.plano === 'base' ? 'bg-azul text-white' : 'text-texto/60'}`}>Slark Base</button>
-                  <button type="button" onClick={() => setForm({ ...form, plano: 'pro' })} className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${form.plano === 'pro' ? 'bg-azul text-white' : 'text-texto/60'}`}>Slark Pro</button>
+                  <button type="button" onClick={() => setForm({ ...form, plano: 'base' })} className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${form.plano === 'base' ? 'bg-azul text-white' : 'text-texto/60'}`}>Plano Base</button>
+                  <button type="button" onClick={() => setForm({ ...form, plano: 'live' })} className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${form.plano === 'live' ? 'bg-azul text-white' : 'text-texto/60'}`}>Plano Live</button>
                 </div>
-                <p className="mt-1.5 text-xs text-texto/45">O plano Pro libera o material das apostilas Runaway pra escola.</p>
+                <p className="mt-1.5 text-xs text-texto/45">O Base inclui o Slark App com nomes automáticos para equipes. O Live inclui Slark Live e personalização dos nomes das equipes.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

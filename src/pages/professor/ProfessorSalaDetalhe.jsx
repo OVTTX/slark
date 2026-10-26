@@ -1,3 +1,4 @@
+import { usePlano } from '../../lib/usePlano'
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -19,6 +20,7 @@ const TAMANHO_MAX_TIME = 4
 export default function ProfessorSalaDetalhe() {
   const { id } = useParams()
   const { perfil } = useAuth()
+  const { personalizarEquipes, carregando: carregandoPlano } = usePlano()
   const { limite, usados, recarregar: recarregarLimite } = useLimiteAlunos()
 
   const [sala, setSala] = useState(null)
@@ -93,7 +95,7 @@ export default function ProfessorSalaDetalhe() {
     e.preventDefault()
     setSalvando(true)
     try {
-      const { error } = await supabase.from('times').insert({ sala_id: id, nome: nomeTime })
+      const { error } = await supabase.from('times').insert({ sala_id: id, nome: personalizarEquipes ? nomeTime : 'Equipe' })
       if (error) throw error
       setNomeTime('')
       setModalNovo(false)
@@ -524,15 +526,15 @@ export default function ProfessorSalaDetalhe() {
             </div>
             <form onSubmit={criarTime} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-texto/70 mb-1.5">Nome da equipe</label>
+                <label className="block text-sm font-medium text-texto/70 mb-1.5">{personalizarEquipes ? 'Nome da equipe' : 'Identificação da equipe'}</label>
                 <input
-                  required value={nomeTime} onChange={(e) => setNomeTime(e.target.value)}
+                  required={personalizarEquipes} disabled={!personalizarEquipes || carregandoPlano} value={personalizarEquipes ? nomeTime : 'Nome automático · Plano Base'} onChange={(e) => setNomeTime(e.target.value)}
                   placeholder="Ex: Time Águia"
                   className="w-full px-4 py-2.5 rounded-xl bg-card border border-azul/15 text-white focus:outline-none focus:border-azul transition"
                 />
               </div>
               <button
-                type="submit" disabled={salvando}
+                type="submit" disabled={salvando || carregandoPlano}
                 className="w-full py-3 rounded-full bg-azul hover:bg-azul-puro text-white font-semibold transition shadow-lg shadow-azul/40 disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {salvando && <Loader2 size={18} className="animate-spin" />}

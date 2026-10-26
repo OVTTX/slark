@@ -3,9 +3,9 @@ import {soloAction} from './solo.js';
 import {fixedTeamCode} from './team-codes.js';
 import {initTournament,controlTournament,tournamentView,extraQuestion,teamLabel} from './tournament.js';
 import {randomInt,randomUUID,timingSafeEqual} from 'node:crypto';
-import {screenRankings,transact} from './store.js';
+import {screenRankings,transact,assertRoomPlan} from './store.js';
 import {fail,validateDeck,summary,teacherView,answer,results,traits} from './domain.js';
-import {accountInfo,studentCatalog,loadTeams,saveObservation,withSlarkSession} from './slark.js';
+import {accountInfo,requireSchoolLive,studentCatalog,loadTeams,saveObservation,withSlarkSession} from './slark.js';
 function equal(a,b){const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);}
 async function body(req){if(req.body&&typeof req.body==='object')return req.body;let s='';for await(const c of req){s+=c;if(s.length>100000)fail('Envio muito grande.',413);}try{return JSON.parse(s||'{}')}catch{fail('Dados inválidos.');}}
 async function handler(req,res){
@@ -18,6 +18,7 @@ async function handler(req,res){
  const accountId=req.slarkVerifiedId||null;
  if(['join','state','answer'].includes(action)&&!accountId)fail('Entre com sua conta Slark para participar.',401);
  const profile=accountId&&accountId!=='demo'?await accountInfo(accountId):null;
+ if(profile && profile.perfil!=='admin_slark')await requireSchoolLive(profile.escola_id);
  const isStudent=profile?.perfil==='aluno';
  const owner=isStudent?null:accountId;
  if(action==='session')return res.end(JSON.stringify({authenticated:!!accountId,admin:!!owner,student:isStudent,role:profile?.perfil,name:profile?.nome,avatar:profile?.avatar_url,demo:owner==='demo',demoEnabled:process.env.ENABLE_DEMO==='1'}));
@@ -34,7 +35,7 @@ async function handler(req,res){
   if(owner==='demo')imported={trail:{id:'demo-trail',titulo:'Trilha demonstrativa'},teams:Array.from({length:b.mode==='tournament'?8:2},(_,i)=>i).map(i=>({id:`demo-${i}`,name:`Quarteto ${i+1}`,members:[0,1,2,3].map(j=>({id:`demo-${i}-${j}`,name:`Estudante fictício ${i*4+j+1}`}))}))};
   else imported=await loadTeams(owner,String(b.trailId||''));
  }
- const result=await transact(async s=>{
+ const result=await transact(async (s,client)=>{
  const own=r=>{if(!owner||r.owner!==owner)fail('Sala de outro professor ou acesso não autorizado.',403);};
  const rooms=Object.values(s.rooms).filter(r=>r.version===2&&r.rankingVersion===2);
  if(action==='rooms'){if(!owner)fail('Entre como professor.',401);return rooms.filter(r=>r.owner===owner).map(summary);}
@@ -44,6 +45,7 @@ async function handler(req,res){
   const r={version:2,rankingVersion:2,rankingId:randomUUID(),owner,pin,name:String(b.name||'Slark Live Room').slice(0,100),chapter:String(b.chapter||'Fim do capítulo').slice(0,100),trailId:imported.trail.id,demo:owner==='demo',items,teams,status:'ready',index:-1,openedAt:null,endsAt:null,revealed:false,answers:{},observations:[]};if(b.mode==='tournament')initTournament(r);s.rooms[pin]=r;return teacherView(r);
  }
  const p=String(b.pin||u.searchParams.get('pin')||'');const r=s.rooms[p];if(!r||r.version!==2)fail('Sala não encontrada. Confira o PIN.',404);
+ await assertRoomPlan(p,client);
  if(action==='teacher'){own(r);return teacherView(r);}
  if(action==='room')return summary(r);
  if(action==='control'&&req.method==='POST'){
