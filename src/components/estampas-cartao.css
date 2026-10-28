@@ -1,0 +1,34 @@
+.slark-print-collection {padding:26px;border:1px solid var(--app-line);border-radius:24px;background:var(--app-panel);}
+.slark-print-heading>span {display:flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.12em;color:var(--app-brand-text);font-weight:700;}
+.slark-print-heading h2 {font-size:23px;font-weight:700;margin-top:10px;}
+.slark-print-heading p {font-size:13px;line-height:1.7;color:var(--app-secondary);margin-top:8px;}
+.slark-print-coming {border:1px solid var(--app-line);border-radius:14px;padding:14px 16px;color:var(--app-secondary);font-size:12px;line-height:1.6;margin:20px 0;}
+.slark-print-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.slark-print-option {padding:10px;border:1px solid var(--app-line);border-radius:16px;text-align:left;min-width:0;background:rgb(var(--c-onbg) / .02);}
+.slark-print-option.is-selected {outline:2px solid var(--app-brand-text);outline-offset:2px;}
+.slark-print-swatch {height:120px;border-radius:10px;display:grid;place-items:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#15285c,#000026);color:#a6caff;}
+.slark-print-swatch strong {color:#f0f5ff;letter-spacing:.12em;font-size:16px;position:relative;z-index:1;}
+.slark-print-name {display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:11px;font-size:12px;font-weight:600;}
+.slark-print-name svg {color:var(--app-brand-text);flex-shrink:0;}
+.slark-print-option small {display:flex;align-items:center;gap:5px;font-size:10px;color:var(--app-muted);margin-top:6px;}
+.slark-print-selection {display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:22px;margin-top:22px;border-top:1px solid var(--app-line);}
+.slark-print-selection strong {font-size:14px;}
+.slark-print-selection p {color:var(--app-secondary);font-size:12px;line-height:1.6;margin-top:6px;}
+.slark-print-selection small {color:var(--app-muted);font-size:11px;line-height:1.6;display:block;margin-top:8px;}
+.slark-print-selection button {display:flex;align-items:center;gap:6px;justify-content:center;flex-shrink:0;border:1px solid var(--app-line);border-radius:99px;min-height:44px;padding:11px 18px;background:var(--skin-accent,#0651c3);color:#fff;font-size:12px;}
+.slark-print-selection button:disabled {opacity:.5;}
+.slark-print-status {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px;font-size:12px;color:var(--app-secondary);}
+.slark-print-status button {text-decoration:underline;}
+.slark-print-preview-label {font-size:11px;color:var(--app-muted);margin:18px 0 10px;}
+.slark-stamp-art {display:block;position:absolute;inset:0;pointer-events:none;}
+.slark-stamp-art[data-estampa=original] {display:none;}
+.slark-stamp-art[data-estampa=orbitas] {background:repeating-radial-gradient(ellipse at 100% 80%,transparent 0 18px,currentColor 19px 20px,transparent 21px 44px);}
+.slark-stamp-art[data-estampa=constelacao] {background-image:radial-gradient(circle,currentColor 1.4px,transparent 1.7px),radial-gradient(circle,currentColor 1px,transparent 1.5px),linear-gradient(32deg,transparent 49.7%,currentColor 50%,transparent 50.3%);background-size:57px 65px,93px 109px,150px 170px;background-position:0 0,15px 22px,0 0;}
+.slark-stamp-art[data-estampa=ondas] {background:repeating-radial-gradient(ellipse at 170% -80%,transparent 0 18px,currentColor 19px 23px,transparent 24px 38px);}
+.slark-stamp-art[data-estampa=geometria] {background-image:linear-gradient(60deg,transparent 49%,currentColor 50%,transparent 51%),linear-gradient(-60deg,transparent 49%,currentColor 50%,transparent 51%);background-size:72px 124px;}
+.slark-print-swatch>.slark-stamp-art {opacity:.38;}
+.slark-id-face>.slark-stamp-art {position:absolute;z-index:0;opacity:.2;color:var(--id-accent);}
+.slark-id-face>:not(.slark-stamp-art) {z-index:1;}
+.slark-app[data-skin=ouro] .slark-print-swatch {background:linear-gradient(135deg,#7b602a,#493617);color:#f1d69a;}
+.slark-app[data-skin=noir] .slark-print-swatch {background:#151515;color:#ccc;}
+@media(max-width:639px) {.slark-print-collection {padding:20px;}.slark-print-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}.slark-print-selection {align-items:stretch;flex-direction:column;}.slark-print-heading h2 {font-size:21px;}}

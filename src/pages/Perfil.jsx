@@ -1,3 +1,5 @@
+import EstampasCartao from '../components/EstampasCartao'
+import { EstampasCartaoProvider } from '../context/EstampasCartaoContext'
 import CarteirinhaTelaCheia from '../components/CarteirinhaTelaCheia'
 import CarteirinhaAluno from '../components/CarteirinhaAluno'
 import LojaPersonalizacao from '../components/LojaPersonalizacao'
@@ -9,7 +11,7 @@ import SeloFlor from '../components/SeloFlor'
 import SeloCaracteristica from '../components/SeloCaracteristica'
 import {
   Camera, Loader2, Save, KeyRound, Check, User, ShieldCheck, Contact,
-  Award, Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search,
+  Sparkles, Award, Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search,
 } from 'lucide-react'
 
 const ROTULO_PERFIL = {
@@ -172,7 +174,7 @@ export default function Perfil() {
     : null
 
   return (
-    <AppLayout>
+    <EstampasCartaoProvider key={perfil?.id} perfil={perfil}><AppLayout>
       <div>
         <h1 className="text-4xl font-bold text-white tracking-tight">Meu Perfil</h1>
         <p className="mt-2 text-texto/60">{ehAluno ? 'Sua jornada de aprendizado.' : 'Gerencie seus dados de acesso.'}</p>
@@ -224,6 +226,7 @@ export default function Perfil() {
                 className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium transition ${aba === 'carteirinha' ? 'bg-azul/15 text-white' : 'text-texto/60 hover:text-white hover:bg-white/5'}`}>
                 <Contact size={16} /> Minha carteirinha
               </button>}
+              {ehAluno && <button type="button" onClick={() => setAba('estampas')} className={`mt-1 w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${aba === 'estampas' ? 'bg-azul/15 text-white' : 'text-texto/60 hover:bg-white/5'}`}><Sparkles size={16} /> Estampas do cartão</button>}
               <button
                 onClick={() => setAba('geral')}
                 className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium transition ${aba === 'geral' ? 'bg-azul/15 text-white' : 'text-texto/60 hover:text-white hover:bg-white/5'}`}
@@ -272,7 +275,7 @@ export default function Perfil() {
 
           {/* Coluna direita: conteúdo da aba selecionada */}
           <div className="space-y-5">
-            {ehAluno && aba === 'carteirinha' ? <CarteirinhaAluno key={perfil.id} perfil={perfil} /> : aba === 'personalizacao' ? <LojaPersonalizacao /> : aba === 'geral' ? (
+            {ehAluno && aba === 'estampas' ? <EstampasCartao perfil={perfil} /> : ehAluno && aba === 'carteirinha' ? <CarteirinhaAluno key={perfil.id} perfil={perfil} /> : aba === 'personalizacao' ? <LojaPersonalizacao /> : aba === 'geral' ? (
               <div className="rounded-2xl bg-card border p-6">
                 <div className="text-lg font-bold text-white">Informações da Conta</div>
                 <p className="text-sm text-texto/50 mt-1">Seus dados de identificação na Slark.</p>
@@ -352,6 +355,6 @@ export default function Perfil() {
         </div>
       </div>
       {ehAluno && <CarteirinhaTelaCheia key={perfil.id} ref={cartaoFullscreen} perfil={perfil} />}
-    </AppLayout>
+    </AppLayout></EstampasCartaoProvider>
   )
 }

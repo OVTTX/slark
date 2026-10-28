@@ -17,3 +17,13 @@ Verificação: `tests/sql/student-card.sql` testa acesso próprio, bloqueio de o
 Clicar na aba Minha carteirinha abre um dialog modal na camada superior do navegador, com tentativa de fullscreen nativo no mesmo gesto. Quando indisponível, o dialog preenche a área da página. F ou Escape fecham no computador; três toques consecutivos no cartão (intervalos inferiores a 500 ms) fecham em dispositivos touch ou layouts móveis. Arrastar ou cancelar um gesto reinicia a sequência. Nesse modo, o giro no celular fica no botão Ver verso, para não disputar os três toques. O botão Sair permanece disponível para acessibilidade.
 
 O modal preserva o tema, ajusta o cartão à altura e largura disponíveis, bloqueia a rolagem e o foco do fundo e restaura a página ao fechar. Sair do fullscreen nativo pelo navegador também fecha o modal. A prévia e os dados completos continuam na página de perfil.
+
+## Estampas colecionáveis
+
+Perfil do aluno → Estampas do cartão. A Original Slark é a opção inicial. Órbitas, Constelação, Ondas e Geometria têm prévias e aparecem como Em breve. A conquista no Slark Live é futura: não há metas, quantidades, preços, resgates nem concessão automática implementados. Não há envio de imagens próprias.
+
+A coleção permite prévia antes de aplicar; aplicar exige uma estampa lançada e conquistada, exceto a Original, que é sempre disponível. A escolha fica salva por conta e é refletida na carteirinha normal e na tela cheia. Os mesmos temas e informações são preservados.
+
+`estampas_cartao` guarda o catálogo, `aluno_estampas` guarda as conquistas e `cartao_estampa_preferencias` a opção selecionada. As três tabelas têm RLS. Clientes autenticados leem o catálogo e a própria coleção e alteram apenas a própria seleção válida. O admin real pode testar exclusivamente a conta fixa aluno@slarkdemo.com.br. Nenhum cliente pode conceder uma conquista nem lançar estampas. As regras de aquisição e sua integração com Live serão definidas posteriormente pelo responsável pelo produto.
+
+Verificação: testes de seleção/confirmação em tests/card-prints.test.js e testes transacionais de RLS/conquista simulada em tests/sql/card-prints.sql. Simulações revertem catálogo, conquistas e preferências, sem alterar saldos ou partidas reais.

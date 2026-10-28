@@ -1,3 +1,4 @@
+import { useEstampasCartao } from '../context/EstampasCartaoContext'
 import { useEffect, useRef, useState } from 'react'
 import { Contact, Loader2, Mail, Phone, RefreshCw, School, Sparkles, Trophy } from 'lucide-react'
 import LanyardBadge from '../../components/ui/lanyard-badge'
@@ -6,6 +7,7 @@ import { usePersonalizacao } from '../context/PersonalizacaoContext'
 import LogoSlark from './LogoSlark'
 import SeloCaracteristica from './SeloCaracteristica'
 import './carteirinha-aluno.css'
+import './estampas-cartao.css'
 
 const formatarPontos = value => Number(value).toLocaleString('pt-BR')
 const CORES = {
@@ -15,7 +17,7 @@ const CORES = {
   cosmos: ['#302561', '#d9d1ff'], grafite: ['#2e3942', '#d4e4ee'], rubi: ['#652039', '#ffc5d2'],
 }
 
-export function CarteirinhaConteudo({ data, perfil, skin = 'slark', fullscreen = false, onExit }) {
+export function CarteirinhaConteudo({ data, perfil, skin = 'slark', fullscreen = false, onExit, estampa = 'original' }) {
   const host = useRef(null)
   const [size, setSize] = useState({ width: 280, height: 680 })
   const width = size.width
@@ -43,7 +45,7 @@ export function CarteirinhaConteudo({ data, perfil, skin = 'slark', fullscreen =
   const telefoneHref = telefone?.replace(/[^\d+]/g, '')
   const emailValido = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   const local = [escola.cidade, escola.estado].filter(Boolean).join(' · ')
-  return <section className={`slark-student-card${fullscreen ? ' is-fullscreen' : ''}`} aria-labelledby={fullscreen ? 'carteirinha-fullscreen-title' : 'carteirinha-title'}>
+  return <section className={`slark-student-card${fullscreen ? ' is-fullscreen' : ''}`} data-estampa={estampa} aria-labelledby={fullscreen ? 'carteirinha-fullscreen-title' : 'carteirinha-title'}>
     <header className="slark-card-heading">
       <span className="slark-card-eyebrow"><Contact size={14} /> IDENTIDADE SLARK</span>
       <h2 id={fullscreen ? 'carteirinha-fullscreen-title' : 'carteirinha-title'}>Minha carteirinha</h2>
@@ -55,6 +57,7 @@ export function CarteirinhaConteudo({ data, perfil, skin = 'slark', fullscreen =
         interactionLabel={fullscreen ? "Carteirinha Slark. Arraste para balançar. Use Ver verso para virar. No celular, toque três vezes para sair." : undefined}
         strapText="SLARK" strapLabel="CADA MENTE É UM UNIVERSO" strapColor={strapColor} inkColor={inkColor}
         front={<div className="slark-id-face slark-id-front" style={{ fontSize: width / 280 * 14 }}>
+          <span className="slark-stamp-art" data-estampa={estampa} aria-hidden="true"/>
           <div className="slark-id-brand"><LogoSlark /><span>ESTUDANTE</span></div>
           <div className="slark-id-portrait">
             {perfil.avatar_url ? <img src={perfil.avatar_url} alt="" draggable={false} /> : <span>{nome?.[0]?.toUpperCase() || 'S'}</span>}
@@ -70,6 +73,7 @@ export function CarteirinhaConteudo({ data, perfil, skin = 'slark', fullscreen =
           <div className="slark-id-school"><School size={13} /><span>{escola.nome || 'Escola não informada'}</span></div>
         </div>}
         back={<div className="slark-id-face slark-id-back" style={{ fontSize: width / 280 * 14 }}>
+          <span className="slark-stamp-art" data-estampa={estampa} aria-hidden="true"/>
           <div className="slark-id-brand"><LogoSlark /><span>SEU UNIVERSO</span></div>
           <School size={30} className="slark-id-school-icon" />
           <small>MINHA ESCOLA</small><strong className="slark-id-school-name">{escola.nome || 'Escola não informada'}</strong>
@@ -100,8 +104,9 @@ export function CarteirinhaConteudo({ data, perfil, skin = 'slark', fullscreen =
   </section>
 }
 
-export default function CarteirinhaAluno({ perfil, fullscreen = false, onExit }) {
+export default function CarteirinhaAluno({ perfil, fullscreen = false, onExit, estampaPreview }) {
   const personalizacao = usePersonalizacao()
+  const colecao = useEstampasCartao()
   const [state, setState] = useState({ data: null, error: '', loading: true })
   const [retry, setRetry] = useState(0)
   useEffect(() => {
@@ -125,6 +130,6 @@ export default function CarteirinhaAluno({ perfil, fullscreen = false, onExit })
   if (state.loading) return <div role="status" className="slark-card-status"><Loader2 size={22} className="animate-spin" /> Preparando sua carteirinha…</div>
   return <>
     {state.error && <div className="slark-card-error" role="alert">{state.error}<button type="button" onClick={() => setRetry(value => value + 1)}><RefreshCw size={14} /> Tentar novamente</button></div>}
-    {state.data && <CarteirinhaConteudo data={state.data} perfil={perfil} skin={personalizacao?.preferencias?.skin} fullscreen={fullscreen} onExit={onExit} />}
+    {state.data && <CarteirinhaConteudo data={state.data} perfil={perfil} skin={personalizacao?.preferencias?.skin} fullscreen={fullscreen} onExit={onExit} estampa={estampaPreview || colecao?.selecionada || 'original'} />}
   </>
 }
