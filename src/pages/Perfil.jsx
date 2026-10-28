@@ -1,3 +1,4 @@
+import CarteirinhaAluno from '../components/CarteirinhaAluno'
 import LojaPersonalizacao from '../components/LojaPersonalizacao'
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -6,7 +7,7 @@ import AppLayout from '../components/AppLayout'
 import SeloFlor from '../components/SeloFlor'
 import SeloCaracteristica from '../components/SeloCaracteristica'
 import {
-  Camera, Loader2, Save, KeyRound, Check, User, ShieldCheck,
+  Camera, Loader2, Save, KeyRound, Check, User, ShieldCheck, Contact,
   Award, Crown, Brain, Lightbulb, MessageCircle, HeartHandshake, Eye, Search,
 } from 'lucide-react'
 
@@ -41,9 +42,13 @@ export default function Perfil() {
   const inputArquivoRef = useRef(null)
   const ehAluno = perfil?.perfil === 'aluno'
 
-  const [aba, setAba] = useState('geral') // 'geral' | 'seguranca'
+  const [aba, setAba] = useState(() => ehAluno ? 'carteirinha' : 'geral')
 
   const [nome, setNome] = useState(perfil?.nome || '')
+  useEffect(() => {
+    setAba(ehAluno ? 'carteirinha' : 'geral')
+    setNome(perfil?.nome || '')
+  }, [perfil?.id, ehAluno])
   const [salvandoNome, setSalvandoNome] = useState(false)
   const [avisoNome, setAvisoNome] = useState('')
   const [erroNome, setErroNome] = useState('')
@@ -213,6 +218,10 @@ export default function Perfil() {
             </div>
 
             <div className="rounded-2xl bg-card border p-2">
+              {ehAluno && <button type="button" onClick={() => setAba('carteirinha')}
+                className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium transition ${aba === 'carteirinha' ? 'bg-azul/15 text-white' : 'text-texto/60 hover:text-white hover:bg-white/5'}`}>
+                <Contact size={16} /> Minha carteirinha
+              </button>}
               <button
                 onClick={() => setAba('geral')}
                 className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium transition ${aba === 'geral' ? 'bg-azul/15 text-white' : 'text-texto/60 hover:text-white hover:bg-white/5'}`}
@@ -261,7 +270,7 @@ export default function Perfil() {
 
           {/* Coluna direita: conteúdo da aba selecionada */}
           <div className="space-y-5">
-            {aba === 'personalizacao' ? <LojaPersonalizacao /> : aba === 'geral' ? (
+            {ehAluno && aba === 'carteirinha' ? <CarteirinhaAluno key={perfil.id} perfil={perfil} /> : aba === 'personalizacao' ? <LojaPersonalizacao /> : aba === 'geral' ? (
               <div className="rounded-2xl bg-card border p-6">
                 <div className="text-lg font-bold text-white">Informações da Conta</div>
                 <p className="text-sm text-texto/50 mt-1">Seus dados de identificação na Slark.</p>
