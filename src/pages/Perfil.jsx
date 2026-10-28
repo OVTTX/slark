@@ -1,3 +1,4 @@
+import CarteirinhaTelaCheia from '../components/CarteirinhaTelaCheia'
 import CarteirinhaAluno from '../components/CarteirinhaAluno'
 import LojaPersonalizacao from '../components/LojaPersonalizacao'
 import { useEffect, useRef, useState } from 'react'
@@ -40,6 +41,7 @@ function mesesDesde(dataIso) {
 export default function Perfil() {
   const { perfil, recarregarPerfil } = useAuth()
   const inputArquivoRef = useRef(null)
+  const cartaoFullscreen = useRef(null)
   const ehAluno = perfil?.perfil === 'aluno'
 
   const [aba, setAba] = useState(() => ehAluno ? 'carteirinha' : 'geral')
@@ -218,7 +220,7 @@ export default function Perfil() {
             </div>
 
             <div className="rounded-2xl bg-card border p-2">
-              {ehAluno && <button type="button" onClick={() => setAba('carteirinha')}
+              {ehAluno && <button type="button" onClick={() => { setAba('carteirinha'); cartaoFullscreen.current?.open() }}
                 className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium transition ${aba === 'carteirinha' ? 'bg-azul/15 text-white' : 'text-texto/60 hover:text-white hover:bg-white/5'}`}>
                 <Contact size={16} /> Minha carteirinha
               </button>}
@@ -349,6 +351,7 @@ export default function Perfil() {
           </div>
         </div>
       </div>
+      {ehAluno && <CarteirinhaTelaCheia key={perfil.id} ref={cartaoFullscreen} perfil={perfil} />}
     </AppLayout>
   )
 }

@@ -23,6 +23,9 @@ import { RotateCw } from "lucide-react"
 export interface LanyardBadgeProps {
   /** Card front. Replaces the built-in front entirely. */
   front?: React.ReactNode
+  /** Three consecutive touch taps on the card; dragging never counts. */
+  onTripleTap?: () => void
+  interactionLabel?: string
   /** Card back. Replaces the built-in back entirely. */
   back?: React.ReactNode
   /** Built-in front: the event title. */
@@ -244,6 +247,8 @@ function Arrow({ className = "", style }: { className?: string; style?: React.CS
 }
 
 export default function LanyardBadge({
+  onTripleTap,
+  interactionLabel,
   front,
   back,
   title = "Cada mente é um universo.",
@@ -260,6 +265,8 @@ export default function LanyardBadge({
   height = "100svh",
   className = "",
 }: LanyardBadgeProps) {
+  const tripleTapRef = React.useRef(onTripleTap)
+  tripleTapRef.current = onTripleTap
   const rootRef = React.useRef<HTMLElement | null>(null)
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null)
   const cardRef = React.useRef<HTMLDivElement | null>(null)
@@ -476,6 +483,8 @@ export default function LanyardBadge({
     // ---- interaction -----------------------------------------------------
     type Drag = { id: number; ox: number; oy: number; tx: number; ty: number; sx: number; sy: number; moved: boolean }
     let drag: Drag | null = null
+    let taps = 0
+    let lastTap = 0
     const local = (e: PointerEvent) => {
       const r = root.getBoundingClientRect()
       return [e.clientX - r.left, e.clientY - r.top]
@@ -486,7 +495,7 @@ export default function LanyardBadge({
     }
     flipRef.current = flip
     const onDown = (e: PointerEvent) => {
-      if (e.button > 0) return
+      if (e.button > 0 || drag || !e.isPrimary) return
       const [x, y] = local(e)
       const T = pts[iT]
       drag = { id: e.pointerId, ox: T.x - x, oy: T.y - y, tx: T.x, ty: T.y, sx: x, sy: y, moved: false }
@@ -503,7 +512,15 @@ export default function LanyardBadge({
     }
     const onUp = (e: PointerEvent) => {
       if (!drag || e.pointerId !== drag.id) return
-      if (!drag.moved && e.type === "pointerup") flip()
+      const touchExit = tripleTapRef.current && (e.pointerType === "touch" || window.matchMedia("(pointer: coarse), (max-width: 767px)").matches)
+      if (!drag.moved && e.type === "pointerup") {
+        if (touchExit) {
+          const now = performance.now()
+          taps = now - lastTap < 500 ? taps + 1 : 1
+          lastTap = now
+          if (taps === 3) { taps = 0; tripleTapRef.current?.() }
+        } else flip()
+      } else { taps = 0; lastTap = 0 }
       drag = null
       if (card.hasPointerCapture(e.pointerId)) card.releasePointerCapture(e.pointerId)
       pts[iT].w = 0.8
@@ -673,7 +690,7 @@ export default function LanyardBadge({
         ref={cardRef}
         role="button"
         tabIndex={0}
-        aria-label="Carteirinha Slark. Arraste para balançar ou pressione Enter para virar."
+        aria-label={interactionLabel || "Carteirinha Slark. Arraste para balançar ou pressione Enter para virar."}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault()

@@ -15,19 +15,27 @@ const CORES = {
   cosmos: ['#302561', '#d9d1ff'], grafite: ['#2e3942', '#d4e4ee'], rubi: ['#652039', '#ffc5d2'],
 }
 
-export function CarteirinhaConteudo({ data, perfil, skin = 'slark' }) {
+export function CarteirinhaConteudo({ data, perfil, skin = 'slark', fullscreen = false, onExit }) {
   const host = useRef(null)
-  const [width, setWidth] = useState(280)
+  const [size, setSize] = useState({ width: 280, height: 680 })
+  const width = size.width
   const [strapColor, inkColor] = CORES[skin] || CORES.slark
   useEffect(() => {
     const node = host.current
     if (!node) return
-    const measure = () => setWidth(Math.max(180, Math.min(280, Math.floor(node.clientWidth - 56))))
+    const measure = () => {
+      const height = node.clientHeight
+      const width = fullscreen
+        ? Math.max(96, Math.min(360, Math.floor(node.clientWidth - 48), Math.floor((height * .84 - 36) / 1.9)))
+        : Math.max(180, Math.min(280, Math.floor(node.clientWidth - 56)))
+      const nextHeight = fullscreen ? Math.max(1, height) : Math.max(560, width * 1.5 + 260)
+      setSize(previous => previous.width === width && previous.height === nextHeight ? previous : { width, height: nextHeight })
+    }
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(node)
     return () => observer.disconnect()
-  }, [])
+  }, [fullscreen])
   const { aluno, escola, equipe } = data
   const nome = perfil.nome || aluno.nome
   const telefone = escola.telefone?.trim()
@@ -35,15 +43,16 @@ export function CarteirinhaConteudo({ data, perfil, skin = 'slark' }) {
   const telefoneHref = telefone?.replace(/[^\d+]/g, '')
   const emailValido = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   const local = [escola.cidade, escola.estado].filter(Boolean).join(' · ')
-  return <section className="slark-student-card" aria-labelledby="carteirinha-title">
+  return <section className={`slark-student-card${fullscreen ? ' is-fullscreen' : ''}`} aria-labelledby={fullscreen ? 'carteirinha-fullscreen-title' : 'carteirinha-title'}>
     <header className="slark-card-heading">
       <span className="slark-card-eyebrow"><Contact size={14} /> IDENTIDADE SLARK</span>
-      <h2 id="carteirinha-title">Minha carteirinha</h2>
+      <h2 id={fullscreen ? 'carteirinha-fullscreen-title' : 'carteirinha-title'}>Minha carteirinha</h2>
       <p>Seu universo, sempre com você.</p>
     </header>
     <div ref={host} className="slark-card-stage">
       <span className="slark-card-orbit" aria-hidden="true" />
-      <LanyardBadge cardWidth={width} height={`${Math.max(560, width * 1.5 + 260)}px`}
+      <LanyardBadge cardWidth={width} height={`${size.height}px`} onTripleTap={fullscreen ? onExit : undefined}
+        interactionLabel={fullscreen ? "Carteirinha Slark. Arraste para balançar. Use Ver verso para virar. No celular, toque três vezes para sair." : undefined}
         strapText="SLARK" strapLabel="CADA MENTE É UM UNIVERSO" strapColor={strapColor} inkColor={inkColor}
         front={<div className="slark-id-face slark-id-front" style={{ fontSize: width / 280 * 14 }}>
           <div className="slark-id-brand"><LogoSlark /><span>ESTUDANTE</span></div>
@@ -74,7 +83,7 @@ export function CarteirinhaConteudo({ data, perfil, skin = 'slark' }) {
           <p className="slark-id-motto">Cada mente é um universo.</p>
         </div>} />
     </div>
-    <p className="slark-card-hint">Arraste para balançar. Toque na carteirinha ou em “Ver verso” para virar.</p>
+    <p className="slark-card-hint">{fullscreen ? 'Arraste para balançar. Use “Ver verso” para virar.' : 'Arraste para balançar. Toque na carteirinha ou em “Ver verso” para virar.'}</p>
     <div className="slark-card-details">
       <dl>
         <div><dt>Característica</dt><dd>{aluno.caracteristica || 'A definir'}</dd></div>
@@ -91,7 +100,7 @@ export function CarteirinhaConteudo({ data, perfil, skin = 'slark' }) {
   </section>
 }
 
-export default function CarteirinhaAluno({ perfil }) {
+export default function CarteirinhaAluno({ perfil, fullscreen = false, onExit }) {
   const personalizacao = usePersonalizacao()
   const [state, setState] = useState({ data: null, error: '', loading: true })
   const [retry, setRetry] = useState(0)
@@ -116,6 +125,6 @@ export default function CarteirinhaAluno({ perfil }) {
   if (state.loading) return <div role="status" className="slark-card-status"><Loader2 size={22} className="animate-spin" /> Preparando sua carteirinha…</div>
   return <>
     {state.error && <div className="slark-card-error" role="alert">{state.error}<button type="button" onClick={() => setRetry(value => value + 1)}><RefreshCw size={14} /> Tentar novamente</button></div>}
-    {state.data && <CarteirinhaConteudo data={state.data} perfil={perfil} skin={personalizacao?.preferencias?.skin} />}
+    {state.data && <CarteirinhaConteudo data={state.data} perfil={perfil} skin={personalizacao?.preferencias?.skin} fullscreen={fullscreen} onExit={onExit} />}
   </>
 }

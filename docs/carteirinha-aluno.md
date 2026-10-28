@@ -11,3 +11,9 @@ Dados reais na frente: foto/nome do perfil, turma, característica, saldo pessoa
 O RPC `slark_carteirinha_aluno` é somente leitura. O wrapper público usa SECURITY INVOKER; a implementação privada confere o usuário autenticado e ativo, permite apenas a própria conta de aluno e a prévia do aluno demo fixo por um admin real. O retorno contém somente os campos necessários, sem lista de alunos, membros de equipes ou dados de cobrança. A migração não modifica pontos, equipes nem políticas existentes.
 
 Verificação: `tests/sql/student-card.sql` testa acesso próprio, bloqueio de outra conta/aluno/professor/inativo/anônimo, demo, saldo, empate e estados sem equipe/contato. As alterações de teste são revertidas pela transação.
+
+## Tela cheia
+
+Clicar na aba Minha carteirinha abre um dialog modal na camada superior do navegador, com tentativa de fullscreen nativo no mesmo gesto. Quando indisponível, o dialog preenche a área da página. F ou Escape fecham no computador; três toques consecutivos no cartão (intervalos inferiores a 500 ms) fecham em dispositivos touch ou layouts móveis. Arrastar ou cancelar um gesto reinicia a sequência. Nesse modo, o giro no celular fica no botão Ver verso, para não disputar os três toques. O botão Sair permanece disponível para acessibilidade.
+
+O modal preserva o tema, ajusta o cartão à altura e largura disponíveis, bloqueia a rolagem e o foco do fundo e restaura a página ao fechar. Sair do fullscreen nativo pelo navegador também fecha o modal. A prévia e os dados completos continuam na página de perfil.
